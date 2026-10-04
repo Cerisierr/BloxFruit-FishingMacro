@@ -1,7 +1,14 @@
 # Changelog: CeriFish — Fishing Macro (AutoHotkey v2)
 
-Current delivered files: `BloxFishing.ahk`, `BloxFishing.html`, and CeriFish logo assets (v1.29.3 below).
+Current delivered files: `BloxFishing.ahk`, `BloxFishing.html`, and CeriFish logo assets (v1.29.5 below).
 Nothing is pending from the earlier "not delivered" list except the open points at the bottom.
+
+---
+
+## v1.29.5: Detect the recent-death HUD and protect fishing-bar reads
+
+- Stop if the `Died Recently - PvP disabled` status appears after a run starts; a badge already present at startup is treated as a baseline because it remains after respawn.
+- When the status overlaps the progress strip, reconnect the visible green strip fragments and ignore unreliable progress estimates while retaining fish/zone control.
 
 ---
 

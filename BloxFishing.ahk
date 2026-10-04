@@ -300,7 +300,7 @@ class ReelController {
 ;  CONFIGURATION
 ; ============================================================================
 APP_NAME    := "CeriFish"
-APP_VERSION := "1.29.3"
+APP_VERSION := "1.29.5"
 INI_FILE    := A_ScriptDir "\BloxFishing.ini"
 UPDATE_URL  := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.ahk"
 UPDATE_HTML_URL := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.html"
@@ -321,6 +321,7 @@ Regions := {
     bar:   [0.2138, 0.7184, 0.8502, 0.8181],   ; reel bar search band
     baitLine: [0.4200, 0.8050, 0.5800, 0.8600],  ; "Selected Bait: Kelp Bait x80" under the NPC label
     health: [0.0100, 0.8150, 0.2000, 0.8750],  ; HP bar (bottom-left): green fill, empty when dead
+    diedHud: [0.3000, 0.7800, 0.7000, 0.8550], ; centered "Died Recently - PvP disabled" status text
     bite:  [0.2800, 0.1600, 0.7200, 0.6000],   ; "!" marker area (excludes the top-right player list)
     meter: [0.2800, 0.6000, 0.3800, 0.9600],   ; cast charge meter: tube sits low on 1366x768 RDP (0.64-0.92)
     meterWide: [0.1800, 0.2200, 0.8200, 0.9600], ; fallback if the camera was moved
@@ -410,7 +411,9 @@ BotState := {
   , atNpc: true, bait: -1, sinceSell: 0, lastResponse: 0.0, witness: ""
   , flicked: false, lastEscaped: false, buyFailures: 0, lastBought: 0
   , meterFull: 0, biteInfo: "", zoomedAt: -1, biteMisses: 0
-  , npcHits: 0, hpNext: 0.0, hpLostSince: 0.0, hpDead: false, hpOcrNext: 0.0, hpZeroReads: 0, paused: false, stopReason: "", moneyLast: -1, lastOcr: "", logBuf: "", levelStart: -1, levelLast: -1, levelRead: 0.0, reportDue: false, hookQ: [], errAt: Map(), stopShot: ""
+  , npcHits: 0, hpNext: 0.0, hpLostSince: 0.0, hpDead: false, hpOcrNext: 0.0, hpZeroReads: 0
+  , diedHudNext: 0.0, diedHudVisible: false, diedHudReads: 0, diedHudSeen: false
+  , paused: false, stopReason: "", moneyLast: -1, lastOcr: "", logBuf: "", levelStart: -1, levelLast: -1, levelRead: 0.0, reportDue: false, hookQ: [], errAt: Map(), stopShot: ""
   , biteBase: 0, biteBaseN: 0, biteFrame: 0, biteFrameW: 0, biteFrameH: 0
   , lastHourlySlot: "", questState: "unknown", questType: "", questRarity: "", questTimed: false, questRead: 0.0, questMiss: 0
   , questNextTry: 0.0, questAcceptedAt: 0.0, questFails: 0, questStreak: 0, questHandFails: 0, questSkillUses: 0, questObjective: "", questEntry: "", questProg: "", questResumed: false, questSig: "", questBlock: 0.0
@@ -536,6 +539,16 @@ Alive(hp := false) {
         Halt("no confirmed game response for " . Round(Timing.responseTimeout) . " s")
         return false
     }
+    if DeathRecentlyHud() {
+        if !BotState.diedHudSeen {
+            BotState.diedHudSeen := true
+            LogMsg("[death] the 'Died Recently - PvP disabled' HUD appeared during this run - stopping")
+            Halt("death detected (Died Recently HUD)")
+            return false
+        }
+    } else {
+        BotState.diedHudSeen := false
+    }
     ; hp = true only inside the fishing loops (the HP bar is hidden during NPC dialogues)
     if (hp && HealthLost()) {
         LogMsg("[death] Health reads 0/x - character is dead, stopping")
@@ -543,6 +556,49 @@ Alive(hp := false) {
         return false
     }
     return true
+}
+
+; Detect the bright centered status text with a small cached pixel scan.
+; The badge persists after respawn, so it is a death event only when it appears
+; after the run's initial baseline; while already present it is treated as a
+; visual obstruction over the lower edge of the fishing bar.
+DeathRecentlyHud(force := false) {
+    if (!force && Now() < BotState.diedHudNext)
+        return BotState.diedHudVisible
+    BotState.diedHudNext := Now() + 0.65
+    r := SubRect(BotState.win, Regions.diedHud)
+    if (r.w <= 0 || r.h <= 0) {
+        BotState.diedHudVisible := false
+        return false
+    }
+    gr := ScreenGrab.Get(r.w, r.h)
+    gr.Capture(r.x, r.y)
+    bits := gr.bits
+    white := 0, total := 0, activeCols := 0
+    x := 0
+    while (x < r.w) {
+        colHit := false
+        y := 0
+        while (y < r.h) {
+            v := NumGet(bits, (y * r.w + x) * 4, "UInt")
+            rr := (v >> 16) & 255
+            gg := (v >> 8) & 255
+            bb := v & 255
+            if (rr >= 178 && gg >= 178 && bb >= 178 && Max(rr, gg, bb) - Min(rr, gg, bb) <= 70) {
+                white++
+                colHit := true
+            }
+            total++
+            y += 3
+        }
+        if colHit
+            activeCols++
+        x += 3
+    }
+    found := (total > 0 && white / total >= 0.025 && activeCols >= r.w * 0.22 / 3)
+    BotState.diedHudReads := found ? BotState.diedHudReads + 1 : 0
+    BotState.diedHudVisible := found && (force || BotState.diedHudReads >= 2)
+    return BotState.diedHudVisible
 }
 
 ; True once the HP bar has been empty for 3 s. Checked at most twice a second.
@@ -889,6 +945,8 @@ FindBar() {
     w := r.w, h := r.h
     minW := Floor(win.w * 0.18)
     maxW := Floor(win.w * 0.99)
+    diedHud := DeathRecentlyHud()
+    centerX := win.w // 2 - (r.x - win.x)
 
     bestW := 0, bTop := -1, bBot := -1, bL := 0, bR := 0
     gTop := -1, gBot := -1, gL := 0, gR := 0
@@ -898,6 +956,7 @@ FindBar() {
         base := y * w * 4
         runStart := -1, last := -1
         curLen := 0, curL := 0, curR := 0
+        leftL := -1, leftR := -1, rightL := -1, rightR := -1
         x := 0
         while (x < w) {
             v := NumGet(bits, base + x * 4, "UInt")
@@ -914,6 +973,15 @@ FindBar() {
                     curL := runStart
                     curR := last
                 }
+                if diedHud {
+                    if ((runStart + last) / 2 < centerX) {
+                        leftL := (leftL < 0) ? runStart : Min(leftL, runStart)
+                        leftR := Max(leftR, last)
+                    } else {
+                        rightL := (rightL < 0) ? runStart : Min(rightL, runStart)
+                        rightR := Max(rightR, last)
+                    }
+                }
                 runStart := -1
             }
             x += 2
@@ -922,6 +990,29 @@ FindBar() {
             curLen := last - runStart
             curL := runStart
             curR := last
+        }
+        if (diedHud && runStart >= 0) {
+            if ((runStart + last) / 2 < centerX) {
+                leftL := (leftL < 0) ? runStart : Min(leftL, runStart)
+                leftR := Max(leftR, last)
+            } else {
+                rightL := (rightL < 0) ? runStart : Min(rightL, runStart)
+                rightR := Max(rightR, last)
+            }
+        }
+        ; The white death-status label can hide the center of the green strip.
+        ; Stitch only the two fragments around a centered, text-sized gap.
+        if (diedHud && leftL >= 0 && rightL >= 0) {
+            gap := rightL - leftR
+            gapCenter := (leftR + rightL) / 2
+            mergedW := rightR - leftL
+            if (gap > 0 && gap <= Ceil(win.w * 0.38)
+                && Abs(gapCenter - centerX) <= win.w * 0.08
+                && mergedW >= minW && mergedW <= maxW && mergedW > curLen) {
+                curLen := mergedW
+                curL := leftL
+                curR := rightR
+            }
         }
 
         if (curLen >= minW && curLen <= maxW) {
@@ -3044,9 +3135,13 @@ Reel(spend := true) {
             if (ae > Max(zoneHalf, 0.000001))
                 outTicks++
         }
-        p := ReadProgress(geo)
-        if (p >= 0)
-            progress := p
+        ; The status label can cover the green strip, so don't let a partial
+        ; read skew the escape estimate while still using the fish/zone control.
+        if !DeathRecentlyHud() {
+            p := ReadProgress(geo)
+            if (p >= 0)
+                progress := p
+        }
     }
 
     Mouse.Hold(false)
@@ -3977,6 +4072,8 @@ RunBot() {
     }
     FocusGame()
     Wait(0.15)
+    BotState.diedHudNext := 0.0
+    BotState.diedHudSeen := DeathRecentlyHud(true) ; persistent badge at launch is the baseline, not a new death
 
     BotState.shiftLock := false
     BotState.shiftVerified := false
