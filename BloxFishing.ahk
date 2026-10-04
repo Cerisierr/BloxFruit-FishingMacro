@@ -300,8 +300,9 @@ class ReelController {
 ;  CONFIGURATION
 ; ============================================================================
 APP_NAME    := "Blox Fruits Fishing Macro"
-APP_VERSION := "1.24.6"
+APP_VERSION := "1.25.0"
 INI_FILE    := A_ScriptDir "\BloxFishing.ini"
+UPDATE_URL  := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.ahk"
 LOG_FILE    := A_ScriptDir "\BloxFishing.log"
 ERR_DIR     := A_ScriptDir "\errors"          ; game screenshots taken when something goes wrong
 ROBLOX_WIN  := "ahk_exe RobloxPlayerBeta.exe"
@@ -5659,6 +5660,77 @@ ApplyRunVis() {
     Ui.btnStop.Visible := run
     Ui.btnPause.Visible := run
     Ui.btnCheck.Visible := !run
+    Ui.btnUpdate.Visible := !run
+}
+
+VersionIsNewer(remote, local) {
+    r := StrSplit(remote, ".")
+    l := StrSplit(local, ".")
+    Loop Max(r.Length, l.Length) {
+        rv := (A_Index <= r.Length) ? Integer(r[A_Index]) : 0
+        lv := (A_Index <= l.Length) ? Integer(l[A_Index]) : 0
+        if (rv != lv)
+            return rv > lv
+    }
+    return false
+}
+
+CheckForUpdates(manual := false, *) {
+    if BotState.running {
+        if manual
+            MsgBox("Stop the macro before installing an update.", APP_NAME, "Icon!")
+        return
+    }
+    try {
+        request := ComObject("WinHttp.WinHttpRequest.5.1")
+        request.Open("GET", UPDATE_URL, false)
+        request.SetTimeouts(4000, 4000, 6000, 6000)
+        request.SetRequestHeader("User-Agent", "Blox-Fruits-Fishing-Macro")
+        request.Send()
+        if (request.Status != 200)
+            throw Error("GitHub returned HTTP " . request.Status)
+        latest := request.ResponseText
+        if (StrLen(latest) < 50000 || !InStr(latest, "class ReelController"))
+            throw Error("GitHub returned an incomplete macro file")
+        if !RegExMatch(latest, 'APP_VERSION\s*:=\s*"([0-9.]+)"', &match)
+            throw Error("Could not read the version from GitHub")
+        remoteVersion := match[1]
+        if !VersionIsNewer(remoteVersion, APP_VERSION) {
+            if manual
+                MsgBox("You already have the latest version (" . APP_VERSION . ").", APP_NAME)
+            return
+        }
+        answer := MsgBox("Version " . remoteVersion . " is available (you have " . APP_VERSION
+            . "). Install it and restart the macro now?", APP_NAME, "YesNo")
+        if (answer != "Yes")
+            return
+        InstallUpdate(latest, remoteVersion)
+    } catch as err {
+        if manual
+            MsgBox("Could not check GitHub for updates.`n`n" . err.Message, APP_NAME, "Icon!")
+    }
+}
+
+InstallUpdate(source, version) {
+    target := A_ScriptFullPath
+    temp := A_Temp . "\BloxFishing-update-" . version . ".ahk"
+    backup := target . ".bak"
+    try {
+        if FileExist(temp)
+            FileDelete(temp)
+        FileAppend(source, temp, "UTF-8-RAW")
+        if (FileGetSize(temp) < 50000)
+            throw Error("The downloaded file is incomplete")
+        FileCopy(target, backup, true)
+        FileMove(temp, target, true)
+        Run('"' . A_AhkPath . '" "' . target . '"')
+        ExitApp()
+    } catch as err {
+        try if FileExist(temp)
+            FileDelete(temp)
+        MsgBox("The update was downloaded but could not be installed.`nYour current macro is unchanged.`n`n"
+            . err.Message, APP_NAME, "Icon!")
+    }
 }
 
 ChangeTheme(name) {
@@ -5763,32 +5835,33 @@ BuildGui(startPage := "dash") {
 
     ; ---- top navigation ----------------------------------------------------
     Ui.tabPages := ["dash", "fish", "shop", "quest", "hook", "look"]
-    Ui.tabs := g.Add("Tab", "x8 y6 w634 h48 -Wrap"
-        , ["Home", "Fishing", "Bait & Sales", "Quests", "Discord", "Theme"])
+    Ui.tabs := g.Add("Tab", "x8 y6 w634 h30 -Wrap"
+        , ["Home", "Fishing", "NPC + Bait", "Quests", "Alerts", "Display"])
     Ui.tabs.OnEvent("Change", TabPageChanged)
     Ui.tabs.UseTab(0)
 
 
     ; ---- DASHBOARD ---------------------------------------------------------
     PageHeader(g, "dash", "Home", "Start the macro and see what it is doing.")
-    Ui.btnStart := Btn(g, "", 16, 716, 94, 30, "Start (F2)", ToggleRun, "primary")
-    Ui.btnStop := Btn(g, "", 16, 716, 94, 30, "Stop (F2)", ToggleRun, "danger")
-    Ui.btnCheck := Btn(g, "", 116, 716, 112, 30, "Check setup", CheckSetup, "ghost")
-    Ui.btnPause := Btn(g, "", 234, 716, 102, 30, "Pause (F3)", TogglePause, "primary")
-    Btn(g, "", 342, 716, 82, 30, "Quit (F4)", (*) => ExitApp(), "ghost")
+    Ui.btnStart := Btn(g, "", 14, 716, 86, 30, "Start (F2)", ToggleRun, "primary")
+    Ui.btnStop := Btn(g, "", 14, 716, 86, 30, "Stop (F2)", ToggleRun, "danger")
+    Ui.btnCheck := Btn(g, "", 106, 716, 98, 30, "Check setup", CheckSetup, "ghost")
+    Ui.btnUpdate := Btn(g, "", 210, 716, 96, 30, "Updates", CheckForUpdates.Bind(true), "ghost")
+    Ui.btnPause := Btn(g, "", 210, 716, 96, 30, "Pause (F3)", TogglePause, "primary")
+    Btn(g, "", 312, 716, 78, 30, "Quit (F4)", (*) => ExitApp(), "ghost")
     Tile(g, 214, 158, 96, "Fish caught", "tCatch")
     Tile(g, 320, 158, 96, "Bait left", "tBait")
     Tile(g, 426, 158, 150, "Money generated", "tIncome")
     Tile(g, 586, 158, 104, "Level", "tLevel", "tLevelLbl")
     Tile(g, 700, 158, 104, "Run time", "tUp")
-    Box(g, "dash", 213, 240, 592, 60, th.card)
-    Box(g, "dash", 213, 240, 3, 60, th.accent)
-    Lbl(g, "dash", 228, 247, 560, "QUICK SETUP", th.accent, 9, 700)
-    Lbl(g, "dash", 228, 267, 560, "Stand on the lower white circle, choose your NPC and bait, then press F2 to start.", th.txt, 10, 400, 22)
-    Ui.info := Lbl(g, "dash", 214, 306, 590, "", th.muted, 9)
-    Lbl(g, "dash", 214, 332, 300, "Activity log", th.txt, 10, 600)
-    Box(g, "dash", 213, 356, 592, 266, th.line)
-    Ui.log := g.Add("Edit", Format("x214 y357 w590 h264 ReadOnly -Wrap +VScroll -E0x200 Background{} c{}", th.inp, th.txt))
+    Box(g, "dash", 213, 240, 592, 80, th.card)
+    Box(g, "dash", 213, 240, 3, 80, th.accent)
+    Lbl(g, "dash", 228, 247, 560, "BEFORE STARTING", th.accent, 9, 700)
+    Lbl(g, "dash", 228, 266, 560, "NPC visits: lower white circle below the green ring.`nFishing: stand at the dock edge. Choose NPC + bait, then press F2.", th.txt, 9, 400, 42)
+    Ui.info := Lbl(g, "dash", 214, 326, 590, "", th.muted, 9)
+    Lbl(g, "dash", 214, 348, 300, "Activity log", th.txt, 10, 600)
+    Box(g, "dash", 213, 372, 592, 250, th.line)
+    Ui.log := g.Add("Edit", Format("x214 y373 w590 h248 ReadOnly -Wrap +VScroll -E0x200 Background{} c{}", th.inp, th.txt))
     Ui.log.SetFont("s9", "Consolas")
     Reg("dash", Ui.log)
     if th.dark {
@@ -5797,7 +5870,7 @@ BuildGui(startPage := "dash") {
 
     ; ---- FISHING -----------------------------------------------------------
     PageHeader(g, "fish", "Fishing", "Set casting, camera and reeling. Start at the lower white NPC circle under the green marker.")
-    Section(g, "fish", 214, 100, "CASTING")
+    Section(g, "fish", 214, 100, "CAMERA + CASTING")
     AddToggle(g, "fish", "perfect", 214, 126, "Release at the selected charge level", Cfg.perfect, 230)
     Lbl(g, "fish", 470, 129, 90, "Release at", th.muted)
     AddEdit(g, "fish", "perfectPct", 548, 125, 54, Cfg.perfectPct, true)
@@ -5854,12 +5927,12 @@ BuildGui(startPage := "dash") {
     Lbl(g, "quest", 214, 588, 590, "The hourly report also lists the quests of the hour (accepted / done / failed).", th.muted, 9)
 
     ; ---- SHOP AND BAIT -----------------------------------------------------
-    PageHeader(g, "shop", "Bait & Sales", "Choose your fishing NPC, bait, purchase amount and sale interval.")
-    Section(g, "shop", 214, 100, "NPC")
+    PageHeader(g, "shop", "NPC + Bait", "Choose where to fish, prepare bait, and schedule sales.")
+    Section(g, "shop", 214, 100, "FISHING NPC")
     Lbl(g, "shop", 214, 130, 70, "NPC", th.muted)
     AddDdl(g, "shop", "npc", 280, 126, 150, NPC_LIST, IdxOf(NPC_LIST, Cfg.npc))
     Ui.npcNote := Lbl(g, "shop", 214, 160, 590, "", th.muted, 9, 400, 34)
-    Section(g, "shop", 214, 202, "BAIT")
+    Section(g, "shop", 214, 202, "BAIT AND STOCK")
     AddToggle(g, "shop", "buyBait", 214, 228, "Auto-buy bait when it runs low", Cfg.buyBait, 280)
     Lbl(g, "shop", 214, 272, 90, "Bait type", th.muted)
     baitItems := []
@@ -5874,7 +5947,7 @@ BuildGui(startPage := "dash") {
         , Min(10, Max(1, Cfg.baitPer // 10)))
     Ui.costLbl := Lbl(g, "shop", 470, 352, 340, "", th.txt)
     Lbl(g, "shop", 214, 384, 590, "The inventory holds 100 bait at most: the macro only buys what fits (50 in stock + 100 wanted = 50 bought).", th.muted)
-    Section(g, "shop", 214, 424, "SELLING AND INCOME")
+    Section(g, "shop", 214, 424, "SELLING + STATS")
     AddToggle(g, "shop", "sellOn", 214, 450, "Auto-sell fish every", Cfg.sellOn, 140)
     AddEdit(g, "shop", "sellEvery", 420, 446, 64, Cfg.sellEvery, true)
     Lbl(g, "shop", 492, 450, 100, "catches", th.muted)
@@ -5885,7 +5958,7 @@ BuildGui(startPage := "dash") {
         . " in your inventory. Locked baits cannot be bought.", th.muted, 9, 400, 34)
 
     ; ---- WEBHOOK -----------------------------------------------------------
-    PageHeader(g, "hook", "Discord", "Optional: send updates to a Discord channel. Leave this off if unused.")
+    PageHeader(g, "hook", "Alerts", "Choose what the macro reports to Discord. Leave this page off if unused.")
     Section(g, "hook", 214, 98, "DISCORD")
     AddToggle(g, "hook", "hkOn", 214, 122, "Enable webhook", Cfg.hkOn, 200)
     Lbl(g, "hook", 214, 158, 300, "Webhook URL", th.muted)
@@ -5920,7 +5993,7 @@ BuildGui(startPage := "dash") {
     Ui.hookStatus := Lbl(g, "hook", 214, 616, 590, "", th.muted, 9)
 
     ; ---- APPEARANCE --------------------------------------------------------
-    PageHeader(g, "look", "Theme", "Choose a colour theme. It is saved automatically.")
+    PageHeader(g, "look", "Display", "Choose a colour theme. It is saved automatically.")
     px := 214
     py := 112
     for nm in THEME_ORDER {
@@ -5936,11 +6009,11 @@ BuildGui(startPage := "dash") {
     for pg, list in Ui.pages {
         for c in list {
             c.GetPos(&cx, &cy, &cw, &ch)
-            c.Move(cx - 190, cy + 50, cw, ch)
+            c.Move(cx - 190, cy + 40, cw, ch)
         }
     }
     Box(g, "", 0, 704, 650, 1, th.line)
-    Ui.sbDot := g.Add("Text", Format("x444 y721 w190 h22 Background{}", th.bg), "●  Idle")
+    Ui.sbDot := g.Add("Text", Format("x404 y721 w220 h22 Background{}", th.bg), "●  Idle")
     Ui.sbDot.SetFont("s9 w600 c" . th.muted, "Segoe UI")
     ShowPage(startPage)
     g.Show("w650 h758")
@@ -5984,6 +6057,7 @@ SetTimer(UpdateStats, 1000)
 SetTimer(HourlyTick, 15000)
 SetTimer(HookPump, 2200)
 SetTimer(HistPush, 20000)
+SetTimer(CheckForUpdates.Bind(false), -5000)
 LogMsg("[env] remote desktop session: " . (Rdp.on ? "ON" : "off") . " (" . Rdp.how . ")"
     . (Rdp.on ? " - RDP-only bite filter, plain screen capture and cast lead " . Round(Rdp.castLead * 1000) . " ms are active" : ""))
 LogMsg(APP_NAME . " ready. Stand at the " . Cfg.npc . " (Interact prompt visible), rod equipped, "

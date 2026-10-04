@@ -1,7 +1,17 @@
 # Changelog: Blox Fruits Fishing Macro (AutoHotkey v2)
 
-Current delivered file: `BloxFishing.ahk` (v1.24.6 below).
+Current delivered file: `BloxFishing.ahk` (v1.25.0 below).
 Nothing is pending from the earlier "not delivered" list except the open points at the bottom.
+
+---
+
+## v1.25.0: Simpler navigation and GitHub updates
+
+- **Navigation:** renamed the pages by task (Fishing, NPC + Bait, Quests, Alerts, Display) and reduced the blank area under the tabs.
+- **Home:** separates the two positioning cues: use the lower white circle below the green ring for NPC visits; return to the dock edge to fish.
+- **Footer:** added an Updates button; an idle startup check looks for the latest version on the repository's main branch. The macro asks before replacing the current script, saves a `.bak` backup, then restarts.
+- **Settings:** clarified the camera/casting, bait/stock and selling/stats groups. Kept the macro as one AHK file so the updater can replace it as a single download.
+- **Not tested in AutoHotkey or Roblox.**
 
 ---
 
