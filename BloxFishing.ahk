@@ -300,7 +300,7 @@ class ReelController {
 ;  CONFIGURATION
 ; ============================================================================
 APP_NAME    := "Blox Fruits Fishing Macro"
-APP_VERSION := "1.28.2"
+APP_VERSION := "1.28.7"
 INI_FILE    := A_ScriptDir "\BloxFishing.ini"
 UPDATE_URL  := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.ahk"
 UPDATE_HTML_URL := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.html"
@@ -5745,9 +5745,12 @@ HtmlFileURL(path) {
     return "file:///" . url
 }
 HtmlSync(syncFields := false) {
-    global Ui, BotState, BotStats, BAITS, Cfg, APP_VERSION, THEME_ORDER
+    global Ui, BotState, BotStats, BAITS, Cfg, APP_VERSION, THEME_ORDER, THEMES
     try {
         doc := Ui.browser.Document
+        accent := "#" . THEMES[Cfg.theme].accent
+        accentText := "#" . THEMES[Cfg.theme].onAccent
+        palette := THEMES[Cfg.theme]
         doc.getElementById("runstatus").innerText := BotState.running ? (BotState.paused ? "Paused" : "Running") : "Idle"
         doc.getElementById("footstatus").innerText := BotState.running ? (BotState.paused ? "Paused" : "Running") : "Idle"
         doc.getElementById("runbtn").innerText := BotState.running ? "■ Stop macro" : "▶ Start macro"
@@ -5759,11 +5762,66 @@ HtmlSync(syncFields := false) {
         doc.getElementById("sessioninfo").innerText := Ui.info.Text
         doc.getElementById("queststatus").innerText := Ui.questStatus.Text
         doc.getElementById("log").innerText := BotState.logBuf
-        for key, value in Ui.tog
-            doc.getElementById("toggle-" . key).className := "switch" . (value ? " on" : "")
+        logo := doc.querySelector(".logo")
+        logo.style.backgroundColor := accent
+        logo.style.color := accentText
+        doc.querySelector(".brand small").style.color := accent
+        callouts := doc.querySelectorAll(".callout")
+        Loop callouts.length {
+            callout := callouts.item(A_Index - 1)
+            callout.style.backgroundColor := "#" . palette.card
+            callout.style.borderColor := "#" . palette.line
+            callout.style.color := "#" . palette.muted
+        }
+        calloutHeads := doc.querySelectorAll(".callout b")
+        Loop calloutHeads.length
+            calloutHeads.item(A_Index - 1).style.color := accent
+        for key, value in Ui.tog {
+            toggle := doc.getElementById("toggle-" . key)
+            toggle.className := "switch" . (value ? " on" : "")
+            toggle.style.backgroundColor := value ? accent : ""
+        }
+        buttons := doc.getElementsByTagName("button")
+        Loop buttons.length {
+            button := buttons.item(A_Index - 1)
+            classes := " " . button.className . " "
+            if InStr(classes, " btn ") {
+                button.style.backgroundColor := accent
+                button.style.color := accentText
+                button.style.borderColor := accent
+            }
+            if InStr(classes, " active ") {
+                button.style.backgroundColor := accent
+                button.style.borderColor := accent
+            }
+            if InStr(classes, " selected ") {
+                button.style.borderColor := accent
+                button.style.boxShadow := "0 0 0 2px " . accent
+            }
+        }
+        navButtons := doc.querySelectorAll(".nav button")
+        Loop navButtons.length {
+            navButton := navButtons.item(A_Index - 1)
+            if (navButton.className == "active") {
+                navButton.style.backgroundColor := accent
+                navButton.style.color := accentText
+                navButton.style.borderColor := accent
+                navButton.style.boxShadow := "inset 3px 0 " . accent
+            } else if (navButton.getAttribute("data-hover") == "1") {
+                navButton.style.backgroundColor := accent
+                navButton.style.color := accentText
+            } else {
+                navButton.style.backgroundColor := ""
+                navButton.style.color := ""
+                navButton.style.borderColor := ""
+                navButton.style.boxShadow := ""
+            }
+        }
         doc.getElementById("version").innerText := APP_VERSION
         doc.getElementById("version-footer").innerText := APP_VERSION
         doc.body.setAttribute("data-theme", Cfg.theme)
+        doc.body.setAttribute("data-accent", accent)
+        doc.body.setAttribute("data-accent-text", accentText)
         baitSelect := doc.getElementById("bait")
         if (baitSelect.options.length == 0) {
             for i, bait in BAITS {
@@ -5783,6 +5841,13 @@ HtmlSync(syncFields := false) {
         for name in THEME_ORDER {
             theme := doc.getElementById("theme-" . name)
             theme.className := "theme" . (name == Cfg.theme ? " selected" : "")
+            if (name == Cfg.theme) {
+                theme.style.borderColor := accent
+                theme.style.boxShadow := "0 0 0 2px " . accent
+            } else {
+                theme.style.borderColor := ""
+                theme.style.boxShadow := ""
+            }
         }
     }
 }

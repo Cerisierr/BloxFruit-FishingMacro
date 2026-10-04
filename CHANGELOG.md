@@ -1,7 +1,41 @@
 # Changelog: Blox Fruits Fishing Macro (AutoHotkey v2)
 
-Current delivered files: `BloxFishing.ahk` + `BloxFishing.html` (v1.28.2 below).
+Current delivered files: `BloxFishing.ahk` + `BloxFishing.html` (v1.28.7 below).
 Nothing is pending from the earlier "not delivered" list except the open points at the bottom.
+
+---
+
+## v1.28.7: Theme help panels, branding and tab hover
+
+- Apply the selected theme to the BF logo, Fishing Macro label and callouts used for NPC, quest and dashboard guidance.
+- Make hovered navigation tabs use the current theme accent, and clear the temporary hover state on mouseout.
+- Added a dashboard screenshot preview to the README.
+
+---
+
+## v1.28.6: Color every action button with the active theme
+
+- Apply the selected theme's accent background, border and readable text color to all `.btn` controls, including header, footer and dashboard actions.
+
+---
+
+## v1.28.5: Clear stale selected colors
+
+- Clear inline highlight colors from navigation tabs as soon as they become inactive.
+- Clear the previous theme's selected border so only the current theme stays highlighted.
+
+---
+
+## v1.28.4: Apply theme accents consistently and align switches
+
+- Apply the selected accent to active navigation, selected theme, primary actions and button borders.
+- Position setting switches at the right edge of every row in the embedded browser.
+
+---
+
+## v1.28.3: Match active controls to the selected theme
+
+- Apply the selected theme's accent color directly to enabled switches and primary action buttons in the embedded interface.
 
 ---
 

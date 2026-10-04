@@ -46,9 +46,9 @@
     .card { padding: 17px; border: 1px solid #263b53; border-radius: 13px; background: #0b1b2c; box-shadow: 0 8px 20px rgba(0,0,0,.13); }
     .card h2 { margin: 0 0 4px; font-size: 15px; }
     .desc { margin: 0 0 13px; color: #95a9c0; font-size: 11px; line-height: 1.5; }
-    .setting { display: flex; min-height: 37px; align-items: center; justify-content: space-between; border-bottom: 1px solid #182b40; color: #d9e4f1; font-size: 12px; }
+    .setting { position: relative; display: block; min-height: 37px; padding: 10px 54px 9px 0; border-bottom: 1px solid #182b40; color: #d9e4f1; font-size: 12px; }
     .setting:last-child { border-bottom: 0; }
-    .switch { position: relative; display: block; flex: 0 0 39px; width: 39px; height: 22px; border: 0; border-radius: 14px; background: #34465d; }
+    .switch { position: absolute; display: block; top: 50%; right: 0; width: 39px; height: 22px; margin-top: -11px; padding: 0; border: 0; border-radius: 14px; background: #34465d; }
     .switch span { position: absolute; display: block; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #dce7f5; }
     .switch.on { background: #2879e5; }
     .switch.on span { left: 20px; background: #fff; }
@@ -120,13 +120,36 @@
       if (name) query += "&name=" + encodeURIComponent(name);
       window.location.href = "https://ahk.local/?" + query;
     }
+    function navHover(e) {
+      var button = e.srcElement || e.target;
+      if (!button || !button.getAttribute("data-page") || button.className === "active") return;
+      button.setAttribute("data-hover", "1");
+      button.style.backgroundColor = document.body.getAttribute("data-accent");
+      button.style.color = document.body.getAttribute("data-accent-text");
+    }
+    function navLeave(e) {
+      var button = e.srcElement || e.target;
+      if (!button || !button.getAttribute("data-page")) return;
+      button.setAttribute("data-hover", "0");
+      if (button.className !== "active") {
+        button.style.backgroundColor = "";
+        button.style.color = "";
+      }
+    }
     function page(name) {
       var views = document.getElementsByClassName("view");
       var i;
       for (i = 0; i < views.length; i++) views[i].className = "view";
       document.getElementById("page-" + name).className = "view active";
       var nav = document.querySelectorAll(".nav button");
-      for (i = 0; i < nav.length; i++) nav[i].className = nav[i].getAttribute("data-page") === name ? "active" : "";
+      for (i = 0; i < nav.length; i++) {
+        nav[i].className = nav[i].getAttribute("data-page") === name ? "active" : "";
+        nav[i].setAttribute("data-hover", "0");
+        if (nav[i].className !== "active") {
+          nav[i].style.backgroundColor = "";
+          nav[i].style.color = "";
+        }
+      }
       document.getElementById("heading").innerText = document.getElementById("page-" + name).getAttribute("data-title");
       document.getElementById("subtitle").innerText = document.getElementById("page-" + name).getAttribute("data-subtitle");
       cmd("page", null, null, name);
@@ -137,7 +160,7 @@
   <div class="app">
     <aside class="side">
       <div class="brand"><div class="logo">BF</div><div><b>Blox Fruits</b><small>Fishing Macro</small></div></div>
-      <nav class="nav">
+      <nav class="nav" onmouseover="navHover(event)" onmouseout="navLeave(event)">
         <button data-page="dash" onclick="page('dash')">Dashboard</button>
         <button data-page="fish" onclick="page('fish')">Fishing</button>
         <button data-page="shop" onclick="page('shop')">NPC + Bait</button>

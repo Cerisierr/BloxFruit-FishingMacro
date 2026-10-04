@@ -4,7 +4,13 @@ AutoHotkey v2 macro for automating fishing in **Blox Fruits**.
 
 The macro uses screen capture, color detection and Windows OCR to read the fishing bar, the bite indicator, the fish position, chests, the cast charge meter, NPC/shop menus and the quest panel. It controls the reel automatically and can buy bait, sell fish, do the Angler quests and report to Discord.
 
-Current version: **1.28.2** (see `CHANGELOG.md` for the full history).
+Current version: **1.28.7** (see `CHANGELOG.md` for the full history).
+
+## Preview
+
+Dashboard preview using the Sunset theme:
+
+![Blox Fruits Fishing Macro dashboard in the Sunset theme](images/dashboard-preview.png)
 
 ## Features
 
