@@ -5756,6 +5756,7 @@ BuildGui(startPage := "dash") {
     Ui.togCtl := Map()
     Ui.togPage := Map()
     Ui.urlShown := false
+    Ui.switchingTab := false
     Ui.page := "dash"
     for pg in ["dash", "fish", "quest", "shop", "hook", "look"]
         Ui.pages[pg] := []
