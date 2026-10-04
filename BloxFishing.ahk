@@ -300,7 +300,7 @@ class ReelController {
 ;  CONFIGURATION
 ; ============================================================================
 APP_NAME    := "Blox Fruits Fishing Macro"
-APP_VERSION := "1.24.5"
+APP_VERSION := "1.24.6"
 INI_FILE    := A_ScriptDir "\BloxFishing.ini"
 LOG_FILE    := A_ScriptDir "\BloxFishing.log"
 ERR_DIR     := A_ScriptDir "\errors"          ; game screenshots taken when something goes wrong
@@ -5639,22 +5639,26 @@ ShowPage(name) {
             p[2].Visible := !v
         }
     }
-    for pg, trio in Ui.nav {
-        sel := (pg == name)
-        trio[1].Visible := !sel
-        trio[2].Visible := sel
-        trio[3].Visible := sel
+    if !Ui.switchingTab {
+        Ui.switchingTab := true
+        Ui.tabs.Value := IdxOf(Ui.tabPages, name)
+        Ui.switchingTab := false
     }
     ApplyRunVis()
 }
 
+TabPageChanged(*) {
+    if Ui.switchingTab
+        return
+    ShowPage(Ui.tabPages[Ui.tabs.Value])
+}
+
 ApplyRunVis() {
-    on := (Ui.page == "dash")
     run := BotState.running
-    Ui.btnStart.Visible := on && !run
-    Ui.btnStop.Visible := on && run
-    Ui.btnPause.Visible := on && run
-    Ui.btnCheck.Visible := on && !run
+    Ui.btnStart.Visible := !run
+    Ui.btnStop.Visible := run
+    Ui.btnPause.Visible := run
+    Ui.btnCheck.Visible := !run
 }
 
 ChangeTheme(name) {
@@ -5756,37 +5760,21 @@ BuildGui(startPage := "dash") {
     for pg in ["dash", "fish", "quest", "shop", "hook", "look"]
         Ui.pages[pg] := []
 
-    ; ---- sidebar -----------------------------------------------------------
-    Box(g, "", 0, 0, 190, 640, th.side)
-    t := g.Add("Text", Format("x24 y22 w164 h34 Background{}", th.side), "BLOX FISHING")
-    t.SetFont("s15 w700 c" . th.accent, "Segoe UI")
-    t := g.Add("Text", Format("x24 y58 w160 h20 Background{}", th.side), "Auto macro  -  v" . APP_VERSION)
-    t.SetFont("s8 c" . th.muted, "Segoe UI")
-    navDefs := [["dash", "Home"], ["fish", "Fishing"], ["shop", "Bait & Sales"], ["quest", "Quests"]
-              , ["hook", "Discord"], ["look", "Theme"]]
-    ny := 100
-    for d in navDefs {
-        n1 := g.Add("Text", Format("x0 y{} w190 h40 +0x200 Background{}", ny, th.side), "      " . d[2])
-        n1.SetFont("s10 c" . th.muted, "Segoe UI")
-        n1.OnEvent("Click", NavHandler(d[1]))
-        n2 := g.Add("Text", Format("x0 y{} w190 h40 +0x200 Background{}", ny, th.bg), "      " . d[2])
-        n2.SetFont("s10 w600 c" . th.txt, "Segoe UI")
-        n3 := g.Add("Text", Format("x0 y{} w4 h40 Background{}", ny, th.accent))
-        Ui.nav[d[1]] := [n1, n2, n3]
-        ny += 44
-    }
-    Ui.sbDot := g.Add("Text", Format("x24 y556 w160 Background{}", th.side), "●  Idle")
-    Ui.sbDot.SetFont("s9 w600 c" . th.muted, "Segoe UI")
-    t := g.Add("Text", Format("x24 y582 w160 h34 Background{}", th.side), "F2  Start / stop`nF3  Pause   |   F4  Quit`nF8  Debug log")
-    t.SetFont("s8 c" . th.muted, "Segoe UI")
+    ; ---- top navigation ----------------------------------------------------
+    Ui.tabPages := ["dash", "fish", "shop", "quest", "hook", "look"]
+    Ui.tabs := g.Add("Tab", "x8 y6 w634 h48 -Wrap"
+        , ["Home", "Fishing", "Bait & Sales", "Quests", "Discord", "Theme"])
+    Ui.tabs.OnEvent("Change", TabPageChanged)
+    Ui.tabs.UseTab(0)
+
 
     ; ---- DASHBOARD ---------------------------------------------------------
     PageHeader(g, "dash", "Home", "Start the macro and see what it is doing.")
-    Ui.btnStart := Btn(g, "", 214, 100, 190, 42, "Start  (F2)", ToggleRun, "primary")
-    Ui.btnStop := Btn(g, "", 214, 100, 190, 42, "Stop  (F2)", ToggleRun, "danger")
-    Ui.btnCheck := Btn(g, "dash", 416, 100, 150, 42, "Check setup", CheckSetup, "ghost")
-    Ui.btnPause := Btn(g, "dash", 416, 100, 150, 42, "Pause  (F3)", TogglePause, "primary")
-    Btn(g, "dash", 578, 100, 110, 42, "Quit  (F4)", (*) => ExitApp(), "ghost")
+    Ui.btnStart := Btn(g, "", 16, 716, 94, 30, "Start (F2)", ToggleRun, "primary")
+    Ui.btnStop := Btn(g, "", 16, 716, 94, 30, "Stop (F2)", ToggleRun, "danger")
+    Ui.btnCheck := Btn(g, "", 116, 716, 112, 30, "Check setup", CheckSetup, "ghost")
+    Ui.btnPause := Btn(g, "", 234, 716, 102, 30, "Pause (F3)", TogglePause, "primary")
+    Btn(g, "", 342, 716, 82, 30, "Quit (F4)", (*) => ExitApp(), "ghost")
     Tile(g, 214, 158, 96, "Fish caught", "tCatch")
     Tile(g, 320, 158, 96, "Bait left", "tBait")
     Tile(g, 426, 158, 150, "Money generated", "tIncome")
@@ -5943,8 +5931,18 @@ BuildGui(startPage := "dash") {
         }
     }
 
+    ; Keep the same aligned form layout across every page under the tab strip.
+    for pg, list in Ui.pages {
+        for c in list {
+            c.GetPos(&cx, &cy, &cw, &ch)
+            c.Move(cx - 190, cy + 50, cw, ch)
+        }
+    }
+    Box(g, "", 0, 704, 650, 1, th.line)
+    Ui.sbDot := g.Add("Text", Format("x444 y721 w190 h22 Background{}", th.bg), "●  Idle")
+    Ui.sbDot.SetFont("s9 w600 c" . th.muted, "Segoe UI")
     ShowPage(startPage)
-    g.Show("w830 h656")
+    g.Show("w650 h758")
     if th.dark {
         try {
             b := Buffer(4, 0)
