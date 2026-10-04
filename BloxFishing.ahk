@@ -5761,8 +5761,8 @@ BuildGui(startPage := "dash") {
     t.SetFont("s15 w700 c" . th.accent, "Segoe UI")
     t := g.Add("Text", Format("x24 y58 w160 h20 Background{}", th.side), "Auto macro  -  v" . APP_VERSION)
     t.SetFont("s8 c" . th.muted, "Segoe UI")
-    navDefs := [["dash", "Dashboard"], ["fish", "Fishing"], ["quest", "Quest"], ["shop", "Shop and Bait"]
-              , ["hook", "Webhook"], ["look", "Appearance"]]
+    navDefs := [["dash", "Home"], ["fish", "Fishing"], ["shop", "Bait & Sales"], ["quest", "Quests"]
+              , ["hook", "Discord"], ["look", "Theme"]]
     ny := 100
     for d in navDefs {
         n1 := g.Add("Text", Format("x0 y{} w190 h40 +0x200 Background{}", ny, th.side), "      " . d[2])
@@ -5776,11 +5776,11 @@ BuildGui(startPage := "dash") {
     }
     Ui.sbDot := g.Add("Text", Format("x24 y556 w160 Background{}", th.side), "●  Idle")
     Ui.sbDot.SetFont("s9 w600 c" . th.muted, "Segoe UI")
-    t := g.Add("Text", Format("x24 y582 w160 h34 Background{}", th.side), "F2 start / stop    F4 quit`nF8 debug log file")
+    t := g.Add("Text", Format("x24 y582 w160 h34 Background{}", th.side), "F2  Start / stop`nF3  Pause   |   F4  Quit`nF8  Debug log")
     t.SetFont("s8 c" . th.muted, "Segoe UI")
 
     ; ---- DASHBOARD ---------------------------------------------------------
-    PageHeader(g, "dash", "Dashboard", "Live status. Press F2 anywhere to start or stop the macro.")
+    PageHeader(g, "dash", "Home", "Start the macro and see what it is doing.")
     Ui.btnStart := Btn(g, "", 214, 100, 190, 42, "Start  (F2)", ToggleRun, "primary")
     Ui.btnStop := Btn(g, "", 214, 100, 190, 42, "Stop  (F2)", ToggleRun, "danger")
     Ui.btnCheck := Btn(g, "dash", 416, 100, 150, 42, "Check setup", CheckSetup, "ghost")
@@ -5791,10 +5791,13 @@ BuildGui(startPage := "dash") {
     Tile(g, 426, 158, 150, "Money generated", "tIncome")
     Tile(g, 586, 158, 104, "Level", "tLevel", "tLevelLbl")
     Tile(g, 700, 158, 104, "Run time", "tUp")
-    Ui.info := Lbl(g, "dash", 214, 246, 590, "", th.muted, 9)
-    Lbl(g, "dash", 214, 274, 300, "Activity log", th.txt, 10, 600)
-    Box(g, "dash", 213, 298, 592, 302, th.line)
-    Ui.log := g.Add("Edit", Format("x214 y299 w590 h300 ReadOnly -Wrap +VScroll -E0x200 Background{} c{}", th.inp, th.txt))
+    Box(g, "dash", 213, 240, 592, 46, th.card)
+    Lbl(g, "dash", 226, 249, 120, "QUICK START", th.accent, 9, 700)
+    Lbl(g, "dash", 346, 246, 446, "Stand at the lower white NPC circle, choose bait, then press F2. The macro walks back toward the dock edge.", th.txt, 9, 400, 34)
+    Ui.info := Lbl(g, "dash", 214, 296, 590, "", th.muted, 9)
+    Lbl(g, "dash", 214, 322, 300, "Activity log", th.txt, 10, 600)
+    Box(g, "dash", 213, 346, 592, 276, th.line)
+    Ui.log := g.Add("Edit", Format("x214 y347 w590 h274 ReadOnly -Wrap +VScroll -E0x200 Background{} c{}", th.inp, th.txt))
     Ui.log.SetFont("s9", "Consolas")
     Reg("dash", Ui.log)
     if th.dark {
@@ -5802,13 +5805,13 @@ BuildGui(startPage := "dash") {
     }
 
     ; ---- FISHING -----------------------------------------------------------
-    PageHeader(g, "fish", "Fishing", "Start on the lower white NPC circle below the green marker; the macro then walks toward the dock edge.")
+    PageHeader(g, "fish", "Fishing", "Set casting, camera and reeling. Start at the lower white NPC circle under the green marker.")
     Section(g, "fish", 214, 100, "CASTING")
-    AddToggle(g, "fish", "perfect", 214, 126, "Perfect cast", Cfg.perfect, 160)
+    AddToggle(g, "fish", "perfect", 214, 126, "Release at the selected charge level", Cfg.perfect, 230)
     Lbl(g, "fish", 470, 129, 90, "Release at", th.muted)
     AddEdit(g, "fish", "perfectPct", 548, 125, 54, Cfg.perfectPct, true)
-    Lbl(g, "fish", 610, 129, 190, "% of the charge bar", th.muted)
-    AddToggle(g, "fish", "zoomLock", 214, 166, "Lock camera zoom", Cfg.zoomLock, 190)
+    Lbl(g, "fish", 610, 129, 190, "% of charge bar", th.muted)
+    AddToggle(g, "fish", "zoomLock", 214, 166, "Keep zoom distance fixed", Cfg.zoomLock, 210)
     Lbl(g, "fish", 470, 169, 120, "Zoom-out notches", th.muted)
     AddEdit(g, "fish", "zoomOut", 598, 165, 54, Cfg.zoomOut, true)
     Lbl(g, "fish", 272, 209, 170, "Re-apply the zoom every", th.muted)
@@ -5821,23 +5824,23 @@ BuildGui(startPage := "dash") {
     AddToggle(g, "fish", "fastBite", 500, 282, "Faster bite reaction", Cfg.fastBite, 200)
     AddToggle(g, "fish", "slowFlick", 214, 322, "Slower fish trick", Cfg.slowFlick, 200)
     AddToggle(g, "fish", "anchor", 500, 322, "Use lower white NPC circle at start", Cfg.anchor, 270)
-    Lbl(g, "fish", 214, 355, 260, "Extra walk toward the dock edge (0.1 s units)", th.muted)
+    Lbl(g, "fish", 214, 355, 260, "Extra walk time (0.1 s units; 8 = 0.8 s)", th.muted)
     AddEdit(g, "fish", "dockWalk", 480, 351, 54, Cfg.dockWalk, true)
     Section(g, "fish", 214, 390, "GAME")
-    Lbl(g, "fish", 214, 418, 120, "Screen resolution", th.muted)
+    Lbl(g, "fish", 214, 418, 120, "Roblox resolution", th.muted)
     AddDdl(g, "fish", "res", 340, 414, 130, ["Auto", "1920x1080", "2560x1440", "1366x768"]
         , IdxOf(["Auto", "1920x1080", "2560x1440", "1366x768"], Cfg.resolution))
-    Lbl(g, "fish", 500, 418, 120, "Rod hotbar slot", th.muted)
+    Lbl(g, "fish", 500, 418, 120, "Rod slot", th.muted)
     slots := ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
     AddDdl(g, "fish", "rod", 624, 414, 60, slots, IdxOf(slots, Cfg.rodSlot, 4))
-    AddToggle(g, "fish", "gameFast", 214, 454, "Turn on Fast Mode + Reduce Motion when the macro starts", Cfg.gameFast, 480)
+    AddToggle(g, "fish", "gameFast", 214, 454, "Enable Roblox Fast Mode and Reduce Motion at startup", Cfg.gameFast, 480)
     Lbl(g, "fish", 214, 470, 590, "Perfect cast reads the whole charge bar (orange > yellow > green) and releases when it reaches the"
         . " chosen percentage. With zoom-out 8 the bar is small, so 96-98 % is a good value.", th.muted, 9, 400, 44)
 
     ; ---- QUEST -------------------------------------------------------------
-    PageHeader(g, "quest", "Quest", "Auto-quest at the NPC you AFK at.")
+    PageHeader(g, "quest", "Quests", "Optional: accept and track the Angler quests this macro supports.")
     Section(g, "quest", 214, 100, "ANGLER QUEST")
-    AddToggle(g, "quest", "questOn", 214, 126, "Auto-quest (AFK at the Angler)", Cfg.questOn, 300)
+    AddToggle(g, "quest", "questOn", 214, 126, "Accept supported quests near the Angler", Cfg.questOn, 340)
     Lbl(g, "quest", 590, 129, 96, "Rod skill key", th.muted)
     AddDdl(g, "quest", "questKey", 690, 125, 60, ["Z", "X", "C", "V", "F"], IdxOf(["Z", "X", "C", "V", "F"], Cfg.questKey))
     Ui.questNote := Lbl(g, "quest", 214, 166, 590, "", th.muted, 9, 400, 56)
@@ -5859,9 +5862,9 @@ BuildGui(startPage := "dash") {
     Lbl(g, "quest", 214, 588, 590, "The hourly report also lists the quests of the hour (accepted / done / failed).", th.muted, 9)
 
     ; ---- SHOP AND BAIT -----------------------------------------------------
-    PageHeader(g, "shop", "Shop and Bait", "Which NPC you AFK at, which bait to buy, and when to sell.")
+    PageHeader(g, "shop", "Bait & Sales", "Choose your fishing NPC, bait, purchase amount and sale interval.")
     Section(g, "shop", 214, 100, "NPC")
-    Lbl(g, "shop", 214, 130, 70, "AFK at", th.muted)
+    Lbl(g, "shop", 214, 130, 70, "NPC", th.muted)
     AddDdl(g, "shop", "npc", 280, 126, 150, NPC_LIST, IdxOf(NPC_LIST, Cfg.npc))
     Ui.npcNote := Lbl(g, "shop", 214, 160, 590, "", th.muted, 9, 400, 34)
     Section(g, "shop", 214, 202, "BAIT")
@@ -5871,10 +5874,10 @@ BuildGui(startPage := "dash") {
     for b in BAITS
         baitItems.Push(BaitLabel(b))
     AddDdl(g, "shop", "bait", 300, 268, 440, baitItems, IdxOf(BAITS, CurBait(), 1))
-    Lbl(g, "shop", 214, 312, 170, "Bait in inventory now", th.muted)
+    Lbl(g, "shop", 214, 312, 170, "Bait already in bag", th.muted)
     AddEdit(g, "shop", "baitNow", 390, 308, 70, Cfg.baitNow, true)
-    Lbl(g, "shop", 470, 312, 330, "0 = do not count (max 100). Updates live while running.", th.muted)
-    Lbl(g, "shop", 214, 352, 170, "Bait per purchase", th.muted)
+    Lbl(g, "shop", 470, 312, 330, "Enter 0 to let the macro track bait itself (max 100).", th.muted)
+    Lbl(g, "shop", 214, 352, 170, "Buy up to", th.muted)
     AddDdl(g, "shop", "baitPer", 390, 348, 70, ["10", "20", "30", "40", "50", "60", "70", "80", "90", "100"]
         , Min(10, Max(1, Cfg.baitPer // 10)))
     Ui.costLbl := Lbl(g, "shop", 470, 352, 340, "", th.txt)
@@ -5884,13 +5887,13 @@ BuildGui(startPage := "dash") {
     AddEdit(g, "shop", "sellEvery", 420, 446, 64, Cfg.sellEvery, true)
     Lbl(g, "shop", 492, 450, 100, "catches", th.muted)
     Ui.sellNote := Lbl(g, "shop", 600, 450, 210, "", th.bad, 9)
-    AddToggle(g, "shop", "trackIncome", 214, 490, "Track income (reads your $ with Windows OCR)", Cfg.trackIncome, 400)
-    AddToggle(g, "shop", "trackLevel", 214, 520, "Track levels (reads your level with Windows OCR)", Cfg.trackLevel, 400)
+    AddToggle(g, "shop", "trackIncome", 214, 490, "Read money from the HUD (Windows OCR)", Cfg.trackIncome, 400)
+    AddToggle(g, "shop", "trackLevel", 214, 520, "Read your level from the HUD (Windows OCR)", Cfg.trackLevel, 400)
     Lbl(g, "shop", 214, 556, 590, "Sea 2 and Sea 3 baits also need their material (Demonic Wisp, Yeti Fur, Terror Eyes, Dragon Scale)"
         . " in your inventory. Locked baits cannot be bought.", th.muted, 9, 400, 34)
 
     ; ---- WEBHOOK -----------------------------------------------------------
-    PageHeader(g, "hook", "Webhook", "Send progress, sales and an hourly report to a Discord channel.")
+    PageHeader(g, "hook", "Discord", "Optional: send updates to a Discord channel. Leave this off if unused.")
     Section(g, "hook", 214, 98, "DISCORD")
     AddToggle(g, "hook", "hkOn", 214, 122, "Enable webhook", Cfg.hkOn, 200)
     Lbl(g, "hook", 214, 158, 300, "Webhook URL", th.muted)
@@ -5925,7 +5928,7 @@ BuildGui(startPage := "dash") {
     Ui.hookStatus := Lbl(g, "hook", 214, 616, 590, "", th.muted, 9)
 
     ; ---- APPEARANCE --------------------------------------------------------
-    PageHeader(g, "look", "Appearance", "Pick a theme. It applies instantly and is remembered.")
+    PageHeader(g, "look", "Theme", "Choose a colour theme. It is saved automatically.")
     px := 214
     py := 112
     for nm in THEME_ORDER {
