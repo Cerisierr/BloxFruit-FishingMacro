@@ -1,7 +1,15 @@
 # Changelog: Blox Fruits Fishing Macro (AutoHotkey v2)
 
-Current delivered file: `BloxFishing.ahk` (v1.25.0 below).
+Current delivered file: `BloxFishing.ahk` (v1.25.1 below).
 Nothing is pending from the earlier "not delivered" list except the open points at the bottom.
+
+---
+
+## v1.25.1: Fix startup error in the update checker
+
+- Renamed the update-comparison parameters that used AutoHotkey's reserved word `local`. The script now starts normally, and GitHub version checks can run.
+- No other behavior changed.
+- Not tested in AutoHotkey or Roblox.
 
 ---
 
