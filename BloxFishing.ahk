@@ -300,7 +300,7 @@ class ReelController {
 ;  CONFIGURATION
 ; ============================================================================
 APP_NAME    := "CeriFish"
-APP_VERSION := "1.29.8"
+APP_VERSION := "1.29.9"
 INI_FILE    := A_ScriptDir "\BloxFishing.ini"
 UPDATE_URL  := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.ahk"
 UPDATE_HTML_URL := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.html"
@@ -356,7 +356,7 @@ Points := {
 ; Timings in seconds (same defaults as the Python build).
 Timing := {
     castHold: 5.00, releaseLead: 0.0, castSettle: 1.60, quickHold: 0.30, quickSettle: 1.00, maxCastAttempts: 4, castRetryGap: 0.45
-  , biteClickDelay: 0.05, biteToBar: 5.0, maxWaitBite: 30.0, maxReel: 12.0
+  , biteClickDelay: 0.05, hookedDelay: 0.05, biteToBar: 5.0, maxWaitBite: 30.0, maxReel: 12.0
   , flickGap: 0.08, flickSlowDelay: 0.50, flickSlowGap: 0.50, flickSettle: 0.50
   , catchConfirm: 0.30, popupDelay: 1.60, catchClickGap: 0.35, catchSettle: 0.55, recastDelay: 0.50
   , barClear: 3.0, barLost: 0.9, errorRecovery: 1.0, responseTimeout: 300.0
@@ -2923,6 +2923,7 @@ WaitForBite() {
                 NoteResponse()
                 LogMsg("[bite] hooked (" . BotState.biteInfo . ")")
                 HookHooked()
+                Wait(Timing.hookedDelay)                ; let the hooked state register before looking for the reel bar
                 return true
             }
         } else {

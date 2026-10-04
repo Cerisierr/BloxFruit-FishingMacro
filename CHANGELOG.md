@@ -1,7 +1,13 @@
 # Changelog: CeriFish — Fishing Macro (AutoHotkey v2)
 
-Current delivered files: `BloxFishing.ahk`, `BloxFishing.html`, and CeriFish logo assets (v1.29.8 below).
+Current delivered files: `BloxFishing.ahk`, `BloxFishing.html`, and CeriFish logo assets (v1.29.9 below).
 Nothing is pending from the earlier "not delivered" list except the open points at the bottom.
+
+---
+
+## v1.29.9: Give the hooked state time to register
+
+- Wait 50 ms after confirming the red bite marker and tapping to hook, before checking for the reel minigame bar.
 
 ---
 

@@ -4,7 +4,7 @@ AutoHotkey v2 macro for automating fishing in **Blox Fruits**.
 
 The macro uses screen capture, color detection and Windows OCR to read the fishing bar, the bite indicator, the fish position, chests, the cast charge meter, NPC/shop menus and the quest panel. It controls the reel automatically and can buy bait, sell fish, do the Angler quests and report to Discord.
 
-Current version: **1.29.8** (see `CHANGELOG.md` for the full history).
+Current version: **1.29.9** (see `CHANGELOG.md` for the full history).
 
 ## Preview
 
@@ -149,7 +149,7 @@ How it works:
 ## Shop and Bait
 
 - **AFK at**: `Fisherman` or `Angler`. With the Angler, auto-sell is off and auto-quest is available.
-- **Auto-buy bait when it runs low**, **Bait type**, **Bait in inventory now** (`0` = do not count, max 90, updates live), **Bait per purchase** (10-100, multiples of 10). The inventory holds 90 bait at most, so the macro only buys what fits. Each cast also has a short 0.5-second registration pause before launch.
+- **Auto-buy bait when it runs low**, **Bait type**, **Bait in inventory now** (`0` = do not count, max 90, updates live), **Bait per purchase** (10-100, multiples of 10). The inventory holds 90 bait at most, so the macro only buys what fits. Each cast also has a short 0.5-second registration pause before launch, and the macro waits 50 ms after hooking before looking for the reel bar.
 - Baits: Basic, Kelp, Good (Sea 1); Abyssal (Sea 2, needs Demonic Wisp); Frozen (Sea 2, needs Yeti Fur); Epic (Sea 3, needs Terror Eyes); Carnivore (Sea 3, needs Dragon Scale). Locked baits cannot be bought.
 - **Auto-sell fish every N catches**
 - **Track income** and **Track levels**: read your `$` and level with Windows OCR.
