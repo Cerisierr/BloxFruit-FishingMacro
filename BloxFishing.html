@@ -11,7 +11,7 @@
     body { background: #07111f; color: #edf4ff; font: 13px "Segoe UI", Arial, sans-serif; }
     button, input, select { font: inherit; }
     button { cursor: pointer; color: inherit; }
-    .app { display: flex; width: 100%; height: 100%; min-width: 980px; }
+    .app { display: flex; width: 100%; height: 100%; min-width: 0; }
     .side { flex: 0 0 220px; display: flex; flex-direction: column; padding: 20px 14px; background: #06101d; border-right: 1px solid #203149; }
     .brand { display: flex; align-items: center; padding: 3px 8px 22px; }
     .logo { display: block; width: 42px; height: 42px; flex: 0 0 42px; margin-right: 12px; border-radius: 13px; }
@@ -110,7 +110,9 @@
     body[data-theme="Daylight"] input, body[data-theme="Daylight"] select, body[data-theme="Daylight"] .log { background: #fff; border-color: #cdd3e4; color: #1b2033; }
     body[data-theme="Daylight"] .callout { background: #edf2fc; border-color: #cdd3e4; color: #35415c; }
     body[data-theme="Daylight"] .btn.primary, body[data-theme="Daylight"] .switch.on { background: #3b6ef5; color: #fff; }
-    @media (max-width: 1050px) { .side { flex-basis: 190px; } .grid.three > .card { flex-basis: 42%; } .body { padding: 17px; } .top { padding: 0 19px; } }
+    @media (max-width: 1050px) { .side { flex-basis: 180px; padding: 16px 10px; } .grid.three > .card { flex-basis: 42%; } .body { padding: 17px; } .top { padding: 0 16px; } .topactions .btn { margin-left: 5px; padding: 8px 9px; } }
+    @media (max-width: 760px) { .side { flex-basis: 146px; padding: 14px 8px; } .brand { padding-left: 2px; padding-right: 2px; } .logo { width: 34px; height: 34px; flex-basis: 34px; margin-right: 7px; } .brand b { font-size: 13px; } .brand small { font-size: 10px; } .nav button { padding: 10px 8px; font-size: 11px; } .status { padding: 10px; font-size: 11px; } .top { min-height: 82px; height: auto; padding: 8px 11px; } .top h1 { font-size: 18px; } .top p { font-size: 10px; } .topactions { flex-wrap: wrap; justify-content: flex-end; } .topactions .btn { padding: 7px; font-size: 10px; } .body { padding: 12px; } .grid > .card, .grid.three > .card { flex-basis: 100%; min-width: 0; } .metrics { flex-wrap: wrap; } .metric { flex: 1 1 40%; margin-bottom: 8px; } .footer { padding: 0 8px; } .footer > span { display: none; } .footer .actions .btn { margin-right: 4px; padding: 7px; font-size: 10px; } }
+    @media (max-width: 560px) { .side { flex-basis: 124px; padding: 12px 6px; } .brand { flex-wrap: wrap; } .brand .logo { margin-right: 5px; } .brand b { font-size: 12px; } .brand small { display: block; width: 100%; margin-top: 4px; } .nav button { padding: 9px 5px; font-size: 10px; } .status { padding: 8px; font-size: 10px; } .status b { font-size: 13px; } .top { align-items: flex-start; flex-direction: column; justify-content: center; gap: 5px; } .topactions { width: 100%; justify-content: flex-start; } .topactions .btn { margin-left: 0; margin-right: 4px; padding: 6px; font-size: 9px; } .footer .left { font-size: 9px; } .footer .actions .btn { padding: 6px 5px; font-size: 9px; } .card { padding: 12px; } .intro { font-size: 11px; } }
   </style>
   <script>
     function cmd(action, key, value, name) {
@@ -169,7 +171,7 @@
         <button data-page="look" onclick="page('look')">Appearance</button>
         <button data-page="logs" onclick="page('logs')">Logs</button>
       </nav>
-      <div class="sidebottom"><div class="status"><span class="dot">●</span> Macro status<b id="runstatus">Idle</b>Game<b>Blox Fruits</b>Version <span id="version">1.29.2</span></div><div class="ver">Settings save automatically</div></div>
+      <div class="sidebottom"><div class="status"><span class="dot">●</span> Macro status<b id="runstatus">Idle</b>Game<b>Blox Fruits</b>Version <span id="version">1.29.3</span></div><div class="ver">Settings save automatically</div></div>
     </aside>
     <main class="main">
       <header class="top"><div><h1 id="heading">Dashboard</h1><p id="subtitle">Your fishing setup, session status and quick links.</p></div><div class="topactions"><button class="btn" onclick="page('look')">Theme</button><button class="btn" onclick="cmd('check')">Check setup</button><button class="btn primary" id="runbtn" onclick="cmd('start')">Start macro · F2</button></div></header>
@@ -271,7 +273,7 @@
           <div class="actions" style="margin-bottom:12px"><button class="btn" onclick="cmd('check')">Check setup</button></div><pre id="log" class="log"></pre>
         </section>
       </div>
-      <footer class="footer"><div class="left">v<span id="version-footer">1.29.2</span><span class="dot">●</span><span id="footstatus">Idle</span></div><div class="actions"><button class="btn" onclick="cmd('update')">Updates</button><button class="btn" onclick="cmd('pause')">Pause / resume · F3</button><button class="btn" onclick="cmd('quit')">Quit · F4</button></div><span>F2 Start · F3 Pause · F4 Quit</span></footer>
+      <footer class="footer"><div class="left">v<span id="version-footer">1.29.3</span><span class="dot">●</span><span id="footstatus">Idle</span></div><div class="actions"><button class="btn" onclick="cmd('update')">Updates</button><button class="btn" onclick="cmd('pause')">Pause / resume · F3</button><button class="btn" onclick="cmd('quit')">Quit · F4</button></div><span>F2 Start · F3 Pause · F4 Quit</span></footer>
     </main>
   </div>
 </body>

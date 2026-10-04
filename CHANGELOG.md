@@ -1,13 +1,20 @@
 # Changelog: CeriFish — Fishing Macro (AutoHotkey v2)
 
-Current delivered files: `BloxFishing.ahk`, `BloxFishing.html`, and CeriFish logo assets (v1.29.2 below).
+Current delivered files: `BloxFishing.ahk`, `BloxFishing.html`, and CeriFish logo assets (v1.29.3 below).
 Nothing is pending from the earlier "not delivered" list except the open points at the bottom.
+
+---
+
+## v1.29.3: Fit the control panel to the available screen
+
+- Size and center the app window within the primary monitor's work area.
+- Let the HTML interface reflow on narrow RDP displays instead of forcing a 980 px minimum width.
 
 ---
 
 ## v1.29.2: Add the CeriFish CF logo
 
-- Create a geometric CF monogram inspired by the supplied reference, with an editable SVG master and PNG app-header image.
+- Create a geometric CF monogram based on the supplied reference for the app header and Windows icon.
 - Use a multi-size Windows icon for the app window and taskbar.
 - Include the logo files in GitHub updates so the interface and icon remain in sync.
 

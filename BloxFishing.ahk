@@ -300,7 +300,7 @@ class ReelController {
 ;  CONFIGURATION
 ; ============================================================================
 APP_NAME    := "CeriFish"
-APP_VERSION := "1.29.2"
+APP_VERSION := "1.29.3"
 INI_FILE    := A_ScriptDir "\BloxFishing.ini"
 UPDATE_URL  := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.ahk"
 UPDATE_HTML_URL := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.html"
@@ -6172,6 +6172,13 @@ ThemeCard(g, name, x, y) {
 ; ============================================================================
 BuildGui(startPage := "dash") {
     global HTML_FILE
+    MonitorGetWorkArea(1, &workLeft, &workTop, &workRight, &workBottom)
+    workWidth := workRight - workLeft
+    workHeight := workBottom - workTop
+    windowWidth := Min(1160, Max(480, workWidth - 32))
+    windowHeight := Min(758, Max(420, workHeight - 52))
+    windowX := workLeft + Floor((workWidth - windowWidth) / 2)
+    windowY := workTop + Floor((workHeight - windowHeight) / 2)
     if !FileExist(HTML_FILE) {
         MsgBox("The interface file is missing:`n" . HTML_FILE . "`n`nKeep BloxFishing.html next to BloxFishing.ahk.", APP_NAME, "Iconx")
         ExitApp()
@@ -6438,7 +6445,7 @@ BuildGui(startPage := "dash") {
         for c in trio
             c.Visible := false
     }
-    Ui.browserCtl := g.Add("ActiveX", "x0 y0 w1160 h758", "Shell.Explorer")
+    Ui.browserCtl := g.Add("ActiveX", "x0 y0 w" . windowWidth . " h" . windowHeight, "Shell.Explorer")
     Ui.browser := Ui.browserCtl.Value
     Ui.browser.Silent := true
     Ui.browserEvents := HtmlBrowserEvents()
@@ -6451,7 +6458,7 @@ BuildGui(startPage := "dash") {
     try doc.parentWindow.execScript("page('" . startPage . "')")
 
     ShowPage(startPage)
-    g.Show("w1160 h758")
+    g.Show("x" . windowX . " y" . windowY . " w" . windowWidth . " h" . windowHeight)
     ; Showing the parent window can put its older native child controls above
     ; the hosted browser. Explicitly restore the browser host to the top.
     DllCall("SetWindowPos", "ptr", Ui.browserCtl.Hwnd, "ptr", 0
