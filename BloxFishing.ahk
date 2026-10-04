@@ -385,7 +385,7 @@ NPC_LIST := ["Fisherman", "Angler"]
 Cfg := {
     resolution: "Auto", rodSlot: "4", fastBite: false, slowFlick: false
   , chest: true, anchor: true, flick: true, perfect: true, perfectPct: 97
-  , zoomLock: true, zoomOut: 8, zoomEvery: 5, tiltPx: 70, gameFast: true
+  , zoomLock: true, zoomOut: 8, zoomEvery: 5, tiltPx: 70, dockWalk: 8, gameFast: true
   , questOn: true, questKey: "Z"
   , npc: "Fisherman", buyBait: true, baitType: "Basic Bait", baitNow: 0, baitPer: 40, baitRow: 0
   , sellOn: true, sellEvery: 100, trackIncome: true, trackLevel: true
@@ -2412,11 +2412,23 @@ ClearNpcRange(why) {
         Wait(0.6)
         if !NpcLabelVisible() {
             LogMsg("[npc] out of range after " . A_Index . " step" . (A_Index == 1 ? "" : "s"))
+            WalkToFishingEdge(why)
             return true
         }
     }
     LogMsg("[npc] still in range after 6 steps - move the character away from the NPC by hand")
     return true
+}
+
+; Walk a short, configurable distance from the NPC interaction circle toward the dock edge.
+WalkToFishingEdge(why) {
+    ticks := Min(40, Max(0, Cfg.dockWalk))
+    if (ticks <= 0 || !BotState.running)
+        return
+    seconds := ticks / 10
+    LogMsg("[position] walking " . Format("{:.1f}", seconds) . " s from the NPC circle toward the dock edge (" . why . ")")
+    Keys.Tap(Keys.SC_W, seconds)
+    Wait(0.25)
 }
 
 ; One confirmed NPC dialogue is the position reset on F2.
@@ -4105,6 +4117,7 @@ SETTINGS_SPEC := [
   , ["fishing", "anchor", "1", "b"]
   , ["fishing", "perfect", "1", "b"]
   , ["fishing", "perfectPct", "97", "i"]
+  , ["fishing", "dockWalk", "8", "i"]
   , ["camera", "zoomLock", "1", "b"]
   , ["camera", "zoomOut", "8", "i"]
   , ["camera", "zoomEvery", "5", "i"]
@@ -4175,6 +4188,7 @@ LoadSettings() {
     if (ver < 2)
         Cfg.zoomOut := 8                                 ; new default camera distance
     Cfg.perfectPct := Min(100, Max(60, Cfg.perfectPct))
+    Cfg.dockWalk := Min(40, Max(0, Cfg.dockWalk))
     Cfg.hkEveryMin := Max(1, Cfg.hkEveryMin)
     if (Cfg.tiltPx == 40)                                ; old v1.16 default was too little
         Cfg.tiltPx := 70
@@ -4226,6 +4240,7 @@ SyncSettings(save := true) {
         Cfg.zoomOut := Min(30, Max(0, IntOf(Ui.zoomOut, 8)))
         Cfg.zoomEvery := Max(0, IntOf(Ui.zoomEvery, 5))
         Cfg.tiltPx := Min(300, Max(0, IntOf(Ui.tiltPx, 70)))
+        Cfg.dockWalk := Min(40, Max(0, IntOf(Ui.dockWalk, 8)))
         Cfg.baitNow := Min(100, Max(0, IntOf(Ui.baitNow, 0)))
         Cfg.baitPer := Min(100, Max(10, Integer(Ui.baitPer.Text)))
         Cfg.sellEvery := Max(0, IntOf(Ui.sellEvery, 100))
@@ -5482,6 +5497,8 @@ CheckSetup(*) {
     LogMsg("curl.exe: " . (FileExist(A_WinDir . "\System32\curl.exe") ? "found" : "MISSING (webhook disabled)"))
     if WinExist(ROBLOX_WIN) {
         LogMsg("Roblox game area: " . win.w . "x" . win.h . " at " . win.x . "," . win.y)
+        promptVisible := NpcLabelVisible()
+        LogMsg(promptVisible ? "NPC position: Interact prompt visible (in range)." : "NPC position: Interact prompt not visible; move onto the lower white circle below the green marker.")
         if CheckResolution()
             LogMsg("Resolution matches the selected profile.")
         FindBarReport()
@@ -5785,7 +5802,7 @@ BuildGui(startPage := "dash") {
     }
 
     ; ---- FISHING -----------------------------------------------------------
-    PageHeader(g, "fish", "Fishing", "Casting, camera and reeling behaviour.")
+    PageHeader(g, "fish", "Fishing", "Start on the lower white NPC circle below the green marker; the macro then walks toward the dock edge.")
     Section(g, "fish", 214, 100, "CASTING")
     AddToggle(g, "fish", "perfect", 214, 126, "Perfect cast", Cfg.perfect, 160)
     Lbl(g, "fish", 470, 129, 90, "Release at", th.muted)
@@ -5797,22 +5814,24 @@ BuildGui(startPage := "dash") {
     Lbl(g, "fish", 272, 209, 170, "Re-apply the zoom every", th.muted)
     AddEdit(g, "fish", "zoomEvery", 430, 205, 54, Cfg.zoomEvery, true)
     Lbl(g, "fish", 492, 209, 100, "casts", th.muted)
-    Lbl(g, "fish", 590, 209, 100, "Tilt down (px)", th.muted)
+    Lbl(g, "fish", 590, 209, 100, "Camera tilt (px)", th.muted)
     AddEdit(g, "fish", "tiltPx", 690, 205, 54, Cfg.tiltPx, true)
     Section(g, "fish", 214, 256, "REELING AND RECOVERY")
     AddToggle(g, "fish", "chest", 214, 282, "Collect treasure chests", Cfg.chest, 200)
     AddToggle(g, "fish", "fastBite", 500, 282, "Faster bite reaction", Cfg.fastBite, 200)
     AddToggle(g, "fish", "slowFlick", 214, 322, "Slower fish trick", Cfg.slowFlick, 200)
-    AddToggle(g, "fish", "anchor", 500, 322, "Anchor at the NPC on start", Cfg.anchor, 200)
-    Section(g, "fish", 214, 372, "GAME")
-    Lbl(g, "fish", 214, 400, 120, "Screen resolution", th.muted)
-    AddDdl(g, "fish", "res", 340, 396, 130, ["Auto", "1920x1080", "2560x1440", "1366x768"]
+    AddToggle(g, "fish", "anchor", 500, 322, "Use lower white NPC circle at start", Cfg.anchor, 270)
+    Lbl(g, "fish", 214, 355, 260, "Extra walk toward the dock edge (0.1 s units)", th.muted)
+    AddEdit(g, "fish", "dockWalk", 480, 351, 54, Cfg.dockWalk, true)
+    Section(g, "fish", 214, 390, "GAME")
+    Lbl(g, "fish", 214, 418, 120, "Screen resolution", th.muted)
+    AddDdl(g, "fish", "res", 340, 414, 130, ["Auto", "1920x1080", "2560x1440", "1366x768"]
         , IdxOf(["Auto", "1920x1080", "2560x1440", "1366x768"], Cfg.resolution))
-    Lbl(g, "fish", 500, 400, 120, "Rod hotbar slot", th.muted)
+    Lbl(g, "fish", 500, 418, 120, "Rod hotbar slot", th.muted)
     slots := ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
-    AddDdl(g, "fish", "rod", 624, 396, 60, slots, IdxOf(slots, Cfg.rodSlot, 4))
-    AddToggle(g, "fish", "gameFast", 214, 436, "Turn on Fast Mode + Reduce Motion when the macro starts", Cfg.gameFast, 480)
-    Lbl(g, "fish", 214, 452, 590, "Perfect cast reads the whole charge bar (orange > yellow > green) and releases when it reaches the"
+    AddDdl(g, "fish", "rod", 624, 414, 60, slots, IdxOf(slots, Cfg.rodSlot, 4))
+    AddToggle(g, "fish", "gameFast", 214, 454, "Turn on Fast Mode + Reduce Motion when the macro starts", Cfg.gameFast, 480)
+    Lbl(g, "fish", 214, 470, 590, "Perfect cast reads the whole charge bar (orange > yellow > green) and releases when it reaches the"
         . " chosen percentage. With zoom-out 8 the bar is small, so 96-98 % is a good value.", th.muted, 9, 400, 44)
 
     ; ---- QUEST -------------------------------------------------------------
