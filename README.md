@@ -4,7 +4,7 @@ AutoHotkey v2 macro for automating fishing in **Blox Fruits**.
 
 The macro uses screen capture, color detection and Windows OCR to read the fishing bar, the bite indicator, the fish position, chests, the cast charge meter, NPC/shop menus and the quest panel. It controls the reel automatically and can buy bait, sell fish, do the Angler quests and report to Discord.
 
-Current version: **1.24.6** (see `CHANGELOG.md` for the full history).
+Current version: **1.25.0** (see `CHANGELOG.md` for the full history).
 
 ## Features
 
@@ -14,8 +14,13 @@ Current version: **1.24.6** (see `CHANGELOG.md` for the full history).
 - **Auto-quest at the Angler** (all four quest types, survives a restart)
 - Death detection (the Health text reads 0/x), re-anchoring after a missed bite, safety stops with a game screenshot
 - Discord webhook: live messages, hourly report with an image card, quest messages, error alerts
-- GUI with a dashboard, a live activity log and several color themes
+- GUI with task-based pages, a live activity log and several color themes
+- GitHub version check at startup and an Updates button; asks before installing and keeps a `.bak` backup
 - Pause / resume without losing the session
+
+## Updates
+
+The macro checks the repository's `main` branch once after startup. If a newer version is available, it asks before downloading and restarting. Select **Updates** in the footer to check manually. The downloaded script is version-checked, the current file is backed up as `BloxFishing.ahk.bak`, and your settings remain in `BloxFishing.ini`. The updater uses the single-file macro from GitHub, so the app does not need a separate installer.
 
 ## Requirements
 
