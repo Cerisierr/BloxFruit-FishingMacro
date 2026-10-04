@@ -1,16 +1,16 @@
-# Blox Fruits Fishing Macro
+# CeriFish — Fishing Macro
 
 AutoHotkey v2 macro for automating fishing in **Blox Fruits**.
 
 The macro uses screen capture, color detection and Windows OCR to read the fishing bar, the bite indicator, the fish position, chests, the cast charge meter, NPC/shop menus and the quest panel. It controls the reel automatically and can buy bait, sell fish, do the Angler quests and report to Discord.
 
-Current version: **1.28.8** (see `CHANGELOG.md` for the full history).
+Current version: **1.29.2** (see `CHANGELOG.md` for the full history).
 
 ## Preview
 
 Dashboard preview using the Sunset theme:
 
-![Blox Fruits Fishing Macro dashboard in the Sunset theme](images/dashboard-preview.png)
+![CeriFish dashboard in the Sunset theme with the CF logo](images/dashboard-preview.png)
 
 ## Features
 
@@ -21,12 +21,14 @@ Dashboard preview using the Sunset theme:
 - Death detection (the Health text reads 0/x), re-anchoring after a missed bite, safety stops with a game screenshot
 - Discord webhook: live messages, hourly report with an image card, quest messages, error alerts
 - HTML/CSS control panel in `BloxFishing.html`, loaded inside the AHK window with AutoHotkey's ActiveX control; grouped settings, live status and themes
+- **Obsidian** is the default theme; your saved theme choice is kept.
+- CeriFish CF monogram appears in the app header and Windows taskbar/window icon.
 - GitHub version check at startup and an Updates button; asks before installing and keeps a `.bak` backup
 - Pause / resume without losing the session
 
 ## Updates
 
-The macro checks the repository's `main` branch once after startup. If a newer version is available, it asks before downloading and restarting. Select **Updates** in the footer to check manually. The updater downloads `BloxFishing.ahk` and `BloxFishing.html` together, backs up both files, and leaves your settings in `BloxFishing.ini`.
+The macro checks the repository's `main` branch once after startup. If a newer version is available, it asks before downloading and restarting. Select **Updates** in the footer to check manually. The updater downloads `BloxFishing.ahk`, `BloxFishing.html`, and the logo/icon assets together, backs up the interface and assets, and leaves your settings in `BloxFishing.ini`.
 
 ## Requirements
 
@@ -104,7 +106,7 @@ The same actions are available as buttons on the Dashboard. When stopped, the ma
 
 ## Dashboard
 
-The dashboard shows fish, bait, money, level and session time. Use its cards to open Fishing, NPC + Bait, Quests or Alerts. The left navigation keeps Logs and Appearance one click away. The footer keeps Start / Stop, Check setup, Updates, Pause, Quit and shortcut keys easy to find. The activity stream is on the Logs page.
+The dashboard shows fish, bait, money, level and session time. Use its cards to open Fishing, NPC + Bait, Quests or Webhook. The left navigation keeps Logs and Appearance one click away. The footer keeps Start / Stop, Check setup, Updates, Pause, Quit and shortcut keys easy to find. The activity stream is on the Logs page.
 
 ## Fishing
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Blox Fruits Fishing Macro</title>
+  <title>CeriFish — Fishing Macro</title>
   <style>
     * { box-sizing: border-box; }
     html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
@@ -14,7 +14,7 @@
     .app { display: flex; width: 100%; height: 100%; min-width: 980px; }
     .side { flex: 0 0 220px; display: flex; flex-direction: column; padding: 20px 14px; background: #06101d; border-right: 1px solid #203149; }
     .brand { display: flex; align-items: center; padding: 3px 8px 22px; }
-    .logo { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; margin-right: 12px; border-radius: 13px; background: #122a48; color: #4da2ff; font-size: 20px; font-weight: 800; }
+    .logo { display: block; width: 42px; height: 42px; flex: 0 0 42px; margin-right: 12px; border-radius: 13px; }
     .brand b { display: block; font-size: 16px; }
     .brand small { color: #68b5ff; font-size: 12px; }
     .nav { display: flex; flex-direction: column; }
@@ -159,17 +159,17 @@
 <body id="root">
   <div class="app">
     <aside class="side">
-      <div class="brand"><div class="logo">BF</div><div><b>Blox Fruits</b><small>Fishing Macro</small></div></div>
+      <div class="brand"><img class="logo" src="images/cerifish-mark.png" alt="CF" width="42" height="42"><div><b>CeriFish</b><small>Fishing Macro</small></div></div>
       <nav class="nav" onmouseover="navHover(event)" onmouseout="navLeave(event)">
         <button data-page="dash" onclick="page('dash')">Dashboard</button>
         <button data-page="fish" onclick="page('fish')">Fishing</button>
         <button data-page="shop" onclick="page('shop')">NPC + Bait</button>
         <button data-page="quest" onclick="page('quest')">Quests</button>
-        <button data-page="hook" onclick="page('hook')">Alerts</button>
+        <button data-page="hook" onclick="page('hook')">Webhook</button>
         <button data-page="look" onclick="page('look')">Appearance</button>
         <button data-page="logs" onclick="page('logs')">Logs</button>
       </nav>
-      <div class="sidebottom"><div class="status"><span class="dot">●</span> Macro status<b id="runstatus">Idle</b>Game<b>Blox Fruits</b>Version <span id="version">1.28.0</span></div><div class="ver">Settings save automatically</div></div>
+      <div class="sidebottom"><div class="status"><span class="dot">●</span> Macro status<b id="runstatus">Idle</b>Game<b>Blox Fruits</b>Version <span id="version">1.29.2</span></div><div class="ver">Settings save automatically</div></div>
     </aside>
     <main class="main">
       <header class="top"><div><h1 id="heading">Dashboard</h1><p id="subtitle">Your fishing setup, session status and quick links.</p></div><div class="topactions"><button class="btn" onclick="page('look')">Theme</button><button class="btn" onclick="cmd('check')">Check setup</button><button class="btn primary" id="runbtn" onclick="cmd('start')">Start macro · F2</button></div></header>
@@ -230,7 +230,7 @@
             <div class="card"><h2>Supported quest types</h2><p class="desc">Unrecognized quests are recorded in Logs.</p><ul><li>Catch a fish of a specified rarity</li><li>Catch three fish within the time limit</li><li>Make three perfect casts and reactions</li><li>Use the rod skill three times</li></ul></div>
           </div>
         </section>
-        <section class="view" id="page-hook" data-title="Alerts" data-subtitle="Discord notifications and session reports.">
+        <section class="view" id="page-hook" data-title="Webhook" data-subtitle="Discord notifications and session reports.">
           <div class="grid"><div class="card"><h2>Discord webhook</h2><p class="desc">Webhook URLs are saved locally in BloxFishing.ini.</p>
             <div class="setting"><span>Enable webhook</span><button id="toggle-hkOn" class="switch" onclick="cmd('toggle','hkOn')"><span></span></button></div>
             <label class="field"><span>Webhook URL</span><input id="hkUrl" type="password" onchange="cmd('set','hkUrl',this.value)"></label>
@@ -271,7 +271,7 @@
           <div class="actions" style="margin-bottom:12px"><button class="btn" onclick="cmd('check')">Check setup</button></div><pre id="log" class="log"></pre>
         </section>
       </div>
-      <footer class="footer"><div class="left">v<span id="version-footer">1.28.0</span><span class="dot">●</span><span id="footstatus">Idle</span></div><div class="actions"><button class="btn" onclick="cmd('update')">Updates</button><button class="btn" onclick="cmd('pause')">Pause / resume · F3</button><button class="btn" onclick="cmd('quit')">Quit · F4</button></div><span>F2 Start · F3 Pause · F4 Quit</span></footer>
+      <footer class="footer"><div class="left">v<span id="version-footer">1.29.2</span><span class="dot">●</span><span id="footstatus">Idle</span></div><div class="actions"><button class="btn" onclick="cmd('update')">Updates</button><button class="btn" onclick="cmd('pause')">Pause / resume · F3</button><button class="btn" onclick="cmd('quit')">Quit · F4</button></div><span>F2 Start · F3 Pause · F4 Quit</span></footer>
     </main>
   </div>
 </body>

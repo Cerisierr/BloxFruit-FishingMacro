@@ -1,5 +1,5 @@
 ; ============================================================================
-;  Blox Fruits Fishing Macro  -  AutoHotkey v2
+;  CeriFish - Fishing Macro  -  AutoHotkey v2
 ;  Port of the "bloxfish" Python macro (vision + reel controller + shop).
 ;
 ;  Hotkeys : F2 = start / stop     F4 = quit     F8 = toggle debug log file
@@ -299,12 +299,15 @@ class ReelController {
 ; ============================================================================
 ;  CONFIGURATION
 ; ============================================================================
-APP_NAME    := "Blox Fruits Fishing Macro"
-APP_VERSION := "1.28.8"
+APP_NAME    := "CeriFish"
+APP_VERSION := "1.29.2"
 INI_FILE    := A_ScriptDir "\BloxFishing.ini"
 UPDATE_URL  := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.ahk"
 UPDATE_HTML_URL := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.html"
+UPDATE_LOGO_URL := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/images/cerifish-mark.png"
+UPDATE_ICON_URL := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/images/cerifish.ico"
 HTML_FILE := A_ScriptDir . "\BloxFishing.html"
+ICON_FILE := A_ScriptDir . "\images\cerifish.ico"
 LOG_FILE    := A_ScriptDir "\BloxFishing.log"
 ERR_DIR     := A_ScriptDir "\errors"          ; game screenshots taken when something goes wrong
 ROBLOX_WIN  := "ahk_exe RobloxPlayerBeta.exe"
@@ -392,8 +395,8 @@ Cfg := {
   , questOn: true, questKey: "Z"
   , npc: "Fisherman", buyBait: true, baitType: "Basic Bait", baitNow: 0, baitPer: 40, baitRow: 0
   , sellOn: true, sellEvery: 100, trackIncome: true, trackLevel: true
-  , theme: "Midnight"
-  , hkOn: false, hkUrl: "", hkUrlHourly: "", hkName: "Blox Fishing Macro", hkMention: ""
+  , theme: "Obsidian"
+  , hkOn: false, hkUrl: "", hkUrlHourly: "", hkName: "CeriFish Macro", hkMention: ""
   , hkStart: true, hkStop: true, hkSale: true, hkShot: true, hkBait: true
   , hkErr: true
   , hkBuy: true, hkCast: false, hkCatch: true, hkCatchShot: false, hkChest: true, hkQuest: true, hkQuestDone: true, hkQuestFail: true
@@ -4113,7 +4116,7 @@ ToggleDebug(*) {
 ; [section, key, default, type]   type: s = text, i = integer, b = on/off
 SETTINGS_SPEC := [
     ["display", "resolution", "Auto", "s"]
-  , ["display", "theme", "Midnight", "s"]
+  , ["display", "theme", "Obsidian", "s"]
   , ["fishing", "rodSlot", "4", "s"]
   , ["fishing", "fastBite", "0", "b"]
   , ["fishing", "slowFlick", "0", "b"]
@@ -4142,7 +4145,7 @@ SETTINGS_SPEC := [
   , ["webhook", "hkOn", "0", "b"]
   , ["webhook", "hkUrl", "", "s"]
   , ["webhook", "hkUrlHourly", "", "s"]
-  , ["webhook", "hkName", "Blox Fishing Macro", "s"]
+  , ["webhook", "hkName", "CeriFish Macro", "s"]
   , ["webhook", "hkMention", "", "s"]
   , ["webhook", "hkStart", "1", "b"]
   , ["webhook", "hkStop", "1", "b"]
@@ -4184,6 +4187,10 @@ LoadSettings() {
         } else {
             Cfg.%name% := raw
         }
+    }
+    if (Cfg.hkName == "Blox Fishing Macro") {
+        Cfg.hkName := "CeriFish Macro"
+        try IniWrite(Cfg.hkName, INI_FILE, "webhook", "hkName")
     }
     ver := 1
     try ver := Integer(IniRead(INI_FILE, "meta", "ver", "1"))
@@ -4251,7 +4258,7 @@ SyncSettings(save := true) {
         Cfg.hkUrl := Trim(Ui.hkUrl.Value)
         Cfg.hkUrlHourly := Trim(Ui.hkUrlHourly.Value)
         nm := Trim(Ui.hkName.Value)
-        Cfg.hkName := (nm != "") ? nm : "Blox Fishing Macro"
+        Cfg.hkName := (nm != "") ? nm : "CeriFish Macro"
         Cfg.hkMention := RegExReplace(Ui.hkMention.Value, "\D")
     }
     if (Cfg.npc == "Angler")
@@ -4911,7 +4918,7 @@ HookTest(*) {
         return
     }
     f := [["Theme", Cfg.theme], ["NPC", Cfg.npc], ["Bait", CurBait().name]]
-    if HookPost(EmbedJson("Webhook connected", "Test message from the Blox Fishing Macro.", 0x4ADE80, f)
+    if HookPost(EmbedJson("Webhook connected", "Test message from CeriFish.", 0x4ADE80, f)
             , , , "test message")
         SetHookStatus("Test sent - waiting for Discord...")
     if (UrlIsHook(Cfg.hkUrlHourly) && Cfg.hkUrlHourly != Cfg.hkUrl)
@@ -5437,7 +5444,7 @@ ApplyGameSettings() {
 ; ============================================================================
 ;  THEMES
 ; ============================================================================
-THEME_ORDER := ["Midnight", "Obsidian", "Ocean", "Emerald", "Sunset", "Rose", "Daylight"]
+THEME_ORDER := ["Obsidian", "Midnight", "Ocean", "Emerald", "Sunset", "Rose", "Daylight"]
 THEMES := Map(
     "Midnight", {bg: "071321", side: "06101D", card: "0D1C2D", inp: "0A1928", txt: "F0F5FC", muted: "A5B4C8"
                , accent: "3297F5", onAccent: "FFFFFF", good: "55D98A", bad: "F87171", line: "25384D", dark: true}
@@ -5767,9 +5774,6 @@ HtmlSync(syncFields := false) {
         doc.getElementById("sessioninfo").innerText := Ui.info.Text
         doc.getElementById("queststatus").innerText := Ui.questStatus.Text
         doc.getElementById("log").innerText := BotState.logBuf
-        logo := doc.querySelector(".logo")
-        logo.style.backgroundColor := accent
-        logo.style.color := accentText
         doc.querySelector(".brand small").style.color := accent
         callouts := doc.querySelectorAll(".callout")
         Loop callouts.length {
@@ -5936,6 +5940,22 @@ CheckForUpdates(manual := false, *) {
         latestHtml := htmlRequest.ResponseText
         if (StrLen(latestHtml) < 5000 || !InStr(latestHtml, 'id="page-dash"'))
             throw Error("GitHub returned an incomplete BloxFishing.html")
+        logoRequest := ComObject("WinHttp.WinHttpRequest.5.1")
+        logoRequest.Open("GET", UPDATE_LOGO_URL, false)
+        logoRequest.SetTimeouts(4000, 4000, 6000, 6000)
+        logoRequest.SetRequestHeader("User-Agent", "CeriFish")
+        logoRequest.Send()
+        if (logoRequest.Status != 200)
+            throw Error("GitHub could not provide the CeriFish logo (HTTP " . logoRequest.Status . ")")
+        latestLogo := logoRequest.ResponseBody
+        iconRequest := ComObject("WinHttp.WinHttpRequest.5.1")
+        iconRequest.Open("GET", UPDATE_ICON_URL, false)
+        iconRequest.SetTimeouts(4000, 4000, 6000, 6000)
+        iconRequest.SetRequestHeader("User-Agent", "CeriFish")
+        iconRequest.Send()
+        if (iconRequest.Status != 200)
+            throw Error("GitHub could not provide the CeriFish window icon (HTTP " . iconRequest.Status . ")")
+        latestIcon := iconRequest.ResponseBody
         if !RegExMatch(latest, 'APP_VERSION\s*:=\s*"([0-9.]+)"', &match)
             throw Error("Could not read the version from GitHub")
         remoteVersion := match[1]
@@ -5948,33 +5968,49 @@ CheckForUpdates(manual := false, *) {
             . "). Install it and restart the macro now?", APP_NAME, "YesNo")
         if (answer != "Yes")
             return
-        InstallUpdate(latest, latestHtml, remoteVersion)
+        InstallUpdate(latest, latestHtml, latestLogo, latestIcon, remoteVersion)
     } catch as err {
         if manual
             MsgBox("Could not check GitHub for updates.`n`n" . err.Message, APP_NAME, "Icon!")
     }
 }
 
-InstallUpdate(source, htmlSource, version) {
+InstallUpdate(source, htmlSource, logoSource, iconSource, version) {
     target := A_ScriptFullPath
     htmlTarget := A_ScriptDir . "\BloxFishing.html"
     temp := A_Temp . "\BloxFishing-update-" . version . ".ahk"
     htmlTemp := A_Temp . "\BloxFishing-update-" . version . ".html"
+    logoTarget := A_ScriptDir . "\images\cerifish-mark.png"
+    iconTarget := A_ScriptDir . "\images\cerifish.ico"
+    logoTemp := A_Temp . "\CeriFish-logo-update-" . version . ".png"
+    iconTemp := A_Temp . "\CeriFish-icon-update-" . version . ".ico"
     backup := target . ".bak"
     htmlBackup := htmlTarget . ".bak"
     htmlBackedUp := false
     htmlInstalled := false
+    logoBackedUp := false
+    logoInstalled := false
+    iconBackedUp := false
+    iconInstalled := false
     try {
         if FileExist(temp)
             FileDelete(temp)
         if FileExist(htmlTemp)
             FileDelete(htmlTemp)
+        if FileExist(logoTemp)
+            FileDelete(logoTemp)
+        if FileExist(iconTemp)
+            FileDelete(iconTemp)
         FileAppend(source, temp, "UTF-8-RAW")
         FileAppend(htmlSource, htmlTemp, "UTF-8-RAW")
+        WriteBinaryFile(logoTemp, logoSource)
+        WriteBinaryFile(iconTemp, iconSource)
         if (FileGetSize(temp) < 50000)
             throw Error("The downloaded file is incomplete")
         if (FileGetSize(htmlTemp) < 5000)
             throw Error("The downloaded interface file is incomplete")
+        if (FileGetSize(logoTemp) < 1000 || FileGetSize(iconTemp) < 1000)
+            throw Error("The downloaded logo files are incomplete")
         try {
             Ui.browser.Navigate("about:blank")
             while (Ui.browser.ReadyState != 4)
@@ -5984,9 +6020,22 @@ InstallUpdate(source, htmlSource, version) {
             FileCopy(htmlTarget, htmlBackup, true)
             htmlBackedUp := true
         }
+        if FileExist(logoTarget) {
+            FileCopy(logoTarget, logoTarget . ".bak", true)
+            logoBackedUp := true
+        }
+        if FileExist(iconTarget) {
+            FileCopy(iconTarget, iconTarget . ".bak", true)
+            iconBackedUp := true
+        }
+        DirCreate(A_ScriptDir . "\images")
         FileCopy(target, backup, true)
         FileMove(htmlTemp, htmlTarget, true)
         htmlInstalled := true
+        FileMove(logoTemp, logoTarget, true)
+        logoInstalled := true
+        FileMove(iconTemp, iconTarget, true)
+        iconInstalled := true
         FileMove(temp, target, true)
         Run('"' . A_AhkPath . '" "' . target . '"')
         ExitApp()
@@ -5999,6 +6048,16 @@ InstallUpdate(source, htmlSource, version) {
                     FileDelete(htmlTarget)
             }
         }
+        if logoBackedUp {
+            try FileCopy(logoTarget . ".bak", logoTarget, true)
+        } else if logoInstalled {
+            try FileDelete(logoTarget)
+        }
+        if iconBackedUp {
+            try FileCopy(iconTarget . ".bak", iconTarget, true)
+        } else if iconInstalled {
+            try FileDelete(iconTarget)
+        }
         try {
             if FileExist(temp)
                 FileDelete(temp)
@@ -6008,11 +6067,28 @@ InstallUpdate(source, htmlSource, version) {
                 FileDelete(htmlTemp)
         }
         try {
+            if FileExist(logoTemp)
+                FileDelete(logoTemp)
+        }
+        try {
+            if FileExist(iconTemp)
+                FileDelete(iconTemp)
+        }
+        try {
             Ui.browser.Navigate(HtmlFileURL(htmlTarget))
         }
         MsgBox("The update was downloaded but could not be installed.`nYour current macro is unchanged.`n`n"
             . err.Message, APP_NAME, "Icon!")
     }
+}
+
+WriteBinaryFile(path, bytes) {
+    stream := ComObject("ADODB.Stream")
+    stream.Type := 1
+    stream.Open()
+    stream.Write(bytes)
+    stream.SaveToFile(path, 2)
+    stream.Close()
 }
 
 ChangeTheme(name) {
@@ -6100,7 +6176,7 @@ BuildGui(startPage := "dash") {
         MsgBox("The interface file is missing:`n" . HTML_FILE . "`n`nKeep BloxFishing.html next to BloxFishing.ahk.", APP_NAME, "Iconx")
         ExitApp()
     }
-    th := THEMES.Has(Cfg.theme) ? THEMES[Cfg.theme] : THEMES["Midnight"]
+    th := THEMES.Has(Cfg.theme) ? THEMES[Cfg.theme] : THEMES["Obsidian"]
     Ui.th := th
     g := Gui("+MinimizeBox", APP_NAME . "  v" . APP_VERSION)
     g.BackColor := th.bg
@@ -6125,12 +6201,12 @@ BuildGui(startPage := "dash") {
     Panel(g, "", 0, 0, 210, 758)
     Box(g, "", 209, 0, 1, 704, th.line)
     Box(g, "", 18, 20, 36, 36, th.accent)
-    Lbl(g, "", 18, 21, 36, "BF", th.onAccent, 12, 700, 32)
-    Lbl(g, "", 64, 20, 132, "Blox Fruits", th.txt, 11, 700)
+    Lbl(g, "", 18, 21, 36, "CF", th.onAccent, 12, 700, 32)
+    Lbl(g, "", 64, 20, 132, "CeriFish", th.txt, 11, 700)
     Lbl(g, "", 64, 42, 132, "Fishing Macro", th.accent, 9, 600)
     Box(g, "", 16, 70, 178, 1, th.line)
     navDefs := [["dash", "Dashboard", "⌂"], ["fish", "Fishing", "⚓"], ["shop", "NPC + Bait", "▣"]
-              , ["quest", "Quests", "✓"], ["hook", "Alerts", "✉"], ["look", "Appearance", "⚙"]
+              , ["quest", "Quests", "✓"], ["hook", "Webhook", "✉"], ["look", "Appearance", "⚙"]
               , ["logs", "Logs", "≡"]]
     ny := 88
     for item in navDefs {
@@ -6156,7 +6232,7 @@ BuildGui(startPage := "dash") {
 
 
     ; ---- DASHBOARD ---------------------------------------------------------
-    PageHeader(g, "dash", "Fishing Macro Control Panel", "Your fishing setup, session status and quick links.")
+    PageHeader(g, "dash", "CeriFish Control Panel", "Your fishing setup, session status and quick links.")
     Ui.btnStart := Btn(g, "", 14, 716, 86, 30, "Start (F2)", ToggleRun, "primary")
     Ui.btnStop := Btn(g, "", 14, 716, 86, 30, "Stop (F2)", ToggleRun, "danger")
     Ui.btnCheck := Btn(g, "", 106, 716, 98, 30, "Check setup", CheckSetup, "ghost")
@@ -6175,7 +6251,7 @@ BuildGui(startPage := "dash") {
     HomeCard(g, 213, 356, "Fishing setup", "Camera, casting, reeling and dock recovery.", "fish")
     HomeCard(g, 514, 356, "NPC + Bait", "Choose your fishing NPC, bait and sale interval.", "shop")
     HomeCard(g, 213, 480, "Quests", "Angler quest options and current quest status.", "quest")
-    HomeCard(g, 514, 480, "Alerts", "Choose which updates are sent to Discord.", "hook")
+    HomeCard(g, 514, 480, "Webhook", "Choose which updates are sent to Discord.", "hook")
 
     ; ---- LOGS --------------------------------------------------------------
     PageHeader(g, "logs", "Logs", "Live activity, setup checks and error details.")
@@ -6288,7 +6364,7 @@ BuildGui(startPage := "dash") {
         . " in your inventory. Locked baits cannot be bought.", th.muted, 9, 400, 34)
 
     ; ---- WEBHOOK -----------------------------------------------------------
-    PageHeader(g, "hook", "Alerts", "Choose what the macro reports to Discord. Leave this page off if unused.")
+    PageHeader(g, "hook", "Webhook", "Configure Discord notifications and scheduled reports.")
     Panel(g, "hook", 213, 98, 592, 162)
     Panel(g, "hook", 213, 276, 592, 154)
     Panel(g, "hook", 213, 444, 592, 206)
@@ -6412,6 +6488,8 @@ CleanTmp()
 LoadSettings()
 DetectRdp()
 ResetHour()
+if FileExist(ICON_FILE)
+    try TraySetIcon(ICON_FILE)
 BuildGui()
 Hotkey("F2", ToggleRun)
 Hotkey("F3", TogglePause)

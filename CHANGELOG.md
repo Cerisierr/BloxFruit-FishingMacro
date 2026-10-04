@@ -1,7 +1,34 @@
-# Changelog: Blox Fruits Fishing Macro (AutoHotkey v2)
+# Changelog: CeriFish — Fishing Macro (AutoHotkey v2)
 
-Current delivered files: `BloxFishing.ahk` + `BloxFishing.html` (v1.28.8 below).
+Current delivered files: `BloxFishing.ahk`, `BloxFishing.html`, and CeriFish logo assets (v1.29.2 below).
 Nothing is pending from the earlier "not delivered" list except the open points at the bottom.
+
+---
+
+## v1.29.2: Add the CeriFish CF logo
+
+- Create a geometric CF monogram inspired by the supplied reference, with an editable SVG master and PNG app-header image.
+- Use a multi-size Windows icon for the app window and taskbar.
+- Include the logo files in GitHub updates so the interface and icon remain in sync.
+
+---
+
+## v1.29.1: Rename the app to CeriFish
+
+- Replace the Blox Fruits app branding with CeriFish and update the logo initials to CF.
+- Update the default Discord display name and migrate the old default name while preserving custom names.
+
+---
+
+## v1.29.0: Rename Alerts to Webhook
+
+- Rename the Webhook page and dashboard shortcut so their purpose is clear.
+
+---
+
+## v1.28.9: Make Obsidian the default theme
+
+- Set Obsidian as the default for new settings while keeping an existing saved theme choice.
 
 ---
 
