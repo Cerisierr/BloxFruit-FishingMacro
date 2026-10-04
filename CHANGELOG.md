@@ -1,7 +1,15 @@
 # Changelog: Blox Fruits Fishing Macro (AutoHotkey v2)
 
-Current delivered files: `BloxFishing.ahk` + `BloxFishing.html` (v1.28.7 below).
+Current delivered files: `BloxFishing.ahk` + `BloxFishing.html` (v1.28.8 below).
 Nothing is pending from the earlier "not delivered" list except the open points at the bottom.
+
+---
+
+## v1.28.8: Schedule hourly reports on the PC clock
+
+- Send automatic reports at the start of each local PC clock hour while the macro and webhook are active.
+- Removed the configurable interval and enable/disable controls; the hourly schedule is now fixed. Manual **Send report now** is still available.
+- Show the next full-hour report time in the status line and explain the schedule in the interface and README.
 
 ---
 

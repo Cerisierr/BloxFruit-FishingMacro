@@ -4,7 +4,7 @@ AutoHotkey v2 macro for automating fishing in **Blox Fruits**.
 
 The macro uses screen capture, color detection and Windows OCR to read the fishing bar, the bite indicator, the fish position, chests, the cast charge meter, NPC/shop menus and the quest panel. It controls the reel automatically and can buy bait, sell fish, do the Angler quests and report to Discord.
 
-Current version: **1.28.7** (see `CHANGELOG.md` for the full history).
+Current version: **1.28.8** (see `CHANGELOG.md` for the full history).
 
 ## Preview
 
@@ -155,7 +155,8 @@ How it works:
 ## Webhook
 
 - **Enable webhook**, **Webhook URL**, optional separate **hourly report URL**, display name and mention.
-- Messages you can toggle: macro started, stopped + session summary, fish sold, bait purchased, screenshots, errors + game screenshot, hourly report (interval in minutes), buying / selling, casting and hooked, fish caught + progress, catch screenshot, chest collected, and the three quest messages.
+- Messages you can toggle: macro started, stopped + session summary, fish sold, bait purchased, screenshots, errors + game screenshot, buying / selling, casting and hooked, fish caught + progress, catch screenshot, chest collected, and the three quest messages.
+- While the macro and webhook are active, hourly reports are sent automatically at every full hour on the PC's local clock (for example 11:00, 12:00, 13:00). The schedule is fixed and cannot be disabled or rescheduled; **Send report now** remains available for a manual report.
 - **Send report now** sends the hourly report image card immediately.
 - The stop and error messages are plain text embeds sent to the normal webhook. The hourly image card goes only to the hourly report URL (or the normal one if that field is empty).
 - On an error stop, one message includes the reason, the session summary, the last 8 log lines and a game screenshot.

@@ -300,7 +300,7 @@ class ReelController {
 ;  CONFIGURATION
 ; ============================================================================
 APP_NAME    := "Blox Fruits Fishing Macro"
-APP_VERSION := "1.28.7"
+APP_VERSION := "1.28.8"
 INI_FILE    := A_ScriptDir "\BloxFishing.ini"
 UPDATE_URL  := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.ahk"
 UPDATE_HTML_URL := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.html"
@@ -395,7 +395,7 @@ Cfg := {
   , theme: "Midnight"
   , hkOn: false, hkUrl: "", hkUrlHourly: "", hkName: "Blox Fishing Macro", hkMention: ""
   , hkStart: true, hkStop: true, hkSale: true, hkShot: true, hkBait: true
-  , hkHourly: true, hkEveryMin: 60, hkErr: true
+  , hkErr: true
   , hkBuy: true, hkCast: false, hkCatch: true, hkCatchShot: false, hkChest: true, hkQuest: true, hkQuestDone: true, hkQuestFail: true
 }
 
@@ -409,7 +409,7 @@ BotState := {
   , meterFull: 0, biteInfo: "", zoomedAt: -1, biteMisses: 0
   , npcHits: 0, hpNext: 0.0, hpLostSince: 0.0, hpDead: false, hpOcrNext: 0.0, hpZeroReads: 0, paused: false, stopReason: "", moneyLast: -1, lastOcr: "", logBuf: "", levelStart: -1, levelLast: -1, levelRead: 0.0, reportDue: false, hookQ: [], errAt: Map(), stopShot: ""
   , biteBase: 0, biteBaseN: 0, biteFrame: 0, biteFrameW: 0, biteFrameH: 0
-  , questState: "unknown", questType: "", questRarity: "", questTimed: false, questRead: 0.0, questMiss: 0
+  , lastHourlySlot: "", questState: "unknown", questType: "", questRarity: "", questTimed: false, questRead: 0.0, questMiss: 0
   , questNextTry: 0.0, questAcceptedAt: 0.0, questFails: 0, questStreak: 0, questHandFails: 0, questSkillUses: 0, questObjective: "", questEntry: "", questProg: "", questResumed: false, questSig: "", questBlock: 0.0
 }
 Meter := {x: 0, top: 0, bot: 0}
@@ -4149,8 +4149,6 @@ SETTINGS_SPEC := [
   , ["webhook", "hkSale", "1", "b"]
   , ["webhook", "hkShot", "1", "b"]
   , ["webhook", "hkBait", "1", "b"]
-  , ["webhook", "hkHourly", "1", "b"]
-  , ["webhook", "hkEveryMin", "60", "i"]
   , ["webhook", "hkErr", "1", "b"]
   , ["webhook", "hkBuy", "1", "b"]
   , ["webhook", "hkCast", "0", "b"]
@@ -4193,7 +4191,9 @@ LoadSettings() {
         Cfg.zoomOut := 8                                 ; new default camera distance
     Cfg.perfectPct := Min(100, Max(60, Cfg.perfectPct))
     Cfg.dockWalk := Min(40, Max(0, Cfg.dockWalk))
-    Cfg.hkEveryMin := Max(1, Cfg.hkEveryMin)
+    ; Remove the old optional interval settings; reports now follow the PC clock.
+    try IniDelete(INI_FILE, "webhook", "hkHourly")
+    try IniDelete(INI_FILE, "webhook", "hkEveryMin")
     if (Cfg.tiltPx == 40)                                ; old v1.16 default was too little
         Cfg.tiltPx := 70
     Cfg.baitPer := Min(100, Max(10, (Cfg.baitPer // 10) * 10))
@@ -4248,7 +4248,6 @@ SyncSettings(save := true) {
         Cfg.baitNow := Min(100, Max(0, IntOf(Ui.baitNow, 0)))
         Cfg.baitPer := Min(100, Max(10, Integer(Ui.baitPer.Text)))
         Cfg.sellEvery := Max(0, IntOf(Ui.sellEvery, 100))
-        Cfg.hkEveryMin := Max(1, IntOf(Ui.hkEveryMin, 60))
         Cfg.hkUrl := Trim(Ui.hkUrl.Value)
         Cfg.hkUrlHourly := Trim(Ui.hkUrlHourly.Value)
         nm := Trim(Ui.hkName.Value)
@@ -4781,10 +4780,16 @@ HookChest() {
 
 ; Every N minutes while running (default 60).
 HourlyTick() {
-    if !(BotState.running && HookReady() && Cfg.hkHourly)
+    if !(BotState.running && HookReady())
         return
-    if (Now() - Hour.started >= Cfg.hkEveryMin * 60)
-        BotState.reportDue := true
+    if (FormatTime(, "mm") != "00")
+        return
+    slot := FormatTime(, "yyyyMMddHH")
+    if (slot == BotState.lastHourlySlot)
+        return
+    BotState.lastHourlySlot := slot
+    BotState.reportDue := true
+    LogMsg("[webhook] hourly report scheduled at " . FormatTime(, "HH:mm") . " (PC local time)")
 }
 
 ; "done: catch a rare fish (12m 03s)" lines for the report, newest last.
@@ -5480,8 +5485,8 @@ UpdateStats() {
             t .= "   |   " . QuestShort() . (BotStats.quests > 0 ? "  (" . BotStats.quests . " done)" : "")
         if (Cfg.sellOn && Cfg.sellEvery > 0 && Cfg.npc != "Angler")
             t .= "   |   Sale in " . Max(0, Cfg.sellEvery - BotState.sinceSell)
-        if (BotState.running && HookReady() && Cfg.hkHourly)
-            t .= "   |   Report in " . Max(0, Round((Cfg.hkEveryMin * 60 - (Now() - Hour.started)) / 60)) . " min"
+        if (BotState.running && HookReady())
+            t .= "   |   Hourly report at " . FormatTime(DateAdd(A_Now, 1, "Hours"), "HH:00")
         Ui.info.Text := t
         try Ui.questStatus.Text := !BotState.running ? "Macro not running."
             : QuestOn() ? QuestShort() . (BotStats.quests > 0 ? "   (" . BotStats.quests . " done this session)" : "")
@@ -5833,7 +5838,7 @@ HtmlSync(syncFields := false) {
         }
         HtmlField(doc, "bait", IdxOf(BAITS, CurBait(), 1))
         if syncFields {
-            for key in ["perfectPct", "zoomOut", "zoomEvery", "tiltPx", "dockWalk", "baitNow", "sellEvery", "hkUrl", "hkUrlHourly", "hkName", "hkMention", "hkEveryMin"]
+            for key in ["perfectPct", "zoomOut", "zoomEvery", "tiltPx", "dockWalk", "baitNow", "sellEvery", "hkUrl", "hkUrlHourly", "hkName", "hkMention"]
                 HtmlField(doc, key, Ui.%key%.Value)
             for key in ["npc", "res", "rod", "baitPer", "questKey"]
                 HtmlField(doc, key, Ui.%key%.Text)
@@ -6305,10 +6310,7 @@ BuildGui(startPage := "dash") {
     AddToggle(g, "hook", "hkShot", 500, 334, "Screenshots (sale, bait, report)", Cfg.hkShot, 230)
     AddToggle(g, "hook", "hkBait", 214, 368, "Bait purchased", Cfg.hkBait, 200)
     AddToggle(g, "hook", "hkErr", 500, 368, "Errors + game screenshot", Cfg.hkErr, 230)
-    AddToggle(g, "hook", "hkHourly", 214, 402, "Hourly report", Cfg.hkHourly, 120)
-    Lbl(g, "hook", 400, 405, 50, "every", th.muted)
-    AddEdit(g, "hook", "hkEveryMin", 440, 401, 56, Cfg.hkEveryMin, true)
-    Lbl(g, "hook", 504, 405, 40, "min", th.muted)
+    Lbl(g, "hook", 214, 405, 368, "Hourly report: automatic every hour at :00 (PC local time)", th.muted)
     Btn(g, "hook", 600, 400, 204, 26, "Send report now", SendHourly, "ghost")
     Section(g, "hook", 214, 444, "LIVE ACTIVITY  (what the macro is doing right now)")
     AddToggle(g, "hook", "hkBuy", 214, 468, "Buying bait / selling fish", Cfg.hkBuy, 200)

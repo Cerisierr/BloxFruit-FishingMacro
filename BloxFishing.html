@@ -238,8 +238,8 @@
             <label class="field"><span>Display name</span><input id="hkName" onchange="cmd('set','hkName',this.value)"></label>
             <label class="field"><span>Mention user ID (optional)</span><input id="hkMention" onchange="cmd('set','hkMention',this.value)"></label>
             <label class="field"><span>Hourly report URL (optional)</span><input id="hkUrlHourly" type="password" onchange="cmd('set','hkUrlHourly',this.value)"></label>
-            <label class="field"><span>Report interval (minutes)</span><input id="hkEveryMin" type="number" onchange="cmd('set','hkEveryMin',this.value)"></label>
           </div><div class="card"><h2>Notifications</h2><p class="desc">Choose which events are sent to Discord.</p>
+            <div class="callout">Hourly reports are automatic at each full hour on your PC clock (24-hour time).</div>
             <div class="setting"><span>Macro started</span><button id="toggle-hkStart" class="switch" onclick="cmd('toggle','hkStart')"><span></span></button></div>
             <div class="setting"><span>Stopped and session summary</span><button id="toggle-hkStop" class="switch" onclick="cmd('toggle','hkStop')"><span></span></button></div>
             <div class="setting"><span>Fish sold</span><button id="toggle-hkSale" class="switch" onclick="cmd('toggle','hkSale')"><span></span></button></div>
@@ -251,7 +251,6 @@
             <div class="setting"><span>Sale, bait and report screenshots</span><button id="toggle-hkShot" class="switch" onclick="cmd('toggle','hkShot')"><span></span></button></div>
             <div class="setting"><span>Buy/sell activity</span><button id="toggle-hkBuy" class="switch" onclick="cmd('toggle','hkBuy')"><span></span></button></div>
             <div class="setting"><span>Casting and hooked</span><button id="toggle-hkCast" class="switch" onclick="cmd('toggle','hkCast')"><span></span></button></div>
-            <div class="setting"><span>Hourly report</span><button id="toggle-hkHourly" class="switch" onclick="cmd('toggle','hkHourly')"><span></span></button></div>
             <div class="setting"><span>Quest accepted</span><button id="toggle-hkQuest" class="switch" onclick="cmd('toggle','hkQuest')"><span></span></button></div>
             <div class="setting"><span>Quest completed</span><button id="toggle-hkQuestDone" class="switch" onclick="cmd('toggle','hkQuestDone')"><span></span></button></div>
             <div class="setting"><span>Quest failed</span><button id="toggle-hkQuestFail" class="switch" onclick="cmd('toggle','hkQuestFail')"><span></span></button></div>
