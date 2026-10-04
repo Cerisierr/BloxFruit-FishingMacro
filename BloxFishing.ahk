@@ -300,7 +300,7 @@ class ReelController {
 ;  CONFIGURATION
 ; ============================================================================
 APP_NAME    := "Blox Fruits Fishing Macro"
-APP_VERSION := "1.25.0"
+APP_VERSION := "1.25.1"
 INI_FILE    := A_ScriptDir "\BloxFishing.ini"
 UPDATE_URL  := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.ahk"
 LOG_FILE    := A_ScriptDir "\BloxFishing.log"
@@ -5663,14 +5663,14 @@ ApplyRunVis() {
     Ui.btnUpdate.Visible := !run
 }
 
-VersionIsNewer(remote, local) {
-    r := StrSplit(remote, ".")
-    l := StrSplit(local, ".")
-    Loop Max(r.Length, l.Length) {
-        rv := (A_Index <= r.Length) ? Integer(r[A_Index]) : 0
-        lv := (A_Index <= l.Length) ? Integer(l[A_Index]) : 0
-        if (rv != lv)
-            return rv > lv
+VersionIsNewer(remoteVersion, installedVersion) {
+    remoteParts := StrSplit(remoteVersion, ".")
+    installedParts := StrSplit(installedVersion, ".")
+    Loop Max(remoteParts.Length, installedParts.Length) {
+        remotePart := (A_Index <= remoteParts.Length) ? Integer(remoteParts[A_Index]) : 0
+        installedPart := (A_Index <= installedParts.Length) ? Integer(installedParts[A_Index]) : 0
+        if (remotePart != installedPart)
+            return remotePart > installedPart
     }
     return false
 }
