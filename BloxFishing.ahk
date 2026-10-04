@@ -5535,6 +5535,7 @@ Lbl(g, page, x, y, w, txt, color := "", size := 9, weight := 400, h := 0) {
 }
 
 Section(g, page, x, y, txt) {
+    Box(g, page, x, y + 21, 590, 1, Ui.th.line)
     return Lbl(g, page, x, y, 400, txt, Ui.th.accent, 9, 700)
 }
 
@@ -5555,7 +5556,7 @@ AddEdit(g, page, key, x, y, w, val, numeric := false, mask := false) {
     if numeric
         opt .= " Number"
     e := g.Add("Edit", opt, val)
-    e.SetFont("s9", "Segoe UI")
+    e.SetFont("s10", "Segoe UI")
     SendMessage(0x00D3, 3, 6 | (6 << 16), e)                 ; EM_SETMARGINS left/right
     if mask
         SendMessage(0x00CC, 0x25CF, 0, e)                    ; EM_SETPASSWORDCHAR
@@ -5567,7 +5568,7 @@ AddEdit(g, page, key, x, y, w, val, numeric := false, mask := false) {
 AddDdl(g, page, key, x, y, w, items, choose) {
     th := Ui.th
     d := g.Add("DropDownList", Format("x{} y{} w{} Choose{} Background{} c{}", x, y, w, choose, th.inp, th.txt), items)
-    d.SetFont("s9", "Segoe UI")
+    d.SetFont("s10", "Segoe UI")
     if th.dark {
         try DllCall("uxtheme\SetWindowTheme", "ptr", d.Hwnd, "str", "DarkMode_CFD", "str", "")
     }
@@ -5584,7 +5585,7 @@ AddToggle(g, page, key, x, y, label, val, w := 220) {
     off := g.Add("Text", Format("x{} y{} w46 h22 Center +0x200 Background{}", x, y, th.line), "OFF")
     off.SetFont("s8 w700 c" . th.muted, "Segoe UI")
     t := g.Add("Text", Format("x{} y{} w{} h22 +0x200", x + 58, y, w), label)
-    t.SetFont("s9 c" . th.txt, "Segoe UI")
+    t.SetFont("s10 c" . th.txt, "Segoe UI")
     h := FlipHandler(key)
     on.OnEvent("Click", h)
     off.OnEvent("Click", h)
@@ -5708,6 +5709,14 @@ Tile(g, x, y, w, label, key, lblKey := "") {
         Ui.%lblKey% := l
 }
 
+QuickStep(g, x, number, title, detail) {
+    th := Ui.th
+    Box(g, "dash", x, 248, 184, 44, th.inp)
+    Lbl(g, "dash", x + 9, 256, 26, number, th.accent, 11, 700)
+    Lbl(g, "dash", x + 39, 252, 136, title, th.txt, 9, 700)
+    Lbl(g, "dash", x + 39, 269, 136, detail, th.muted, 9)
+}
+
 ThemeCard(g, name, x, y) {
     th := Ui.th
     t := THEMES[name]
@@ -5791,13 +5800,14 @@ BuildGui(startPage := "dash") {
     Tile(g, 426, 158, 150, "Money generated", "tIncome")
     Tile(g, 586, 158, 104, "Level", "tLevel", "tLevelLbl")
     Tile(g, 700, 158, 104, "Run time", "tUp")
-    Box(g, "dash", 213, 240, 592, 46, th.card)
-    Lbl(g, "dash", 226, 249, 120, "QUICK START", th.accent, 9, 700)
-    Lbl(g, "dash", 346, 246, 446, "Stand at the lower white NPC circle, choose bait, then press F2. The macro walks back toward the dock edge.", th.txt, 9, 400, 34)
-    Ui.info := Lbl(g, "dash", 214, 296, 590, "", th.muted, 9)
-    Lbl(g, "dash", 214, 322, 300, "Activity log", th.txt, 10, 600)
-    Box(g, "dash", 213, 346, 592, 276, th.line)
-    Ui.log := g.Add("Edit", Format("x214 y347 w590 h274 ReadOnly -Wrap +VScroll -E0x200 Background{} c{}", th.inp, th.txt))
+    Box(g, "dash", 213, 240, 592, 60, th.card)
+    QuickStep(g, 222, "01", "POSITION", "Lower white circle")
+    QuickStep(g, 418, "02", "SETTINGS", "Choose NPC and bait")
+    QuickStep(g, 614, "03", "START", "Press F2")
+    Ui.info := Lbl(g, "dash", 214, 306, 590, "", th.muted, 9)
+    Lbl(g, "dash", 214, 332, 300, "Activity log", th.txt, 10, 600)
+    Box(g, "dash", 213, 356, 592, 266, th.line)
+    Ui.log := g.Add("Edit", Format("x214 y357 w590 h264 ReadOnly -Wrap +VScroll -E0x200 Background{} c{}", th.inp, th.txt))
     Ui.log.SetFont("s9", "Consolas")
     Reg("dash", Ui.log)
     if th.dark {
@@ -5824,8 +5834,9 @@ BuildGui(startPage := "dash") {
     AddToggle(g, "fish", "fastBite", 500, 282, "Faster bite reaction", Cfg.fastBite, 200)
     AddToggle(g, "fish", "slowFlick", 214, 322, "Slower fish trick", Cfg.slowFlick, 200)
     AddToggle(g, "fish", "anchor", 500, 322, "Use lower white NPC circle at start", Cfg.anchor, 270)
-    Lbl(g, "fish", 214, 355, 260, "Extra walk time (0.1 s units; 8 = 0.8 s)", th.muted)
-    AddEdit(g, "fish", "dockWalk", 480, 351, 54, Cfg.dockWalk, true)
+    Lbl(g, "fish", 214, 355, 230, "Extra walk (0.1 s per step)", th.muted)
+    AddEdit(g, "fish", "dockWalk", 450, 351, 54, Cfg.dockWalk, true)
+    Lbl(g, "fish", 514, 355, 150, "8 = 0.8 seconds", th.muted)
     Section(g, "fish", 214, 390, "GAME")
     Lbl(g, "fish", 214, 418, 120, "Roblox resolution", th.muted)
     AddDdl(g, "fish", "res", 340, 414, 130, ["Auto", "1920x1080", "2560x1440", "1366x768"]
