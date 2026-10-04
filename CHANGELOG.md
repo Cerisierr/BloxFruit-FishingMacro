@@ -1,11 +1,16 @@
 # Changelog: Blox Fruits Fishing Macro (AutoHotkey v2)
 
-Current delivered file: `BloxFishing.ahk` (v1.24.4 below).
+Current delivered file: `BloxFishing.ahk` (v1.24.5 below).
 Nothing is pending from the earlier "not delivered" list except the open points at the bottom.
 
+---
 
+## v1.24.5: Cleaner GUI and clearer setup
 
-
+- **Home:** replaced the cramped three-card strip with one short setup panel: use the lower white NPC circle, choose the NPC and bait, then press F2.
+- **All settings pages:** replaced full-width divider rules with small accent markers so sections read clearly without adding more boxes. Kept larger field and toggle text for legibility.
+- **Fishing settings:** clarified the extra walk input and its units; the movement remains time-based and adjustable.
+- **Not tested in the game** (I cannot run AutoHotkey here).
 
 ---
 

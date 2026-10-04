@@ -300,7 +300,7 @@ class ReelController {
 ;  CONFIGURATION
 ; ============================================================================
 APP_NAME    := "Blox Fruits Fishing Macro"
-APP_VERSION := "1.24.4"
+APP_VERSION := "1.24.5"
 INI_FILE    := A_ScriptDir "\BloxFishing.ini"
 LOG_FILE    := A_ScriptDir "\BloxFishing.log"
 ERR_DIR     := A_ScriptDir "\errors"          ; game screenshots taken when something goes wrong
@@ -5535,8 +5535,8 @@ Lbl(g, page, x, y, w, txt, color := "", size := 9, weight := 400, h := 0) {
 }
 
 Section(g, page, x, y, txt) {
-    Box(g, page, x, y + 21, 590, 1, Ui.th.line)
-    return Lbl(g, page, x, y, 400, txt, Ui.th.accent, 9, 700)
+    Box(g, page, x, y + 2, 3, 16, Ui.th.accent)
+    return Lbl(g, page, x + 12, y, 400, txt, Ui.th.accent, 9, 700)
 }
 
 Btn(g, page, x, y, w, h, txt, cb, kind := "primary") {
@@ -5709,14 +5709,6 @@ Tile(g, x, y, w, label, key, lblKey := "") {
         Ui.%lblKey% := l
 }
 
-QuickStep(g, x, number, title, detail) {
-    th := Ui.th
-    Box(g, "dash", x, 248, 184, 44, th.inp)
-    Lbl(g, "dash", x + 9, 256, 26, number, th.accent, 11, 700)
-    Lbl(g, "dash", x + 39, 252, 136, title, th.txt, 9, 700)
-    Lbl(g, "dash", x + 39, 269, 136, detail, th.muted, 9)
-}
-
 ThemeCard(g, name, x, y) {
     th := Ui.th
     t := THEMES[name]
@@ -5801,9 +5793,9 @@ BuildGui(startPage := "dash") {
     Tile(g, 586, 158, 104, "Level", "tLevel", "tLevelLbl")
     Tile(g, 700, 158, 104, "Run time", "tUp")
     Box(g, "dash", 213, 240, 592, 60, th.card)
-    QuickStep(g, 222, "01", "POSITION", "Lower white circle")
-    QuickStep(g, 418, "02", "SETTINGS", "Choose NPC and bait")
-    QuickStep(g, 614, "03", "START", "Press F2")
+    Box(g, "dash", 213, 240, 3, 60, th.accent)
+    Lbl(g, "dash", 228, 247, 560, "QUICK SETUP", th.accent, 9, 700)
+    Lbl(g, "dash", 228, 267, 560, "Stand on the lower white circle, choose your NPC and bait, then press F2 to start.", th.txt, 10, 400, 22)
     Ui.info := Lbl(g, "dash", 214, 306, 590, "", th.muted, 9)
     Lbl(g, "dash", 214, 332, 300, "Activity log", th.txt, 10, 600)
     Box(g, "dash", 213, 356, 592, 266, th.line)
@@ -5834,9 +5826,9 @@ BuildGui(startPage := "dash") {
     AddToggle(g, "fish", "fastBite", 500, 282, "Faster bite reaction", Cfg.fastBite, 200)
     AddToggle(g, "fish", "slowFlick", 214, 322, "Slower fish trick", Cfg.slowFlick, 200)
     AddToggle(g, "fish", "anchor", 500, 322, "Use lower white NPC circle at start", Cfg.anchor, 270)
-    Lbl(g, "fish", 214, 355, 230, "Extra walk (0.1 s per step)", th.muted)
-    AddEdit(g, "fish", "dockWalk", 450, 351, 54, Cfg.dockWalk, true)
-    Lbl(g, "fish", 514, 355, 150, "8 = 0.8 seconds", th.muted)
+    Lbl(g, "fish", 214, 355, 210, "Extra walk (0.1 s per step)", th.muted)
+    AddEdit(g, "fish", "dockWalk", 430, 351, 54, Cfg.dockWalk, true)
+    Lbl(g, "fish", 494, 355, 150, "8 = 0.8 seconds", th.muted)
     Section(g, "fish", 214, 390, "GAME")
     Lbl(g, "fish", 214, 418, 120, "Roblox resolution", th.muted)
     AddDdl(g, "fish", "res", 340, 414, 130, ["Auto", "1920x1080", "2560x1440", "1366x768"]
