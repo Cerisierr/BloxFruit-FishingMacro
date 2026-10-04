@@ -1,7 +1,16 @@
 # Changelog: CeriFish — Fishing Macro (AutoHotkey v2)
 
-Current delivered files: `BloxFishing.ahk`, `BloxFishing.html`, and CeriFish logo assets (v1.29.6 below).
+Current delivered files: `BloxFishing.ahk`, `BloxFishing.html`, and CeriFish logo assets (v1.29.8 below).
 Nothing is pending from the earlier "not delivered" list except the open points at the bottom.
+
+---
+
+## v1.29.8: Fix false death alerts and respect the 90-bait cap
+
+- Replace the broad white-pixel death guess with OCR that requires both `Died Recently` and `PvP disabled`; confirm the text on two successive fishing-cycle reads and establish the initial baseline after NPC setup.
+- Reuse the OCR result already read at the safe point before each cycle, so the death check does not block fishing-bar tracking.
+- Enforce the actual 90-bait inventory maximum in tracking, shopping, the GUI and the docs.
+- Add a 0.5-second pause before each cast so Roblox has time to register the prior cast.
 
 ---
 

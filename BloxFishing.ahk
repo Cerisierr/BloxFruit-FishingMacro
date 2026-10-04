@@ -300,7 +300,7 @@ class ReelController {
 ;  CONFIGURATION
 ; ============================================================================
 APP_NAME    := "CeriFish"
-APP_VERSION := "1.29.6"
+APP_VERSION := "1.29.8"
 INI_FILE    := A_ScriptDir "\BloxFishing.ini"
 UPDATE_URL  := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.ahk"
 UPDATE_HTML_URL := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.html"
@@ -321,7 +321,7 @@ Regions := {
     bar:   [0.2138, 0.7184, 0.8502, 0.8181],   ; reel bar search band
     baitLine: [0.4200, 0.8050, 0.5800, 0.8600],  ; "Selected Bait: Kelp Bait x80" under the NPC label
     health: [0.0100, 0.8150, 0.2000, 0.8750],  ; HP bar (bottom-left): green fill, empty when dead
-    diedHud: [0.3000, 0.7800, 0.7000, 0.8550], ; centered "Died Recently - PvP disabled" status text
+    diedHud: [0.3000, 0.7800, 0.7000, 0.8650], ; OCR crop for death status and selected-bait line
     bite:  [0.2800, 0.1600, 0.7200, 0.6000],   ; "!" marker area (excludes the top-right player list)
     meter: [0.2800, 0.6000, 0.3800, 0.9600],   ; cast charge meter: tube sits low on 1366x768 RDP (0.64-0.92)
     meterWide: [0.1800, 0.2200, 0.8200, 0.9600], ; fallback if the camera was moved
@@ -358,7 +358,7 @@ Timing := {
     castHold: 5.00, releaseLead: 0.0, castSettle: 1.60, quickHold: 0.30, quickSettle: 1.00, maxCastAttempts: 4, castRetryGap: 0.45
   , biteClickDelay: 0.05, biteToBar: 5.0, maxWaitBite: 30.0, maxReel: 12.0
   , flickGap: 0.08, flickSlowDelay: 0.50, flickSlowGap: 0.50, flickSettle: 0.50
-  , catchConfirm: 0.30, popupDelay: 1.60, catchClickGap: 0.35, catchSettle: 0.55
+  , catchConfirm: 0.30, popupDelay: 1.60, catchClickGap: 0.35, catchSettle: 0.55, recastDelay: 0.50
   , barClear: 3.0, barLost: 0.9, errorRecovery: 1.0, responseTimeout: 300.0
   , chestHold: 2.5, chestGrace: 1.5, chestMinProgress: 0.20, chestMaxGrabs: 4
   , shotDelay: 0.50
@@ -412,7 +412,7 @@ BotState := {
   , flicked: false, lastEscaped: false, buyFailures: 0, lastBought: 0
   , meterFull: 0, biteInfo: "", zoomedAt: -1, biteMisses: 0
   , npcHits: 0, hpNext: 0.0, hpLostSince: 0.0, hpDead: false, hpOcrNext: 0.0, hpZeroReads: 0
-  , diedHudNext: 0.0, diedHudVisible: false, diedHudReads: 0, diedHudSeen: false, diedHudArmed: false
+  , diedHudVisible: false, diedHudReads: 0, diedHudMisses: 0, diedHudSeen: false, diedHudArmed: false
   , paused: false, stopReason: "", moneyLast: -1, lastOcr: "", logBuf: "", levelStart: -1, levelLast: -1, levelRead: 0.0, reportDue: false, hookQ: [], errAt: Map(), stopShot: ""
   , biteBase: 0, biteBaseN: 0, biteFrame: 0, biteFrameW: 0, biteFrameH: 0
   , lastHourlySlot: "", questState: "unknown", questType: "", questRarity: "", questTimed: false, questRead: 0.0, questMiss: 0
@@ -542,9 +542,7 @@ Alive(hp := false) {
     if BotState.diedHudArmed {
         if DeathRecentlyHud() {
             if !BotState.diedHudSeen {
-                ; NPC speech uses bright centered text too; require the fishing HUD, not dialogue.
                 if (BotState.atNpc || InDialogue()) {
-                    BotState.diedHudNext := 0.0
                     BotState.diedHudVisible := false
                     BotState.diedHudReads := 0
                 } else {
@@ -567,46 +565,9 @@ Alive(hp := false) {
     return true
 }
 
-; Detect the bright centered status text with a small cached pixel scan.
-; The badge persists after respawn, so it is a death event only when it appears
-; after the run's initial baseline; while already present it is treated as a
-; visual obstruction over the lower edge of the fishing bar.
-DeathRecentlyHud(force := false) {
-    if (!force && Now() < BotState.diedHudNext)
-        return BotState.diedHudVisible
-    BotState.diedHudNext := Now() + 0.65
-    r := SubRect(BotState.win, Regions.diedHud)
-    if (r.w <= 0 || r.h <= 0) {
-        BotState.diedHudVisible := false
-        return false
-    }
-    gr := ScreenGrab.Get(r.w, r.h)
-    gr.Capture(r.x, r.y)
-    bits := gr.bits
-    white := 0, total := 0, activeCols := 0
-    x := 0
-    while (x < r.w) {
-        colHit := false
-        y := 0
-        while (y < r.h) {
-            v := NumGet(bits, (y * r.w + x) * 4, "UInt")
-            rr := (v >> 16) & 255
-            gg := (v >> 8) & 255
-            bb := v & 255
-            if (rr >= 178 && gg >= 178 && bb >= 178 && Max(rr, gg, bb) - Min(rr, gg, bb) <= 70) {
-                white++
-                colHit := true
-            }
-            total++
-            y += 3
-        }
-        if colHit
-            activeCols++
-        x += 3
-    }
-    found := (total > 0 && white / total >= 0.025 && activeCols >= r.w * 0.22 / 3)
-    BotState.diedHudReads := found ? BotState.diedHudReads + 1 : 0
-    BotState.diedHudVisible := found && (force || BotState.diedHudReads >= 2)
+; OCR verdict is refreshed at the safe top of each fishing cycle. Never scan
+; pixels here: Selected Bait and hotkey labels look like the death badge.
+DeathRecentlyHud() {
     return BotState.diedHudVisible
 }
 
@@ -2585,8 +2546,8 @@ ShopFail(why, what) {
 ; Single place that changes the tracked bait count. Keeps the GUI field and the
 ; saved setting equal to the real count, so "Bait in inventory now" is always current.
 SetBait(n) {
-    BotState.bait := n
-    Cfg.baitNow := (n > 0) ? Min(100, n) : 0
+    BotState.bait := Min(90, Max(0, n))
+    Cfg.baitNow := (BotState.bait > 0) ? BotState.bait : 0
     try Ui.baitNow.Value := Cfg.baitNow
     SetTimer(SaveSettings, -1500)
 }
@@ -2596,7 +2557,7 @@ BuyBait() {
     if ok {
         BotState.buyFailures := 0
         BotState.moneyLast := -1                         ; money was spent: old baseline is stale
-        SetBait(Min(100, Max(0, BotState.bait) + BotState.lastBought))
+        SetBait(Min(90, Max(0, BotState.bait) + BotState.lastBought))
         LogMsg("[bait] topped up to " . BotState.bait)
         return
     }
@@ -2610,17 +2571,17 @@ BuyBait() {
 BuyBaitRoute() {
     bait := CurBait()
     step := Max(1, ShopCfg.craftStep)
-    ; The inventory holds 100 bait at most: only buy what still fits.
-    room := 100 - Max(0, BotState.bait)
+    ; The inventory holds 90 bait at most: only buy what still fits.
+    room := 90 - Max(0, BotState.bait)
     want := Min(Cfg.baitPer, room)
     packs := want // step
     if (packs < 1) {
-        LogMsg("[shop] inventory full (" . Max(0, BotState.bait) . "/100 bait) - nothing to buy")
+        LogMsg("[shop] inventory full (" . Max(0, BotState.bait) . "/90 bait) - nothing to buy")
         BotState.lastBought := 0
         return true
     }
     if (want < Cfg.baitPer)
-        LogMsg("[shop] wanted " . Cfg.baitPer . " but only " . want . " fit (" . Max(0, BotState.bait) . "/100 in stock)")
+        LogMsg("[shop] wanted " . Cfg.baitPer . " but only " . want . " fit (" . Max(0, BotState.bait) . "/90 in stock)")
     nPlus := packs - 1
     bought := step * packs
     cost := packs * bait.price
@@ -2815,6 +2776,11 @@ DoCast() {
         BotState.zoomedAt := BotStats.casts
         ZoomReset()
     }
+
+    ; Give Roblox a short moment to register the previous cast before relaunching.
+    Wait(Timing.recastDelay)
+    if !Alive()
+        return false
 
     ; Perfect cast = release when the charge bar is FULL. The bar bounces
     ; (fills, then drains again), so it is measured against the track height every
@@ -3238,16 +3204,45 @@ WaitBarClear() {
 }
 
 ; Reads "Selected Bait: <name> xN" and syncs the tracked count to what the game shows.
-ReadBaitLine() {
-    r := SubRect(BotState.win, Regions.baitLine)
+ReadBaitLine(baseline := false) {
+    ; One OCR crop reads both the exact recent-death message and selected bait.
+    r := SubRect(BotState.win, Regions.diedHud)
     path := TMP_DIR . "\\bait_line.png"
-    if !PngSave(r.x, r.y, r.w, r.h, path)
+    if !PngSave(r.x, r.y, r.w, r.h, path) {
+        if baseline {
+            BotState.diedHudVisible := false
+            BotState.diedHudReads := 0
+            BotState.diedHudMisses := 0
+            BotState.diedHudSeen := false
+        }
         return
+    }
     txt := OcrFile(path)
+    compact := StrLower(RegExReplace(txt, "[^a-z]"))
+    deathFound := InStr(compact, "diedrecently") && InStr(compact, "pvpdisabled")
+    if baseline {
+        BotState.diedHudReads := deathFound ? 2 : 0
+        BotState.diedHudMisses := 0
+        BotState.diedHudVisible := deathFound
+        BotState.diedHudSeen := deathFound
+    } else {
+        if deathFound {
+            BotState.diedHudReads += 1
+            BotState.diedHudMisses := 0
+            BotState.diedHudVisible := BotState.diedHudReads >= 2
+        } else {
+            BotState.diedHudReads := 0
+            BotState.diedHudMisses += 1
+        }
+        if (BotState.diedHudMisses >= 3) {
+            BotState.diedHudVisible := false
+            BotState.diedHudSeen := false
+        }
+    }
     if !RegExMatch(txt, "i)Bait[^\r\n]*?[x" . Chr(0xD7) . "]\s*(\d{1,3})", &m)
         return
     n := Integer(m[1])
-    if (n > 100)
+    if (n > 90)
         return
     if (n != BotState.bait) {
         LogMsg("[bait] game shows x" . n . " (tracked " . BotState.bait . ")")
@@ -4067,7 +4062,7 @@ RunBot() {
     BotState.diedHudArmed := false
     BotState.diedHudSeen := false
     BotState.diedHudReads := 0
-    BotState.diedHudNext := 0.0
+    BotState.diedHudMisses := 0
     ResetStats()
     SyncSettings()
     profile := ApplyResolution()
@@ -4093,7 +4088,7 @@ RunBot() {
     BotState.sinceSell := 0
     BotState.flicked := false
     BotState.witness := ""
-    BotState.bait := (Cfg.baitNow > 0) ? Cfg.baitNow : -1       ; tracked whenever a count is given
+    BotState.bait := (Cfg.baitNow > 0) ? Min(90, Cfg.baitNow) : -1 ; tracked whenever a count is given
     BotState.meterFull := 0
     BotState.zoomedAt := -1
     BotState.biteMisses := 0
@@ -4146,11 +4141,8 @@ RunBot() {
         FinishRun()
         return
     }
-    ; Establish the persistent-banner baseline only after the NPC setup dialogue
-    ; has closed; its white speech text can otherwise look like the death badge.
-    BotState.diedHudNext := 0.0
-    BotState.diedHudReads := 0
-    BotState.diedHudSeen := DeathRecentlyHud(true)
+    ; Establish the exact-text baseline only after NPC setup and dialogue are done.
+    ReadBaitLine(true)
     BotState.diedHudArmed := true
     if BotState.diedHudSeen
         LogMsg("[death] recent-death badge was already present at fishing start; monitoring new appearances")
@@ -4368,7 +4360,7 @@ SyncSettings(save := true) {
         Cfg.zoomEvery := Max(0, IntOf(Ui.zoomEvery, 5))
         Cfg.tiltPx := Min(300, Max(0, IntOf(Ui.tiltPx, 70)))
         Cfg.dockWalk := Min(40, Max(0, IntOf(Ui.dockWalk, 8)))
-        Cfg.baitNow := Min(100, Max(0, IntOf(Ui.baitNow, 0)))
+        Cfg.baitNow := Min(90, Max(0, IntOf(Ui.baitNow, 0)))
         Cfg.baitPer := Min(100, Max(10, Integer(Ui.baitPer.Text)))
         Cfg.sellEvery := Max(0, IntOf(Ui.sellEvery, 100))
         Cfg.hkUrl := Trim(Ui.hkUrl.Value)
@@ -4838,7 +4830,7 @@ HookBait(bait, qty, cost, shot := "") {
     if (bait.item != "")
         f.Push(["Material", (qty // 10) . " x " . bait.item])
     f.Push(["Total spent this session", "$" . Fmt(BotStats.spent)])
-    f.Push(["Bait in inventory", BotState.bait >= 0 ? Min(100, Max(0, BotState.bait) + qty) . " / 100" : "n/a"])
+    f.Push(["Bait in inventory", BotState.bait >= 0 ? Min(90, Max(0, BotState.bait) + qty) . " / 90" : "n/a"])
     useShot := (shot != "" && FileExist(shot))
     HookPost(EmbedJson("Bait purchased", "The macro restocked its bait.", 0x60A5FA, f, useShot ? HOOK_SHOT_NAME : "")
         , useShot ? shot : "", , "bait message")
@@ -6470,12 +6462,12 @@ BuildGui(startPage := "dash") {
     AddDdl(g, "shop", "bait", 300, 268, 440, baitItems, IdxOf(BAITS, CurBait(), 1))
     Lbl(g, "shop", 214, 312, 170, "Bait already in bag", th.muted)
     AddEdit(g, "shop", "baitNow", 390, 308, 70, Cfg.baitNow, true)
-    Lbl(g, "shop", 470, 312, 330, "Enter 0 to let the macro track bait itself (max 100).", th.muted)
+    Lbl(g, "shop", 470, 312, 330, "Enter 0 to let the macro track bait itself (max 90).", th.muted)
     Lbl(g, "shop", 214, 352, 170, "Buy up to", th.muted)
     AddDdl(g, "shop", "baitPer", 390, 348, 70, ["10", "20", "30", "40", "50", "60", "70", "80", "90", "100"]
         , Min(10, Max(1, Cfg.baitPer // 10)))
     Ui.costLbl := Lbl(g, "shop", 470, 352, 340, "", th.txt)
-    Lbl(g, "shop", 214, 384, 590, "The inventory holds 100 bait at most: the macro only buys what fits (50 in stock + 100 wanted = 50 bought).", th.muted)
+    Lbl(g, "shop", 214, 384, 590, "The inventory holds 90 bait at most: the macro only buys what fits (50 in stock + 100 wanted = 40 bought).", th.muted)
     Section(g, "shop", 214, 424, "SELLING + STATS")
     AddToggle(g, "shop", "sellOn", 214, 450, "Auto-sell fish every", Cfg.sellOn, 140)
     AddEdit(g, "shop", "sellEvery", 420, 446, 64, Cfg.sellEvery, true)
