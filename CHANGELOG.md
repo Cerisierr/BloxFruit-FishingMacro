@@ -1,7 +1,17 @@
 # Changelog: Blox Fruits Fishing Macro (AutoHotkey v2)
 
-Current delivered file: `BloxFishing.ahk` (v1.24.5 below).
+Current delivered file: `BloxFishing.ahk` (v1.24.6 below).
 Nothing is pending from the earlier "not delivered" list except the open points at the bottom.
+
+---
+
+## v1.24.6: Clearer navigation and persistent controls
+
+- **Window layout:** replaced the side navigation with a compact top tab strip and kept Start / Stop, Pause, Check setup, Quit and running status together in a fixed footer.
+- **Settings pages:** aligned the existing controls under the tabs and removed the large sidebar so more space goes to the active page.
+- **Setup guidance:** kept the lower white NPC circle instruction on Home and clarified the fishing page description.
+- **Inspired by NatroMacro's native tabs and persistent controls; no code was copied.**
+- **Not tested in the game** (I cannot run AutoHotkey here).
 
 ---
 
