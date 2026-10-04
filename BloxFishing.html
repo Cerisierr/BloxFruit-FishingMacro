@@ -1,0 +1,256 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blox Fruits Fishing Macro</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { background: #07111f; color: #edf4ff; font: 13px "Segoe UI", Arial, sans-serif; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; color: inherit; }
+    .app { display: flex; width: 100%; height: 100%; min-width: 980px; }
+    .side { flex: 0 0 220px; display: flex; flex-direction: column; padding: 20px 14px; background: #06101d; border-right: 1px solid #203149; }
+    .brand { display: flex; align-items: center; padding: 3px 8px 22px; }
+    .logo { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; margin-right: 12px; border-radius: 13px; background: #122a48; color: #4da2ff; font-size: 20px; font-weight: 800; }
+    .brand b { display: block; font-size: 16px; }
+    .brand small { color: #68b5ff; font-size: 12px; }
+    .nav { display: flex; flex-direction: column; }
+    .nav button { margin: 0 0 5px; padding: 11px 12px; border: 0; border-radius: 9px; background: transparent; color: #9aacc3; text-align: left; }
+    .nav button:hover, .nav button.active { background: #102b49; color: #fff; }
+    .nav button.active { box-shadow: inset 3px 0 #3d91ff; }
+    .sidebottom { margin-top: auto; }
+    .status { padding: 14px; border: 1px solid #253b54; border-radius: 12px; background: #0a1b2d; color: #acbdd1; font-size: 12px; }
+    .status b { display: block; margin: 6px 0 12px; color: #f3f7ff; font-size: 15px; }
+    .dot { color: #54d58a; }
+    .ver { margin: 12px 4px 0; color: #8194ab; font-size: 11px; }
+    .main { display: flex; flex: 1; min-width: 0; flex-direction: column; }
+    .top { display: flex; flex: 0 0 82px; align-items: center; justify-content: space-between; padding: 0 25px; border-bottom: 1px solid #1b2d43; background: #081525; }
+    .top h1 { margin: 0 0 4px; font-size: 22px; }
+    .top p { margin: 0; color: #a5b5c9; font-size: 12px; }
+    .topactions { display: flex; }
+    .topactions .btn { margin-left: 9px; }
+    .btn { padding: 9px 13px; border: 1px solid #2d425c; border-radius: 9px; background: #102238; color: #dce9fb; }
+    .btn:hover { background: #193654; }
+    .btn.primary { border-color: #3984e9; background: #2877df; color: #fff; font-weight: 650; }
+    .btn.danger { border-color: #8c3e4b; background: #642936; }
+    .body { flex: 1; overflow: auto; padding: 22px 25px 25px; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .intro { margin: 0 0 16px; color: #a6b8ce; font-size: 13px; line-height: 1.55; }
+    .grid { display: flex; flex-wrap: wrap; margin: -7px; }
+    .grid > .card { flex: 1 1 42%; min-width: 240px; margin: 7px; }
+    .grid.three > .card { flex-basis: 28%; }
+    .card { padding: 17px; border: 1px solid #263b53; border-radius: 13px; background: #0b1b2c; box-shadow: 0 8px 20px rgba(0,0,0,.13); }
+    .card h2 { margin: 0 0 4px; font-size: 15px; }
+    .desc { margin: 0 0 13px; color: #95a9c0; font-size: 11px; line-height: 1.5; }
+    .setting { display: flex; min-height: 37px; align-items: center; justify-content: space-between; border-bottom: 1px solid #182b40; color: #d9e4f1; font-size: 12px; }
+    .setting:last-child { border-bottom: 0; }
+    .switch { position: relative; display: block; flex: 0 0 39px; width: 39px; height: 22px; border: 0; border-radius: 14px; background: #34465d; }
+    .switch span { position: absolute; display: block; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #dce7f5; }
+    .switch.on { background: #2879e5; }
+    .switch.on span { left: 20px; background: #fff; }
+    .field { display: block; margin: 10px 0; color: #a9bbd1; font-size: 12px; }
+    .field > span { display: block; margin-bottom: 6px; }
+    .field input, .field select { width: 100%; padding: 8px 10px; border: 1px solid #2a4059; border-radius: 7px; outline: 0; background: #071525; color: #eff5ff; }
+    .field input:focus, .field select:focus { border-color: #4b9eff; }
+    .field small { display: block; margin-top: 5px; color: #8297b0; font-size: 10px; line-height: 1.45; }
+    .callout { margin-bottom: 15px; padding: 12px 14px; border: 1px solid #294667; border-radius: 10px; background: #0c2138; color: #b9cce1; font-size: 12px; line-height: 1.55; }
+    .callout b { color: #74b7ff; }
+    .metrics { display: flex; margin: 14px -5px; }
+    .metric { flex: 1; margin: 0 5px; padding: 12px; border: 1px solid #233952; border-radius: 10px; background: #0a1929; }
+    .metric small { color: #91a5be; font-size: 10px; }
+    .metric b { display: block; margin-top: 6px; font-size: 18px; }
+    .actions { display: flex; }
+    .actions .btn { margin-right: 8px; }
+    .footer { display: flex; flex: 0 0 49px; align-items: center; justify-content: space-between; padding: 0 22px; border-top: 1px solid #1b2d43; background: #081525; color: #91a5bc; font-size: 11px; }
+    .footer .left { display: flex; align-items: center; }
+    .footer .left .dot { margin: 0 8px; }
+    .log { height: 450px; overflow: auto; padding: 12px; border: 1px solid #223851; border-radius: 9px; background: #06111e; color: #bdd0e6; font: 11px Consolas, monospace; white-space: pre-wrap; }
+    .themegrid { display: flex; flex-wrap: wrap; }
+    .theme { min-width: 125px; margin: 0 10px 10px 0; padding: 14px; border: 1px solid #2b4058; border-radius: 10px; background: #102238; }
+    .theme:hover, .theme.selected { border-color: #58a3ff; }
+    .theme.selected { box-shadow: 0 0 0 2px rgba(58,145,255,.25); }
+    body[data-theme="Obsidian"] { background: #141414; color: #ededed; }
+    body[data-theme="Obsidian"] .side, body[data-theme="Obsidian"] .top, body[data-theme="Obsidian"] .footer { background: #0c0c0c; border-color: #333; }
+    body[data-theme="Obsidian"] .card, body[data-theme="Obsidian"] .status, body[data-theme="Obsidian"] .metric { background: #1d1d1d; border-color: #333; }
+    body[data-theme="Obsidian"] input, body[data-theme="Obsidian"] select, body[data-theme="Obsidian"] .log { background: #262626; border-color: #333; color: #ededed; }
+    body[data-theme="Obsidian"] .btn.primary, body[data-theme="Obsidian"] .switch.on { background: #b388ff; }
+    body[data-theme="Ocean"] { background: #0b1b26; color: #e3f4fa; }
+    body[data-theme="Ocean"] .side { background: #07131b; border-color: #1e4258; }
+    body[data-theme="Ocean"] .top, body[data-theme="Ocean"] .footer { background: #0b1b26; border-color: #1e4258; }
+    body[data-theme="Ocean"] .card, body[data-theme="Ocean"] .status, body[data-theme="Ocean"] .metric { background: #102a39; border-color: #1e4258; }
+    body[data-theme="Ocean"] input, body[data-theme="Ocean"] select, body[data-theme="Ocean"] .log { background: #163547; border-color: #1e4258; color: #e3f4fa; }
+    body[data-theme="Ocean"] .btn.primary, body[data-theme="Ocean"] .switch.on { background: #22d3ee; }
+    body[data-theme="Emerald"] { background: #0d1a14; color: #e4f6ec; }
+    body[data-theme="Emerald"] .side { background: #08120e; border-color: #21402f; }
+    body[data-theme="Emerald"] .top, body[data-theme="Emerald"] .footer { background: #0d1a14; border-color: #21402f; }
+    body[data-theme="Emerald"] .card, body[data-theme="Emerald"] .status, body[data-theme="Emerald"] .metric { background: #12261c; border-color: #21402f; }
+    body[data-theme="Emerald"] input, body[data-theme="Emerald"] select, body[data-theme="Emerald"] .log { background: #193327; border-color: #21402f; color: #e4f6ec; }
+    body[data-theme="Emerald"] .btn.primary, body[data-theme="Emerald"] .switch.on { background: #34d399; }
+    body[data-theme="Sunset"] { background: #1a1214; color: #f8eae4; }
+    body[data-theme="Sunset"] .side { background: #120b0d; border-color: #42292e; }
+    body[data-theme="Sunset"] .top, body[data-theme="Sunset"] .footer { background: #1a1214; border-color: #42292e; }
+    body[data-theme="Sunset"] .card, body[data-theme="Sunset"] .status, body[data-theme="Sunset"] .metric { background: #251a1d; border-color: #42292e; }
+    body[data-theme="Sunset"] input, body[data-theme="Sunset"] select, body[data-theme="Sunset"] .log { background: #2f2024; border-color: #42292e; color: #f8eae4; }
+    body[data-theme="Sunset"] .btn.primary, body[data-theme="Sunset"] .switch.on { background: #fb923c; }
+    body[data-theme="Rose"] { background: #1b1020; color: #f7e9f8; }
+    body[data-theme="Rose"] .side { background: #130a18; border-color: #43284f; }
+    body[data-theme="Rose"] .top, body[data-theme="Rose"] .footer { background: #1b1020; border-color: #43284f; }
+    body[data-theme="Rose"] .card, body[data-theme="Rose"] .status, body[data-theme="Rose"] .metric { background: #261630; border-color: #43284f; }
+    body[data-theme="Rose"] input, body[data-theme="Rose"] select, body[data-theme="Rose"] .log { background: #321d3e; border-color: #43284f; color: #f7e9f8; }
+    body[data-theme="Rose"] .btn.primary, body[data-theme="Rose"] .switch.on { background: #f472b6; }
+    body[data-theme="Daylight"] { background: #f3f5fa; color: #1b2033; }
+    body[data-theme="Daylight"] .side { background: #e3e8f2; border-color: #cdd3e4; }
+    body[data-theme="Daylight"] .top, body[data-theme="Daylight"] .footer { background: #fff; border-color: #cdd3e4; color: #5f6786; }
+    body[data-theme="Daylight"] .card, body[data-theme="Daylight"] .status, body[data-theme="Daylight"] .metric { background: #fff; border-color: #cdd3e4; color: #1b2033; }
+    body[data-theme="Daylight"] .field, body[data-theme="Daylight"] .desc, body[data-theme="Daylight"] .status, body[data-theme="Daylight"] .setting { color: #5f6786; }
+    body[data-theme="Daylight"] input, body[data-theme="Daylight"] select, body[data-theme="Daylight"] .log { background: #fff; border-color: #cdd3e4; color: #1b2033; }
+    body[data-theme="Daylight"] .callout { background: #edf2fc; border-color: #cdd3e4; color: #35415c; }
+    body[data-theme="Daylight"] .btn.primary, body[data-theme="Daylight"] .switch.on { background: #3b6ef5; color: #fff; }
+    @media (max-width: 1050px) { .side { flex-basis: 190px; } .grid.three > .card { flex-basis: 42%; } .body { padding: 17px; } .top { padding: 0 19px; } }
+  </style>
+  <script>
+    function cmd(action, key, value, name) {
+      var query = "do=" + encodeURIComponent(action);
+      if (key) query += "&key=" + encodeURIComponent(key);
+      if (typeof value !== "undefined") query += "&value=" + encodeURIComponent(value);
+      if (name) query += "&name=" + encodeURIComponent(name);
+      window.location.href = "https://ahk.local/?" + query;
+    }
+    function page(name) {
+      var views = document.getElementsByClassName("view");
+      var i;
+      for (i = 0; i < views.length; i++) views[i].className = "view";
+      document.getElementById("page-" + name).className = "view active";
+      var nav = document.querySelectorAll(".nav button");
+      for (i = 0; i < nav.length; i++) nav[i].className = nav[i].getAttribute("data-page") === name ? "active" : "";
+      document.getElementById("heading").innerText = document.getElementById("page-" + name).getAttribute("data-title");
+      document.getElementById("subtitle").innerText = document.getElementById("page-" + name).getAttribute("data-subtitle");
+      cmd("page", null, null, name);
+    }
+  </script>
+</head>
+<body id="root">
+  <div class="app">
+    <aside class="side">
+      <div class="brand"><div class="logo">BF</div><div><b>Blox Fruits</b><small>Fishing Macro</small></div></div>
+      <nav class="nav">
+        <button data-page="dash" onclick="page('dash')">Dashboard</button>
+        <button data-page="fish" onclick="page('fish')">Fishing</button>
+        <button data-page="shop" onclick="page('shop')">NPC + Bait</button>
+        <button data-page="quest" onclick="page('quest')">Quests</button>
+        <button data-page="hook" onclick="page('hook')">Alerts</button>
+        <button data-page="look" onclick="page('look')">Appearance</button>
+        <button data-page="logs" onclick="page('logs')">Logs</button>
+      </nav>
+      <div class="sidebottom"><div class="status"><span class="dot">●</span> Macro status<b id="runstatus">Idle</b>Game<b>Blox Fruits</b>Version <span id="version">1.28.0</span></div><div class="ver">Settings save automatically</div></div>
+    </aside>
+    <main class="main">
+      <header class="top"><div><h1 id="heading">Dashboard</h1><p id="subtitle">Your fishing setup, session status and quick links.</p></div><div class="topactions"><button class="btn" onclick="page('look')">Theme</button><button class="btn" onclick="cmd('check')">Check setup</button><button class="btn primary" id="runbtn" onclick="cmd('start')">Start macro · F2</button></div></header>
+      <div class="body">
+        <section class="view active" id="page-dash" data-title="Dashboard" data-subtitle="Your fishing setup, session status and quick links.">
+          <div class="callout"><b>Before starting</b><br>Stand in the lower white circle to talk to the NPC. For fishing, stand at the edge of the dock. Choose your NPC and bait, then press F2.</div>
+          <div class="metrics"><div class="metric"><small>Fish caught</small><b id="catch">0</b></div><div class="metric"><small>Bait left</small><b id="baitstat">n/a</b></div><div class="metric"><small>Money</small><b id="income">$0</b></div><div class="metric"><small>Run time</small><b id="uptime">0m 00s</b></div></div>
+          <div class="grid three"><div class="card"><h2>Fishing</h2><p class="desc">Casting, camera and dock options.</p><button class="btn" onclick="page('fish')">Configure →</button></div><div class="card"><h2>NPC + Bait</h2><p class="desc">Choose the NPC, bait and sale interval.</p><button class="btn" onclick="page('shop')">Configure →</button></div><div class="card"><h2>Quests</h2><p class="desc">Angler quest options and status.</p><button class="btn" onclick="page('quest')">Configure →</button></div></div>
+          <div class="card" style="margin-top:14px"><h2>Session</h2><p id="sessioninfo" class="desc">Ready.</p><div class="actions"><button class="btn" onclick="cmd('update')">Check updates</button><button class="btn" onclick="page('logs')">Open logs</button></div></div>
+        </section>
+        <section class="view" id="page-fish" data-title="Fishing" data-subtitle="Set casting, camera and dock recovery options.">
+          <p class="intro">Adjust your fishing settings. The upward camera tilt helps keep the cast bar easier to read.</p>
+          <div class="grid three">
+            <div class="card"><h2>Casting</h2><p class="desc">Set the cast release and timing.</p>
+              <div class="setting"><span>Perfect cast</span><button id="toggle-perfect" class="switch" onclick="cmd('toggle','perfect')"><span></span></button></div>
+              <label class="field"><span>Release at charge (%)</span><input id="perfectPct" type="number" onchange="cmd('set','perfectPct',this.value)"><small>Recommended: 96–98%.</small></label>
+              <div class="setting"><span>Fast bite reaction</span><button id="toggle-fastBite" class="switch" onclick="cmd('toggle','fastBite')"><span></span></button></div>
+              <div class="setting"><span>Slow fish trick</span><button id="toggle-slowFlick" class="switch" onclick="cmd('toggle','slowFlick')"><span></span></button></div>
+            </div>
+            <div class="card"><h2>Camera &amp; view</h2><p class="desc">Keep zoom distance and angle steady.</p>
+              <div class="setting"><span>Lock zoom distance</span><button id="toggle-zoomLock" class="switch" onclick="cmd('toggle','zoomLock')"><span></span></button></div>
+              <label class="field"><span>Zoom-out notches</span><input id="zoomOut" type="number" onchange="cmd('set','zoomOut',this.value)"></label>
+              <label class="field"><span>Reapply zoom every X casts</span><input id="zoomEvery" type="number" onchange="cmd('set','zoomEvery',this.value)"></label>
+              <label class="field"><span>Camera tilt upward</span><input id="tiltPx" type="number" onchange="cmd('set','tiltPx',this.value)"><small>Increase this value to tilt the view further up.</small></label>
+            </div>
+            <div class="card"><h2>Dock &amp; game</h2><p class="desc">Recovery movement and Roblox options.</p>
+              <div class="setting"><span>Collect treasure chests</span><button id="toggle-chest" class="switch" onclick="cmd('toggle','chest')"><span></span></button></div>
+              <div class="setting"><span>Use lower white NPC circle</span><button id="toggle-anchor" class="switch" onclick="cmd('toggle','anchor')"><span></span></button></div>
+              <label class="field"><span>Extra dock steps</span><input id="dockWalk" type="number" onchange="cmd('set','dockWalk',this.value)"><small>Each step lasts about 0.1 seconds.</small></label>
+              <label class="field"><span>Roblox resolution</span><select id="res" onchange="cmd('set','res',this.value)"><option>Auto</option><option>1920x1080</option><option>2560x1440</option><option>1366x768</option></select></label>
+              <label class="field"><span>Rod slot</span><select id="rod" onchange="cmd('set','rod',this.value)"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>0</option></select></label>
+              <div class="setting"><span>Enable Roblox Fast Mode</span><button id="toggle-gameFast" class="switch" onclick="cmd('toggle','gameFast')"><span></span></button></div>
+            </div>
+          </div>
+        </section>
+        <section class="view" id="page-shop" data-title="NPC + Bait" data-subtitle="Choose your NPC, prepare bait and schedule sales.">
+          <p class="intro">The macro walks to the selected NPC. The lower white ring in your screenshot is the NPC interaction target.</p>
+          <div class="grid"><div class="card"><h2>Fishing NPC</h2><p class="desc">Fisherman sells bait and buys fish. Angler is for quests.</p>
+            <label class="field"><span>NPC</span><select id="npc" onchange="cmd('set','npc',this.value)"><option>Fisherman</option><option>Angler</option></select></label>
+            <div class="callout">Stand in the white circle around the NPC to interact.</div><h2>Auto-buy bait</h2>
+            <div class="setting"><span>Buy bait automatically</span><button id="toggle-buyBait" class="switch" onclick="cmd('toggle','buyBait')"><span></span></button></div>
+            <label class="field"><span>Bait type</span><select id="bait" onchange="cmd('set','bait',this.value)"></select></label>
+            <label class="field"><span>Bait already in bag</span><input id="baitNow" type="number" onchange="cmd('set','baitNow',this.value)"><small>Enter 0 to let the macro track it.</small></label>
+            <label class="field"><span>Buy up to</span><select id="baitPer" onchange="cmd('set','baitPer',this.value)"><option>10</option><option>20</option><option>30</option><option>40</option><option>50</option><option>60</option><option>70</option><option>80</option><option>90</option><option>100</option></select></label>
+          </div><div class="card"><h2>Auto-sell</h2><p class="desc">Sell fish to the Fisherman after a chosen number of catches.</p>
+            <div class="setting"><span>Enable auto-sell</span><button id="toggle-sellOn" class="switch" onclick="cmd('toggle','sellOn')"><span></span></button></div>
+            <label class="field"><span>Sell every X catches</span><input id="sellEvery" type="number" onchange="cmd('set','sellEvery',this.value)"></label>
+            <h2 style="margin-top:20px">Session stats</h2><div class="setting"><span>Read money from the HUD</span><button id="toggle-trackIncome" class="switch" onclick="cmd('toggle','trackIncome')"><span></span></button></div>
+            <div class="setting"><span>Read level from the HUD</span><button id="toggle-trackLevel" class="switch" onclick="cmd('toggle','trackLevel')"><span></span></button></div>
+            <p class="desc">Money and level are read using Windows OCR.</p>
+          </div></div>
+        </section>
+        <section class="view" id="page-quest" data-title="Quests" data-subtitle="Configure supported quests near the Angler.">
+          <div class="grid"><div class="card"><h2>Angler quests</h2><p class="desc">Accept supported quests automatically while near the Angler.</p>
+            <div class="setting"><span>Auto-accept quests</span><button id="toggle-questOn" class="switch" onclick="cmd('toggle','questOn')"><span></span></button></div>
+            <label class="field"><span>Rod skill key</span><select id="questKey" onchange="cmd('set','questKey',this.value)"><option>Z</option><option>X</option><option>C</option><option>V</option><option>F</option></select></label>
+            <p id="queststatus" class="callout">Macro not running.</p></div>
+            <div class="card"><h2>Supported quest types</h2><p class="desc">Unrecognized quests are recorded in Logs.</p><ul><li>Catch a fish of a specified rarity</li><li>Catch three fish within the time limit</li><li>Make three perfect casts and reactions</li><li>Use the rod skill three times</li></ul></div>
+          </div>
+        </section>
+        <section class="view" id="page-hook" data-title="Alerts" data-subtitle="Discord notifications and session reports.">
+          <div class="grid"><div class="card"><h2>Discord webhook</h2><p class="desc">Webhook URLs are saved locally in BloxFishing.ini.</p>
+            <div class="setting"><span>Enable webhook</span><button id="toggle-hkOn" class="switch" onclick="cmd('toggle','hkOn')"><span></span></button></div>
+            <label class="field"><span>Webhook URL</span><input id="hkUrl" type="password" onchange="cmd('set','hkUrl',this.value)"></label>
+            <div class="actions"><button class="btn" onclick="cmd('test')">Send test</button><button class="btn" onclick="cmd('report')">Send report now</button></div>
+            <label class="field"><span>Display name</span><input id="hkName" onchange="cmd('set','hkName',this.value)"></label>
+            <label class="field"><span>Mention user ID (optional)</span><input id="hkMention" onchange="cmd('set','hkMention',this.value)"></label>
+            <label class="field"><span>Hourly report URL (optional)</span><input id="hkUrlHourly" type="password" onchange="cmd('set','hkUrlHourly',this.value)"></label>
+            <label class="field"><span>Report interval (minutes)</span><input id="hkEveryMin" type="number" onchange="cmd('set','hkEveryMin',this.value)"></label>
+          </div><div class="card"><h2>Notifications</h2><p class="desc">Choose which events are sent to Discord.</p>
+            <div class="setting"><span>Macro started</span><button id="toggle-hkStart" class="switch" onclick="cmd('toggle','hkStart')"><span></span></button></div>
+            <div class="setting"><span>Stopped and session summary</span><button id="toggle-hkStop" class="switch" onclick="cmd('toggle','hkStop')"><span></span></button></div>
+            <div class="setting"><span>Fish sold</span><button id="toggle-hkSale" class="switch" onclick="cmd('toggle','hkSale')"><span></span></button></div>
+            <div class="setting"><span>Bait purchased</span><button id="toggle-hkBait" class="switch" onclick="cmd('toggle','hkBait')"><span></span></button></div>
+            <div class="setting"><span>Errors</span><button id="toggle-hkErr" class="switch" onclick="cmd('toggle','hkErr')"><span></span></button></div>
+            <div class="setting"><span>Chest collected</span><button id="toggle-hkChest" class="switch" onclick="cmd('toggle','hkChest')"><span></span></button></div>
+            <div class="setting"><span>Fish caught</span><button id="toggle-hkCatch" class="switch" onclick="cmd('toggle','hkCatch')"><span></span></button></div>
+            <div class="setting"><span>Catch screenshot</span><button id="toggle-hkCatchShot" class="switch" onclick="cmd('toggle','hkCatchShot')"><span></span></button></div>
+            <div class="setting"><span>Sale, bait and report screenshots</span><button id="toggle-hkShot" class="switch" onclick="cmd('toggle','hkShot')"><span></span></button></div>
+            <div class="setting"><span>Buy/sell activity</span><button id="toggle-hkBuy" class="switch" onclick="cmd('toggle','hkBuy')"><span></span></button></div>
+            <div class="setting"><span>Casting and hooked</span><button id="toggle-hkCast" class="switch" onclick="cmd('toggle','hkCast')"><span></span></button></div>
+            <div class="setting"><span>Hourly report</span><button id="toggle-hkHourly" class="switch" onclick="cmd('toggle','hkHourly')"><span></span></button></div>
+            <div class="setting"><span>Quest accepted</span><button id="toggle-hkQuest" class="switch" onclick="cmd('toggle','hkQuest')"><span></span></button></div>
+            <div class="setting"><span>Quest completed</span><button id="toggle-hkQuestDone" class="switch" onclick="cmd('toggle','hkQuestDone')"><span></span></button></div>
+            <div class="setting"><span>Quest failed</span><button id="toggle-hkQuestFail" class="switch" onclick="cmd('toggle','hkQuestFail')"><span></span></button></div>
+          </div></div>
+        </section>
+        <section class="view" id="page-look" data-title="Appearance" data-subtitle="Choose the control panel colors.">
+          <div class="card"><h2>Theme</h2><p class="desc">Your choice is saved automatically.</p><div class="themegrid">
+            <button id="theme-Midnight" class="theme" data-theme="Midnight" onclick="cmd('theme',null,null,'Midnight')" style="background:#071321;color:#f0f5fc">Midnight</button>
+            <button id="theme-Obsidian" class="theme" data-theme="Obsidian" onclick="cmd('theme',null,null,'Obsidian')" style="background:#141414;color:#ededed">Obsidian</button>
+            <button id="theme-Ocean" class="theme" data-theme="Ocean" onclick="cmd('theme',null,null,'Ocean')" style="background:#0b1b26;color:#e3f4fa">Ocean</button>
+            <button id="theme-Emerald" class="theme" data-theme="Emerald" onclick="cmd('theme',null,null,'Emerald')" style="background:#0d1a14;color:#e4f6ec">Emerald</button>
+            <button id="theme-Sunset" class="theme" data-theme="Sunset" onclick="cmd('theme',null,null,'Sunset')" style="background:#1a1214;color:#f8eae4">Sunset</button>
+            <button id="theme-Rose" class="theme" data-theme="Rose" onclick="cmd('theme',null,null,'Rose')" style="background:#1b1020;color:#f7e9f8">Rose</button>
+            <button id="theme-Daylight" class="theme" data-theme="Daylight" onclick="cmd('theme',null,null,'Daylight')" style="background:#f3f5fa;color:#1b2033">Daylight</button>
+          </div></div>
+        </section>
+        <section class="view" id="page-logs" data-title="Logs" data-subtitle="Live activity and setup details.">
+          <div class="actions" style="margin-bottom:12px"><button class="btn" onclick="cmd('check')">Check setup</button></div><pre id="log" class="log"></pre>
+        </section>
+      </div>
+      <footer class="footer"><div class="left">v<span id="version-footer">1.28.0</span><span class="dot">●</span><span id="footstatus">Idle</span></div><div class="actions"><button class="btn" onclick="cmd('update')">Updates</button><button class="btn" onclick="cmd('pause')">Pause / resume · F3</button><button class="btn" onclick="cmd('quit')">Quit · F4</button></div><span>F2 Start · F3 Pause · F4 Quit</span></footer>
+    </main>
+  </div>
+</body>
+</html>

@@ -300,9 +300,11 @@ class ReelController {
 ;  CONFIGURATION
 ; ============================================================================
 APP_NAME    := "Blox Fruits Fishing Macro"
-APP_VERSION := "1.25.1"
+APP_VERSION := "1.28.2"
 INI_FILE    := A_ScriptDir "\BloxFishing.ini"
 UPDATE_URL  := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.ahk"
+UPDATE_HTML_URL := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.html"
+HTML_FILE := A_ScriptDir . "\BloxFishing.html"
 LOG_FILE    := A_ScriptDir "\BloxFishing.log"
 ERR_DIR     := A_ScriptDir "\errors"          ; game screenshots taken when something goes wrong
 ROBLOX_WIN  := "ahk_exe RobloxPlayerBeta.exe"
@@ -753,6 +755,7 @@ LogMsg(msg) {
     }
     if BotState.debug
         try FileAppend(line . "`n", LOG_FILE)
+    try HtmlSync()
 }
 
 ; ---- geometry --------------------------------------------------------------
@@ -4295,6 +4298,7 @@ RefreshDynamic() {
             ? "Every 15 min the Angler offers one quest: catch a fish of a rarity, catch 3 fish in 2 min, 3 perfect casts + 3 perfect reactions, or use a rod skill 3 times. The macro accepts it (Quest > Yes), keeps fishing, and hands it in when the progress bar is full."
             : "Auto-quest only works when you AFK at the Angler (Shop and Bait page > AFK at)."
     }
+    try HtmlSync()
 }
 
 ; ============================================================================
@@ -5430,8 +5434,8 @@ ApplyGameSettings() {
 ; ============================================================================
 THEME_ORDER := ["Midnight", "Obsidian", "Ocean", "Emerald", "Sunset", "Rose", "Daylight"]
 THEMES := Map(
-    "Midnight", {bg: "0F1220", side: "0A0D18", card: "171B2E", inp: "1F2542", txt: "E6E9F5", muted: "8B93B5"
-               , accent: "6C8CFF", onAccent: "0B1020", good: "4ADE80", bad: "F87171", line: "2A3050", dark: true}
+    "Midnight", {bg: "071321", side: "06101D", card: "0D1C2D", inp: "0A1928", txt: "F0F5FC", muted: "A5B4C8"
+               , accent: "3297F5", onAccent: "FFFFFF", good: "55D98A", bad: "F87171", line: "25384D", dark: true}
   , "Obsidian", {bg: "141414", side: "0C0C0C", card: "1D1D1D", inp: "262626", txt: "EDEDED", muted: "9A9A9A"
                , accent: "B388FF", onAccent: "150A25", good: "4ADE80", bad: "F87171", line: "333333", dark: true}
   , "Ocean",    {bg: "0B1B26", side: "07131B", card: "102A39", inp: "163547", txt: "E3F4FA", muted: "7FA7B8"
@@ -5483,6 +5487,7 @@ UpdateStats() {
             : QuestOn() ? QuestShort() . (BotStats.quests > 0 ? "   (" . BotStats.quests . " done this session)" : "")
             : "Auto-quest is off or not at the Angler."
     }
+    try HtmlSync()
 }
 
 CheckSetup(*) {
@@ -5538,6 +5543,22 @@ Lbl(g, page, x, y, w, txt, color := "", size := 9, weight := 400, h := 0) {
 Section(g, page, x, y, txt) {
     Box(g, page, x, y + 2, 3, 16, Ui.th.accent)
     return Lbl(g, page, x + 12, y, 400, txt, Ui.th.accent, 9, 700)
+}
+
+Panel(g, page, x, y, w, h) {
+    th := Ui.th
+    Box(g, page, x, y, w, h, th.line)
+    return Box(g, page, x + 1, y + 1, w - 2, h - 2, th.card)
+}
+
+HomeCard(g, x, y, title, detail, target) {
+    th := Ui.th
+    Panel(g, "dash", x, y, 288, 112)
+    Box(g, "dash", x + 14, y + 13, 34, 34, th.inp)
+    Lbl(g, "dash", x + 14, y + 13, 34, SubStr(title, 1, 1), th.accent, 12, 700, 32)
+    Lbl(g, "dash", x + 58, y + 12, 218, title, th.txt, 11, 700)
+    Lbl(g, "dash", x + 58, y + 38, 218, detail, th.muted, 9, 400, 34)
+    Btn(g, "dash", x + 16, y + 76, 118, 25, "Configure", NavHandler(target), "ghost")
 }
 
 Btn(g, page, x, y, w, h, txt, cb, kind := "primary") {
@@ -5611,7 +5632,7 @@ FlipToggle(key) {
 SetToggle(key, v) {
     v := v ? true : false
     Ui.tog[key] := v
-    if (Ui.page == Ui.togPage[key]) {
+    if (!Ui.htmlMode && Ui.page == Ui.togPage[key]) {
         p := Ui.togCtl[key]
         p[1].Visible := v
         p[2].Visible := !v
@@ -5622,39 +5643,182 @@ NavHandler(pg) {
     return (*) => ShowPage(pg)
 }
 
+; The visible interface is HTML hosted by the built-in WebBrowser ActiveX
+; control. The existing AHK controls remain the settings model so all macro
+; behavior, validation and INI persistence continue to use the same code.
+class HtmlBrowserEvents {
+    BeforeNavigate2(pDisp, &URL, &Flags, &TargetFrameName, &PostData, &Headers, &Cancel, ComObj) {
+        address := String(URL)
+        if InStr(address, "https://ahk.local/") {
+            Cancel := true
+            HtmlCommand(address)
+        }
+    }
+}
+
+HtmlDecode(value) {
+    s := StrReplace(value, "+", " ")
+    out := ""
+    i := 1
+    while i <= StrLen(s) {
+        if (SubStr(s, i, 1) == "%" && RegExMatch(SubStr(s, i), "^%[0-9A-Fa-f]{2}", &m)) {
+            out .= Chr(Integer("0x" . SubStr(m[0], 2, 2)))
+            i += 3
+        } else {
+            out .= SubStr(s, i, 1)
+            i += 1
+        }
+    }
+    return out
+}
+
+HtmlCommand(address) {
+    global Ui, Cfg
+    query := Map()
+    if !InStr(address, "?")
+        return
+    for pair in StrSplit(SubStr(address, InStr(address, "?") + 1), "&") {
+        bits := StrSplit(pair, "=")
+        if (bits.Length >= 2)
+            query[HtmlDecode(bits[1])] := HtmlDecode(bits[2])
+    }
+    cmd := query.Has("do") ? query["do"] : ""
+    if (cmd == "page") {
+        ShowPage(query.Has("name") ? query["name"] : "dash")
+    } else if (cmd == "toggle") {
+        key := query.Has("key") ? query["key"] : ""
+        if Ui.tog.Has(key) {
+            SetToggle(key, !Ui.tog[key])
+            OnUiChange()
+        }
+    } else if (cmd == "set") {
+        key := query.Has("key") ? query["key"] : ""
+        value := query.Has("value") ? query["value"] : ""
+        try {
+            if (key == "bait")
+                Ui.bait.Choose(Integer(value))
+            else if (key == "npc")
+                Ui.npc.Choose(value)
+            else if (key == "res")
+                Ui.res.Choose(value)
+            else if (key == "rod")
+                Ui.rod.Choose(value)
+            else if (key == "questKey")
+                Ui.questKey.Choose(value)
+            else if (key == "baitPer")
+                Ui.baitPer.Choose(value)
+            else if Ui.HasOwnProp(key)
+                Ui.%key%.Value := value
+            OnUiChange()
+        }
+    } else if (cmd == "start") {
+        ToggleRun()
+    } else if (cmd == "pause") {
+        TogglePause()
+    } else if (cmd == "check") {
+        CheckSetup()
+    } else if (cmd == "update") {
+        CheckForUpdates(true)
+    } else if (cmd == "test") {
+        HookTest()
+    } else if (cmd == "report") {
+        SendHourly()
+    } else if (cmd == "quit") {
+        ExitApp()
+    } else if (cmd == "theme") {
+        ChangeTheme(query.Has("name") ? query["name"] : Cfg.theme)
+    }
+    HtmlSync(true)
+}
+
+HtmlField(doc, id, value) {
+    try {
+        element := doc.getElementById(id)
+        if (String(element.value) != String(value))
+            element.value := String(value)
+    }
+}
+
+HtmlFileURL(path) {
+    url := StrReplace(path, "\", "/")
+    url := StrReplace(url, " ", "%20")
+    return "file:///" . url
+}
+HtmlSync(syncFields := false) {
+    global Ui, BotState, BotStats, BAITS, Cfg, APP_VERSION, THEME_ORDER
+    try {
+        doc := Ui.browser.Document
+        doc.getElementById("runstatus").innerText := BotState.running ? (BotState.paused ? "Paused" : "Running") : "Idle"
+        doc.getElementById("footstatus").innerText := BotState.running ? (BotState.paused ? "Paused" : "Running") : "Idle"
+        doc.getElementById("runbtn").innerText := BotState.running ? "■ Stop macro" : "▶ Start macro"
+        doc.getElementById("catch").innerText := Fmt(BotStats.catches)
+        doc.getElementById("baitstat").innerText := (BotState.bait >= 0) ? Fmt(BotState.bait) : "n/a"
+        doc.getElementById("income").innerText := "$" . Fmt(BotStats.income)
+        up := BotState.running ? (Now() - BotStats.started) : BotStats.lastUp
+        doc.getElementById("uptime").innerText := FmtDur(up)
+        doc.getElementById("sessioninfo").innerText := Ui.info.Text
+        doc.getElementById("queststatus").innerText := Ui.questStatus.Text
+        doc.getElementById("log").innerText := BotState.logBuf
+        for key, value in Ui.tog
+            doc.getElementById("toggle-" . key).className := "switch" . (value ? " on" : "")
+        doc.getElementById("version").innerText := APP_VERSION
+        doc.getElementById("version-footer").innerText := APP_VERSION
+        doc.body.setAttribute("data-theme", Cfg.theme)
+        baitSelect := doc.getElementById("bait")
+        if (baitSelect.options.length == 0) {
+            for i, bait in BAITS {
+                option := doc.createElement("option")
+                option.value := i
+                option.text := BaitLabel(bait)
+                baitSelect.options.add(option)
+            }
+        }
+        HtmlField(doc, "bait", IdxOf(BAITS, CurBait(), 1))
+        if syncFields {
+            for key in ["perfectPct", "zoomOut", "zoomEvery", "tiltPx", "dockWalk", "baitNow", "sellEvery", "hkUrl", "hkUrlHourly", "hkName", "hkMention", "hkEveryMin"]
+                HtmlField(doc, key, Ui.%key%.Value)
+            for key in ["npc", "res", "rod", "baitPer", "questKey"]
+                HtmlField(doc, key, Ui.%key%.Text)
+        }
+        for name in THEME_ORDER {
+            theme := doc.getElementById("theme-" . name)
+            theme.className := "theme" . (name == Cfg.theme ? " selected" : "")
+        }
+    }
+}
+
 ThemeHandler(name) {
     return (*) => ChangeTheme(name)
 }
 
 ShowPage(name) {
     Ui.page := name
-    for pg, list in Ui.pages {
-        vis := (pg == name)
-        for c in list
-            c.Visible := vis
-    }
-    for key, v in Ui.tog {
-        if (Ui.togPage[key] == name) {
-            p := Ui.togCtl[key]
-            p[1].Visible := v
-            p[2].Visible := !v
+    if !Ui.htmlMode {
+        for pg, list in Ui.pages {
+            vis := (pg == name)
+            for c in list
+                c.Visible := vis
         }
-    }
-    if !Ui.switchingTab {
-        Ui.switchingTab := true
-        Ui.tabs.Value := IdxOf(Ui.tabPages, name)
-        Ui.switchingTab := false
+        for key, v in Ui.tog {
+            if (Ui.togPage[key] == name) {
+                p := Ui.togCtl[key]
+                p[1].Visible := v
+                p[2].Visible := !v
+            }
+        }
+        for pg, trio in Ui.nav {
+            selected := (pg == name)
+            trio[1].Visible := !selected
+            trio[2].Visible := selected
+            trio[3].Visible := selected
+        }
     }
     ApplyRunVis()
 }
 
-TabPageChanged(*) {
-    if Ui.switchingTab
-        return
-    ShowPage(Ui.tabPages[Ui.tabs.Value])
-}
-
 ApplyRunVis() {
+    if Ui.htmlMode
+        return
     run := BotState.running
     Ui.btnStart.Visible := !run
     Ui.btnStop.Visible := run
@@ -5692,6 +5856,16 @@ CheckForUpdates(manual := false, *) {
         latest := request.ResponseText
         if (StrLen(latest) < 50000 || !InStr(latest, "class ReelController"))
             throw Error("GitHub returned an incomplete macro file")
+        htmlRequest := ComObject("WinHttp.WinHttpRequest.5.1")
+        htmlRequest.Open("GET", UPDATE_HTML_URL, false)
+        htmlRequest.SetTimeouts(4000, 4000, 6000, 6000)
+        htmlRequest.SetRequestHeader("User-Agent", "Blox-Fruits-Fishing-Macro")
+        htmlRequest.Send()
+        if (htmlRequest.Status != 200)
+            throw Error("GitHub could not provide BloxFishing.html (HTTP " . htmlRequest.Status . ")")
+        latestHtml := htmlRequest.ResponseText
+        if (StrLen(latestHtml) < 5000 || !InStr(latestHtml, 'id="page-dash"'))
+            throw Error("GitHub returned an incomplete BloxFishing.html")
         if !RegExMatch(latest, 'APP_VERSION\s*:=\s*"([0-9.]+)"', &match)
             throw Error("Could not read the version from GitHub")
         remoteVersion := match[1]
@@ -5704,30 +5878,68 @@ CheckForUpdates(manual := false, *) {
             . "). Install it and restart the macro now?", APP_NAME, "YesNo")
         if (answer != "Yes")
             return
-        InstallUpdate(latest, remoteVersion)
+        InstallUpdate(latest, latestHtml, remoteVersion)
     } catch as err {
         if manual
             MsgBox("Could not check GitHub for updates.`n`n" . err.Message, APP_NAME, "Icon!")
     }
 }
 
-InstallUpdate(source, version) {
+InstallUpdate(source, htmlSource, version) {
     target := A_ScriptFullPath
+    htmlTarget := A_ScriptDir . "\BloxFishing.html"
     temp := A_Temp . "\BloxFishing-update-" . version . ".ahk"
+    htmlTemp := A_Temp . "\BloxFishing-update-" . version . ".html"
     backup := target . ".bak"
+    htmlBackup := htmlTarget . ".bak"
+    htmlBackedUp := false
+    htmlInstalled := false
     try {
         if FileExist(temp)
             FileDelete(temp)
+        if FileExist(htmlTemp)
+            FileDelete(htmlTemp)
         FileAppend(source, temp, "UTF-8-RAW")
+        FileAppend(htmlSource, htmlTemp, "UTF-8-RAW")
         if (FileGetSize(temp) < 50000)
             throw Error("The downloaded file is incomplete")
+        if (FileGetSize(htmlTemp) < 5000)
+            throw Error("The downloaded interface file is incomplete")
+        try {
+            Ui.browser.Navigate("about:blank")
+            while (Ui.browser.ReadyState != 4)
+                Sleep(10)
+        }
+        if FileExist(htmlTarget) {
+            FileCopy(htmlTarget, htmlBackup, true)
+            htmlBackedUp := true
+        }
         FileCopy(target, backup, true)
+        FileMove(htmlTemp, htmlTarget, true)
+        htmlInstalled := true
         FileMove(temp, target, true)
         Run('"' . A_AhkPath . '" "' . target . '"')
         ExitApp()
     } catch as err {
-        try if FileExist(temp)
-            FileDelete(temp)
+        if htmlBackedUp {
+            try FileCopy(htmlBackup, htmlTarget, true)
+        } else if htmlInstalled {
+            try {
+                if FileExist(htmlTarget)
+                    FileDelete(htmlTarget)
+            }
+        }
+        try {
+            if FileExist(temp)
+                FileDelete(temp)
+        }
+        try {
+            if FileExist(htmlTemp)
+                FileDelete(htmlTemp)
+        }
+        try {
+            Ui.browser.Navigate(HtmlFileURL(htmlTarget))
+        }
         MsgBox("The update was downloaded but could not be installed.`nYour current macro is unchanged.`n`n"
             . err.Message, APP_NAME, "Icon!")
     }
@@ -5813,6 +6025,11 @@ ThemeCard(g, name, x, y) {
 ;  MAIN WINDOW
 ; ============================================================================
 BuildGui(startPage := "dash") {
+    global HTML_FILE
+    if !FileExist(HTML_FILE) {
+        MsgBox("The interface file is missing:`n" . HTML_FILE . "`n`nKeep BloxFishing.html next to BloxFishing.ahk.", APP_NAME, "Iconx")
+        ExitApp()
+    }
     th := THEMES.Has(Cfg.theme) ? THEMES[Cfg.theme] : THEMES["Midnight"]
     Ui.th := th
     g := Gui("+MinimizeBox", APP_NAME . "  v" . APP_VERSION)
@@ -5822,6 +6039,7 @@ BuildGui(startPage := "dash") {
     g.SetFont("s9 c" . th.txt, "Segoe UI")
     g.OnEvent("Close", (*) => ExitApp())
     Ui.gui := g
+    Ui.htmlMode := false
     Ui.pages := Map()
     Ui.nav := Map()
     Ui.tog := Map()
@@ -5830,46 +6048,80 @@ BuildGui(startPage := "dash") {
     Ui.urlShown := false
     Ui.switchingTab := false
     Ui.page := "dash"
-    for pg in ["dash", "fish", "quest", "shop", "hook", "look"]
+    for pg in ["dash", "fish", "quest", "shop", "hook", "look", "logs"]
         Ui.pages[pg] := []
 
-    ; ---- top navigation ----------------------------------------------------
-    Ui.tabPages := ["dash", "fish", "shop", "quest", "hook", "look"]
-    Ui.tabs := g.Add("Tab", "x8 y6 w634 h30 -Wrap"
-        , ["Home", "Fishing", "NPC + Bait", "Quests", "Alerts", "Display"])
-    Ui.tabs.OnEvent("Change", TabPageChanged)
-    Ui.tabs.UseTab(0)
+    ; ---- left navigation ---------------------------------------------------
+    Panel(g, "", 0, 0, 210, 758)
+    Box(g, "", 209, 0, 1, 704, th.line)
+    Box(g, "", 18, 20, 36, 36, th.accent)
+    Lbl(g, "", 18, 21, 36, "BF", th.onAccent, 12, 700, 32)
+    Lbl(g, "", 64, 20, 132, "Blox Fruits", th.txt, 11, 700)
+    Lbl(g, "", 64, 42, 132, "Fishing Macro", th.accent, 9, 600)
+    Box(g, "", 16, 70, 178, 1, th.line)
+    navDefs := [["dash", "Dashboard", "⌂"], ["fish", "Fishing", "⚓"], ["shop", "NPC + Bait", "▣"]
+              , ["quest", "Quests", "✓"], ["hook", "Alerts", "✉"], ["look", "Appearance", "⚙"]
+              , ["logs", "Logs", "≡"]]
+    ny := 88
+    for item in navDefs {
+        normal := g.Add("Text", Format("x14 y{} w182 h38 +0x200 Background{}", ny, th.side)
+            , "  " . item[3] . "    " . item[2])
+        normal.SetFont("s10 c" . th.muted, "Segoe UI")
+        normal.OnEvent("Click", NavHandler(item[1]))
+        active := g.Add("Text", Format("x14 y{} w182 h38 +0x200 Background{}", ny, th.card)
+            , "  " . item[3] . "    " . item[2])
+        active.SetFont("s10 w600 c" . th.txt, "Segoe UI")
+        active.OnEvent("Click", NavHandler(item[1]))
+        marker := g.Add("Text", Format("x14 y{} w3 h38 Background{}", ny, th.accent))
+        Ui.nav[item[1]] := [normal, active, marker]
+        ny += 42
+    }
+    Panel(g, "", 12, 414, 184, 132)
+    Lbl(g, "", 26, 428, 156, "MACRO STATUS", th.muted, 8, 700)
+    Ui.sbDot := Lbl(g, "", 26, 450, 156, "●  Idle", th.muted, 10, 600)
+    Lbl(g, "", 26, 480, 156, "GAME", th.muted, 8, 700)
+    Lbl(g, "", 26, 498, 156, "Blox Fruits", th.txt, 9, 600)
+    Box(g, "", 26, 520, 156, 1, th.line)
+    Lbl(g, "", 26, 526, 156, "Version  " . APP_VERSION, th.muted, 8)
 
 
     ; ---- DASHBOARD ---------------------------------------------------------
-    PageHeader(g, "dash", "Home", "Start the macro and see what it is doing.")
+    PageHeader(g, "dash", "Fishing Macro Control Panel", "Your fishing setup, session status and quick links.")
     Ui.btnStart := Btn(g, "", 14, 716, 86, 30, "Start (F2)", ToggleRun, "primary")
     Ui.btnStop := Btn(g, "", 14, 716, 86, 30, "Stop (F2)", ToggleRun, "danger")
     Ui.btnCheck := Btn(g, "", 106, 716, 98, 30, "Check setup", CheckSetup, "ghost")
     Ui.btnUpdate := Btn(g, "", 210, 716, 96, 30, "Updates", CheckForUpdates.Bind(true), "ghost")
     Ui.btnPause := Btn(g, "", 210, 716, 96, 30, "Pause (F3)", TogglePause, "primary")
-    Btn(g, "", 312, 716, 78, 30, "Quit (F4)", (*) => ExitApp(), "ghost")
     Tile(g, 214, 158, 96, "Fish caught", "tCatch")
     Tile(g, 320, 158, 96, "Bait left", "tBait")
     Tile(g, 426, 158, 150, "Money generated", "tIncome")
     Tile(g, 586, 158, 104, "Level", "tLevel", "tLevelLbl")
     Tile(g, 700, 158, 104, "Run time", "tUp")
-    Box(g, "dash", 213, 240, 592, 80, th.card)
+    Panel(g, "dash", 213, 240, 592, 80)
     Box(g, "dash", 213, 240, 3, 80, th.accent)
     Lbl(g, "dash", 228, 247, 560, "BEFORE STARTING", th.accent, 9, 700)
     Lbl(g, "dash", 228, 266, 560, "NPC visits: lower white circle below the green ring.`nFishing: stand at the dock edge. Choose NPC + bait, then press F2.", th.txt, 9, 400, 42)
     Ui.info := Lbl(g, "dash", 214, 326, 590, "", th.muted, 9)
-    Lbl(g, "dash", 214, 348, 300, "Activity log", th.txt, 10, 600)
-    Box(g, "dash", 213, 372, 592, 250, th.line)
-    Ui.log := g.Add("Edit", Format("x214 y373 w590 h248 ReadOnly -Wrap +VScroll -E0x200 Background{} c{}", th.inp, th.txt))
+    HomeCard(g, 213, 356, "Fishing setup", "Camera, casting, reeling and dock recovery.", "fish")
+    HomeCard(g, 514, 356, "NPC + Bait", "Choose your fishing NPC, bait and sale interval.", "shop")
+    HomeCard(g, 213, 480, "Quests", "Angler quest options and current quest status.", "quest")
+    HomeCard(g, 514, 480, "Alerts", "Choose which updates are sent to Discord.", "hook")
+
+    ; ---- LOGS --------------------------------------------------------------
+    PageHeader(g, "logs", "Logs", "Live activity, setup checks and error details.")
+    Panel(g, "logs", 213, 100, 592, 522)
+    Ui.log := g.Add("Edit", Format("x214 y101 w590 h520 ReadOnly -Wrap +VScroll -E0x200 Background{} c{}", th.inp, th.txt))
     Ui.log.SetFont("s9", "Consolas")
-    Reg("dash", Ui.log)
+    Reg("logs", Ui.log)
     if th.dark {
         try DllCall("uxtheme\SetWindowTheme", "ptr", Ui.log.Hwnd, "str", "DarkMode_Explorer", "str", "")
     }
 
     ; ---- FISHING -----------------------------------------------------------
     PageHeader(g, "fish", "Fishing", "Set casting, camera and reeling. Start at the lower white NPC circle under the green marker.")
+    Panel(g, "fish", 213, 100, 592, 142)
+    Panel(g, "fish", 213, 256, 592, 124)
+    Panel(g, "fish", 213, 390, 592, 142)
     Section(g, "fish", 214, 100, "CAMERA + CASTING")
     AddToggle(g, "fish", "perfect", 214, 126, "Release at the selected charge level", Cfg.perfect, 230)
     Lbl(g, "fish", 470, 129, 90, "Release at", th.muted)
@@ -5904,6 +6156,11 @@ BuildGui(startPage := "dash") {
 
     ; ---- QUEST -------------------------------------------------------------
     PageHeader(g, "quest", "Quests", "Optional: accept and track the Angler quests this macro supports.")
+    Panel(g, "quest", 213, 100, 592, 128)
+    Panel(g, "quest", 213, 236, 592, 56)
+    Panel(g, "quest", 213, 306, 592, 114)
+    Panel(g, "quest", 213, 436, 592, 90)
+    Panel(g, "quest", 213, 528, 592, 88)
     Section(g, "quest", 214, 100, "ANGLER QUEST")
     AddToggle(g, "quest", "questOn", 214, 126, "Accept supported quests near the Angler", Cfg.questOn, 340)
     Lbl(g, "quest", 590, 129, 96, "Rod skill key", th.muted)
@@ -5928,6 +6185,9 @@ BuildGui(startPage := "dash") {
 
     ; ---- SHOP AND BAIT -----------------------------------------------------
     PageHeader(g, "shop", "NPC + Bait", "Choose where to fish, prepare bait, and schedule sales.")
+    Panel(g, "shop", 213, 100, 592, 96)
+    Panel(g, "shop", 213, 202, 592, 206)
+    Panel(g, "shop", 213, 424, 592, 174)
     Section(g, "shop", 214, 100, "FISHING NPC")
     Lbl(g, "shop", 214, 130, 70, "NPC", th.muted)
     AddDdl(g, "shop", "npc", 280, 126, 150, NPC_LIST, IdxOf(NPC_LIST, Cfg.npc))
@@ -5959,6 +6219,9 @@ BuildGui(startPage := "dash") {
 
     ; ---- WEBHOOK -----------------------------------------------------------
     PageHeader(g, "hook", "Alerts", "Choose what the macro reports to Discord. Leave this page off if unused.")
+    Panel(g, "hook", 213, 98, 592, 162)
+    Panel(g, "hook", 213, 276, 592, 154)
+    Panel(g, "hook", 213, 444, 592, 206)
     Section(g, "hook", 214, 98, "DISCORD")
     AddToggle(g, "hook", "hkOn", 214, 122, "Enable webhook", Cfg.hkOn, 200)
     Lbl(g, "hook", 214, 158, 300, "Webhook URL", th.muted)
@@ -6005,18 +6268,51 @@ BuildGui(startPage := "dash") {
         }
     }
 
-    ; Keep the same aligned form layout across every page under the tab strip.
+    ; Widen the content column while retaining the same functional controls.
     for pg, list in Ui.pages {
         for c in list {
             c.GetPos(&cx, &cy, &cw, &ch)
-            c.Move(cx - 190, cy + 40, cw, ch)
+            c.Move(232 + (cx - 214) * 1.45, cy, cw * 1.45, ch)
         }
     }
-    Box(g, "", 0, 704, 650, 1, th.line)
-    Ui.sbDot := g.Add("Text", Format("x404 y721 w220 h22 Background{}", th.bg), "●  Idle")
-    Ui.sbDot.SetFont("s9 w600 c" . th.muted, "Segoe UI")
+    Box(g, "", 0, 704, 1160, 1, th.line)
+    Ui.btnStart.Move(230, 716, 124, 32)
+    Ui.btnStop.Move(230, 716, 124, 32)
+    Ui.btnCheck.Move(362, 716, 136, 32)
+    Ui.btnUpdate.Move(506, 716, 106, 32)
+    Ui.btnPause.Move(506, 716, 106, 32)
+    Ui.btnQuit := Btn(g, "", 620, 716, 94, 32, "Quit (F4)", (*) => ExitApp(), "ghost")
+    Lbl(g, "", 838, 722, 280, "v" . APP_VERSION . "   |   F2 Start   F3 Pause   F4 Quit", th.muted, 9)
+
+    ; Render the web-style panel inside the AHK window (no external browser).
+    for pg, list in Ui.pages {
+        for c in list
+            c.Visible := false
+    }
+    for c in [Ui.btnStart, Ui.btnStop, Ui.btnPause, Ui.btnCheck, Ui.btnUpdate, Ui.btnQuit]
+        c.Visible := false
+    for pg, trio in Ui.nav {
+        for c in trio
+            c.Visible := false
+    }
+    Ui.browserCtl := g.Add("ActiveX", "x0 y0 w1160 h758", "Shell.Explorer")
+    Ui.browser := Ui.browserCtl.Value
+    Ui.browser.Silent := true
+    Ui.browserEvents := HtmlBrowserEvents()
+    ComObjConnect(Ui.browser, Ui.browserEvents)
+    Ui.browser.Navigate(HtmlFileURL(HTML_FILE))
+    while (Ui.browser.ReadyState != 4)
+        Sleep(10)
+    doc := Ui.browser.Document
+    Ui.htmlMode := true
+    try doc.parentWindow.execScript("page('" . startPage . "')")
+
     ShowPage(startPage)
-    g.Show("w650 h758")
+    g.Show("w1160 h758")
+    ; Showing the parent window can put its older native child controls above
+    ; the hosted browser. Explicitly restore the browser host to the top.
+    DllCall("SetWindowPos", "ptr", Ui.browserCtl.Hwnd, "ptr", 0
+        , "int", 0, "int", 0, "int", 0, "int", 0, "uint", 0x13)
     if th.dark {
         try {
             b := Buffer(4, 0)
@@ -6031,6 +6327,7 @@ BuildGui(startPage := "dash") {
         SendMessage(0x00B7, 0, 0, Ui.log)                    ; EM_SCROLLCARET
     }
     RefreshDynamic()
+    HtmlSync(true)
     SetStatus()
 }
 

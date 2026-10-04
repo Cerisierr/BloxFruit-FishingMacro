@@ -1,7 +1,52 @@
 # Changelog: Blox Fruits Fishing Macro (AutoHotkey v2)
 
-Current delivered file: `BloxFishing.ahk` (v1.25.1 below).
+Current delivered files: `BloxFishing.ahk` + `BloxFishing.html` (v1.28.2 below).
 Nothing is pending from the earlier "not delivered" list except the open points at the bottom.
+
+---
+
+## v1.28.2: Fix hosted panel layering and switches
+
+- Keep the embedded HTML panel above the legacy AHK controls when the window is shown.
+- Use explicit switch-knob elements so enabled switches align their knobs to the right in the embedded browser.
+
+---
+
+## v1.28.1: Fix updater rollback syntax
+
+- Fixed the AutoHotkey v2 `if`/`else` structure in the updater's recovery path so the script parses correctly.
+- Kept cleanup and interface restoration inside explicit `try` blocks.
+
+---
+
+## v1.28.0: External HTML interface loaded by AHK
+
+- Moved the dashboard markup and styling into `BloxFishing.html` beside the AHK script.
+- AutoHotkey v2 now loads that local file inside its GUI using the built-in `Shell.Explorer` ActiveX control; no separate browser window is opened.
+- Removed the AHK-generated HTML strings that caused the startup syntax error shown in the report.
+- Updated the GitHub updater to download, back up and install the AHK and HTML files together.
+- Not launched in AutoHotkey or Roblox; visual rendering and button interaction remain unverified.
+
+---
+
+## v1.27.0: Embedded HTML control panel
+
+- Replaced the native AHK dashboard display with a responsive HTML/CSS control panel hosted inside the macro window; it does not open an external browser.
+- Grouped the existing fishing, camera, dock, NPC, bait, quest, Discord, appearance and log settings into dedicated sections.
+- Wired the HTML switches and fields to the existing AHK settings, validation, persistence, actions and live session status.
+- Kept the interface in the single AHK file so the existing GitHub updater can update the UI and macro together.
+- Not launched in AutoHotkey or Roblox; in-window rendering and interaction remain to be visually verified.
+
+---
+
+## v1.26.0: Dashboard redesign
+
+- Replaced the top tabs with a left navigation bar, a persistent macro status panel and a wide footer.
+- Added a dashboard with live session totals and direct links to the functional Fishing, NPC + Bait, Quests and Alerts settings.
+- Added clear card panels to every settings page and moved the activity stream to its own Logs page.
+- Updated the default Midnight palette to the blue/navy style of the requested reference.
+- Kept one AHK file so the GitHub updater can install a complete, self-contained update.
+- Not tested in AutoHotkey or Roblox.
 
 ---
 
