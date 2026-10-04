@@ -1,13 +1,21 @@
 # Changelog: CeriFish — Fishing Macro (AutoHotkey v2)
 
-Current delivered files: `BloxFishing.ahk`, `BloxFishing.html`, and CeriFish logo assets (v1.29.5 below).
+Current delivered files: `BloxFishing.ahk`, `BloxFishing.html`, and CeriFish logo assets (v1.29.6 below).
 Nothing is pending from the earlier "not delivered" list except the open points at the bottom.
+
+---
+
+## v1.29.6: Ignore the death badge during NPC setup
+
+- Arm recent-death detection only after NPC setup succeeds, then sample the badge baseline after the dialogue closes.
+- Verify a candidate against NPC dialogue state so its centered white speech text cannot trigger a false death stop.
 
 ---
 
 ## v1.29.5: Detect the recent-death HUD and protect fishing-bar reads
 
 - Stop if the `Died Recently - PvP disabled` status appears after a run starts; a badge already present at startup is treated as a baseline because it remains after respawn.
+- Arm the death-status check only after NPC setup and ignore centered NPC dialogue text to prevent startup false alarms.
 - When the status overlaps the progress strip, reconnect the visible green strip fragments and ignore unreliable progress estimates while retaining fish/zone control.
 
 ---

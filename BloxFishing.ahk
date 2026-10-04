@@ -300,7 +300,7 @@ class ReelController {
 ;  CONFIGURATION
 ; ============================================================================
 APP_NAME    := "CeriFish"
-APP_VERSION := "1.29.5"
+APP_VERSION := "1.29.6"
 INI_FILE    := A_ScriptDir "\BloxFishing.ini"
 UPDATE_URL  := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.ahk"
 UPDATE_HTML_URL := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.html"
@@ -412,7 +412,7 @@ BotState := {
   , flicked: false, lastEscaped: false, buyFailures: 0, lastBought: 0
   , meterFull: 0, biteInfo: "", zoomedAt: -1, biteMisses: 0
   , npcHits: 0, hpNext: 0.0, hpLostSince: 0.0, hpDead: false, hpOcrNext: 0.0, hpZeroReads: 0
-  , diedHudNext: 0.0, diedHudVisible: false, diedHudReads: 0, diedHudSeen: false
+  , diedHudNext: 0.0, diedHudVisible: false, diedHudReads: 0, diedHudSeen: false, diedHudArmed: false
   , paused: false, stopReason: "", moneyLast: -1, lastOcr: "", logBuf: "", levelStart: -1, levelLast: -1, levelRead: 0.0, reportDue: false, hookQ: [], errAt: Map(), stopShot: ""
   , biteBase: 0, biteBaseN: 0, biteFrame: 0, biteFrameW: 0, biteFrameH: 0
   , lastHourlySlot: "", questState: "unknown", questType: "", questRarity: "", questTimed: false, questRead: 0.0, questMiss: 0
@@ -539,15 +539,24 @@ Alive(hp := false) {
         Halt("no confirmed game response for " . Round(Timing.responseTimeout) . " s")
         return false
     }
-    if DeathRecentlyHud() {
-        if !BotState.diedHudSeen {
-            BotState.diedHudSeen := true
-            LogMsg("[death] the 'Died Recently - PvP disabled' HUD appeared during this run - stopping")
-            Halt("death detected (Died Recently HUD)")
-            return false
+    if BotState.diedHudArmed {
+        if DeathRecentlyHud() {
+            if !BotState.diedHudSeen {
+                ; NPC speech uses bright centered text too; require the fishing HUD, not dialogue.
+                if (BotState.atNpc || InDialogue()) {
+                    BotState.diedHudNext := 0.0
+                    BotState.diedHudVisible := false
+                    BotState.diedHudReads := 0
+                } else {
+                    BotState.diedHudSeen := true
+                    LogMsg("[death] the 'Died Recently - PvP disabled' HUD appeared during fishing - stopping")
+                    Halt("death detected (Died Recently HUD)")
+                    return false
+                }
+            }
+        } else {
+            BotState.diedHudSeen := false
         }
-    } else {
-        BotState.diedHudSeen := false
     }
     ; hp = true only inside the fishing loops (the HP bar is hidden during NPC dialogues)
     if (hp && HealthLost()) {
@@ -4055,6 +4064,10 @@ Cycle() {
 RunBot() {
     BotState.running := true
     BotState.paused := false
+    BotState.diedHudArmed := false
+    BotState.diedHudSeen := false
+    BotState.diedHudReads := 0
+    BotState.diedHudNext := 0.0
     ResetStats()
     SyncSettings()
     profile := ApplyResolution()
@@ -4072,8 +4085,6 @@ RunBot() {
     }
     FocusGame()
     Wait(0.15)
-    BotState.diedHudNext := 0.0
-    BotState.diedHudSeen := DeathRecentlyHud(true) ; persistent badge at launch is the baseline, not a new death
 
     BotState.shiftLock := false
     BotState.shiftVerified := false
@@ -4135,6 +4146,14 @@ RunBot() {
         FinishRun()
         return
     }
+    ; Establish the persistent-banner baseline only after the NPC setup dialogue
+    ; has closed; its white speech text can otherwise look like the death badge.
+    BotState.diedHudNext := 0.0
+    BotState.diedHudReads := 0
+    BotState.diedHudSeen := DeathRecentlyHud(true)
+    BotState.diedHudArmed := true
+    if BotState.diedHudSeen
+        LogMsg("[death] recent-death badge was already present at fishing start; monitoring new appearances")
     UpdateLevel()
     HookStartMsg()
 

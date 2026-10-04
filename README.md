@@ -4,7 +4,7 @@ AutoHotkey v2 macro for automating fishing in **Blox Fruits**.
 
 The macro uses screen capture, color detection and Windows OCR to read the fishing bar, the bite indicator, the fish position, chests, the cast charge meter, NPC/shop menus and the quest panel. It controls the reel automatically and can buy bait, sell fish, do the Angler quests and report to Discord.
 
-Current version: **1.29.5** (see `CHANGELOG.md` for the full history).
+Current version: **1.29.6** (see `CHANGELOG.md` for the full history).
 
 ## Preview
 
@@ -187,7 +187,7 @@ Repeat
 
 If something goes wrong, the macro has several recovery checks and stops itself when it cannot safely confirm the game state.
 
-**Death check:** the macro stops when the Health text reads `0/x` (two OCR reads in a row), or when the `Died Recently - PvP disabled` HUD first appears during the run. That badge can persist after respawn, so an existing badge at startup is treated as a baseline and used to compensate for its overlap with the fishing progress strip.
+**Death check:** the macro stops when the Health text reads `0/x` (two OCR reads in a row), or when the `Died Recently - PvP disabled` HUD first appears after fishing begins. The HUD baseline is sampled after NPC setup, since the badge can persist after respawn and the NPC dialogue has similar white text. When present, its overlap with the fishing progress strip is accounted for.
 
 ## Automatic detection
 
