@@ -1,7 +1,75 @@
 # Changelog: CeriFish — Fishing Macro (AutoHotkey v2)
 
-Current delivered files: `BloxFishing.ahk`, `BloxFishing.html`, and CeriFish logo assets (v1.29.9 below).
+Current delivered files: `BloxFishing.ahk`, `BloxFishing.html`, the `modules/` source files, and CeriFish logo assets (v1.33.0 below).
 Nothing is pending from the earlier "not delivered" list except the open points at the bottom.
+
+---
+
+## v1.33.0: Individual action embeds and resolved startup settings
+
+- Add enabled-by-default individual Discord embeds for each recorded macro action, including casts, bite detection, and rod Power attempts.
+- When a Hooked marker is followed by no reel bar, attach a bite-zone crop with a red frame around the detected pixels.
+- Include NPC, bait, rod slot and configured/effective resolution in the start notification.
+- Normalize invalid saved NPC, bait, rod-slot and resolution values; persist repaired defaults so GUI controls do not start blank.
+- Populate the HTML controls directly from the validated settings rather than the hidden native controls.
+
+---
+
+## v1.32.1: Place auto-sell warning and clarify rod-skill timing
+
+- Move the Angler auto-sell warning into the Auto-sell card.
+- Attempt Z at the start of every reel instead of estimating readiness from the macro's catch counter; the game accepts the input when rod Power is ready.
+- Log each Z input attempt so it can be compared with the game capture and fishing timeline.
+
+---
+
+## v1.32.0: Use the fishing rod skill automatically
+
+- Add an enabled-by-default option that taps the rod's Z skill when reeling begins.
+- Keep the perfect cast meter tracking and release timing; it continues to release at the configured charge threshold (97% by default).
+
+---
+
+## v1.31.1: Fix updater rollback syntax
+
+- Wrap module rollback branches in explicit blocks so AutoHotkey v2 parses the `else` correctly when an update fails.
+
+---
+
+## v1.31.0: Split the AHK application into modules
+
+- Keep `BloxFishing.ahk` as a short entry point and move input, vision, NPC/shop, fishing, quests, settings, screen/OCR, webhooks, reports, game settings, and GUI code into the `modules/` directory.
+- Extend the updater to download, validate, back up, and install all AHK modules with the main script so the app does not restart with a mixed version.
+- This is a source and packaging change; it does not add AI navigation after death yet.
+
+---
+
+## v1.30.3: Trust the bait counter and recover partial NPC menus
+
+- Read the selected-bait HUD count above 90 so an over-cap inventory (such as x92) is never mistaken for empty; keep purchases capped at 90 and only infer empty bait after rereading the HUD.
+- Treat a stable dialogue banner with partial menu-row detection as an opened Angler root menu. Use calibrated row positions when the visual scan misses menu rows, and do not walk or click Interact again while the dialogue is open.
+- After a failed shop interaction, clear the NPC interaction range before the next fishing cycle.
+
+---
+
+## v1.30.2: Verify Shift Lock before every NPC menu retry
+
+- Recheck that the mouse cursor is released immediately before each `Nevermind` retry after an accidental NPC dialogue. If Shift Lock recaptures it, stop recovery without sending another menu click (which could rotate the camera); keep the existing safe-stop behavior.
+
+---
+
+## v1.30.1: NPC warning, bar-miss webhook and safer dialogue recovery
+
+- Show a clear Angler warning that auto-sell only works with the Fisherman.
+- Add a configurable webhook for “Fishing bar never appeared,” including the bite details and diagnostic screenshot.
+- On an accidental NPC dialogue after casting, probe whether Shift Lock is trapping the cursor before attempting Nevermind. Confirm the dialogue is closed, avoid reapplying camera tilt, step out of NPC range, and stop safely if the cursor cannot be freed or the interaction prompt remains.
+
+---
+
+## v1.30.0: Shorter recasts and event screenshots
+
+- Reduce the post-catch and cast settling pauses while retaining a 0.2-second recast registration delay.
+- Save labeled, full-game screenshots before and after NPC dialogue, when the red bite marker triggers `Hooked`, and when the reel bar fails to appear. The log records the trigger and screenshot path; the debug folder retains the newest 80 images.
 
 ---
 

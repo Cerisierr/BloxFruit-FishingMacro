@@ -4,7 +4,11 @@ AutoHotkey v2 macro for automating fishing in **Blox Fruits**.
 
 The macro uses screen capture, color detection and Windows OCR to read the fishing bar, the bite indicator, the fish position, chests, the cast charge meter, NPC/shop menus and the quest panel. It controls the reel automatically and can buy bait, sell fish, do the Angler quests and report to Discord.
 
-Current version: **1.29.9** (see `CHANGELOG.md` for the full history).
+Current version: **1.33.0** (see `CHANGELOG.md` for the full history).
+
+## Source layout
+
+`BloxFishing.ahk` is the short entry point. The `modules/` directory contains the input, vision, fishing, NPC/shop, quest, settings, screen/OCR, webhook, report, game-settings, and GUI code. Keep the entry script, `modules/`, `BloxFishing.html`, and `images/` together. The in-app updater installs the script and its modules as one update. To move from a pre-1.31 single-file copy, update the whole repository once; older updaters cannot install module-based releases.
 
 ## Preview
 
@@ -15,6 +19,9 @@ Dashboard preview using the Sunset theme:
 ## Features
 
 - Automatic casting (optional **Perfect cast**), bite detection and reel controller
+- Optional automatic fishing-rod skill (**Z**) at the start of every reel; the game decides when rod Power allows it
+- Optional individual Discord embeds for each recorded macro action, including casts, bite detection, and rod Power attempts
+- When a Hooked marker is followed by no reel bar, the Discord screenshot marks the bite-detection pixels with a red frame
 - Treasure chest collection during the minigame (a chest must be seen on several reads in a row, so false chests are ignored)
 - Auto-buy bait and auto-sell fish at the NPC (live bait counter, income and level tracking)
 - **Auto-quest at the Angler** (all four quest types, survives a restart)
@@ -41,6 +48,8 @@ The macro checks the repository's `main` branch once after startup. If a newer v
 - Supported resolution profiles: `1920x1080`, `2560x1440`, `1366x768` (RDP / small screens) and `Auto`
 
 > The selected profile must match the Roblox game area closely, otherwise screen detection can fail. The `1366x768` profile is scaled from 1920x1080 and has not been fully measured.
+
+> If an NPC conversation leaves the camera facing the dock instead of the water, set Roblox **Camera Mode** to **Follow** in the in-game settings. Roblox documents that Follow rotates with the avatar as it moves; Classic stays fixed until the player adjusts it. CeriFish also saves before/after dialogue screenshots under `errors/debug` for camera diagnosis.
 
 ---
 
@@ -111,7 +120,8 @@ The dashboard shows fish, bait, money, level and session time. Use its cards to 
 ## Fishing
 
 **Casting**
-- **Perfect cast**: reads the whole charge bar (orange > yellow > green) and releases at the chosen percentage (**Release at**, default 97 %). With zoom-out 8 the bar is small, so 96-98 % works well. With Perfect cast off, a quick fixed-timing cast is used.
+- **Perfect cast**: reads the whole charge bar (orange > yellow > green) continuously and releases at the chosen percentage (**Release at**, default 97 %). With zoom-out 8 the bar is small, so 96-98 % works well. With Perfect cast off, a quick fixed-timing cast is used.
+- **Use fishing rod skill (Z)**: tries the rod skill at the start of every reel; the game ignores the input while rod Power is unavailable and activates the skill when ready.
 - **Lock camera zoom**, **Zoom-out notches**, **Re-apply the zoom every N casts**, **Tilt down (px)**: camera setup used for stable detection.
 
 **Reeling and recovery**
@@ -149,7 +159,8 @@ How it works:
 ## Shop and Bait
 
 - **AFK at**: `Fisherman` or `Angler`. With the Angler, auto-sell is off and auto-quest is available.
-- **Auto-buy bait when it runs low**, **Bait type**, **Bait in inventory now** (`0` = do not count, max 90, updates live), **Bait per purchase** (10-100, multiples of 10). The inventory holds 90 bait at most, so the macro only buys what fits. Each cast also has a short 0.5-second registration pause before launch, and the macro waits 50 ms after hooking before looking for the reel bar.
+- **Auto-sell is only available with the Fisherman**; the GUI warns when Angler is selected.
+- **Auto-buy bait when it runs low**, **Bait type**, **Bait in inventory now** (`0` = do not count, max 90, updates live), **Bait per purchase** (10-100, multiples of 10). The inventory holds 90 bait at most, so the macro only buys what fits. The macro waits 50 ms after hooking before looking for the reel bar, saves diagnostic screenshots at key fishing/camera steps, and uses shorter recast pauses.
 - Baits: Basic, Kelp, Good (Sea 1); Abyssal (Sea 2, needs Demonic Wisp); Frozen (Sea 2, needs Yeti Fur); Epic (Sea 3, needs Terror Eyes); Carnivore (Sea 3, needs Dragon Scale). Locked baits cannot be bought.
 - **Auto-sell fish every N catches**
 - **Track income** and **Track levels**: read your `$` and level with Windows OCR.
@@ -157,7 +168,7 @@ How it works:
 ## Webhook
 
 - **Enable webhook**, **Webhook URL**, optional separate **hourly report URL**, display name and mention.
-- Messages you can toggle: macro started, stopped + session summary, fish sold, bait purchased, screenshots, errors + game screenshot, buying / selling, casting and hooked, fish caught + progress, catch screenshot, chest collected, and the three quest messages.
+- Messages you can toggle: macro started, stopped + session summary, fish sold, bait purchased, screenshots, errors + game screenshot, reel bar never appeared + diagnostic screenshot, buying / selling, casting and hooked, fish caught + progress, catch screenshot, chest collected, and the three quest messages.
 - While the macro and webhook are active, hourly reports are sent automatically at every full hour on the PC's local clock (for example 11:00, 12:00, 13:00). The schedule is fixed and cannot be disabled or rescheduled; **Send report now** remains available for a manual report.
 - **Send report now** sends the hourly report image card immediately.
 - The stop and error messages are plain text embeds sent to the normal webhook. The hourly image card goes only to the hourly report URL (or the normal one if that field is empty).

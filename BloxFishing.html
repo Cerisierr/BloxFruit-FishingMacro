@@ -171,7 +171,7 @@
         <button data-page="look" onclick="page('look')">Appearance</button>
         <button data-page="logs" onclick="page('logs')">Logs</button>
       </nav>
-      <div class="sidebottom"><div class="status"><span class="dot">●</span> Macro status<b id="runstatus">Idle</b>Game<b>Blox Fruits</b>Version <span id="version">1.29.9</span></div><div class="ver">Settings save automatically</div></div>
+      <div class="sidebottom"><div class="status"><span class="dot">●</span> Macro status<b id="runstatus">Idle</b>Game<b>Blox Fruits</b>Version <span id="version">1.33.0</span></div><div class="ver">Settings save automatically</div></div>
     </aside>
     <main class="main">
       <header class="top"><div><h1 id="heading">Dashboard</h1><p id="subtitle">Your fishing setup, session status and quick links.</p></div><div class="topactions"><button class="btn" onclick="page('look')">Theme</button><button class="btn" onclick="cmd('check')">Check setup</button><button class="btn primary" id="runbtn" onclick="cmd('start')">Start macro · F2</button></div></header>
@@ -190,6 +190,8 @@
               <label class="field"><span>Release at charge (%)</span><input id="perfectPct" type="number" onchange="cmd('set','perfectPct',this.value)"><small>Recommended: 96–98%.</small></label>
               <div class="setting"><span>Fast bite reaction</span><button id="toggle-fastBite" class="switch" onclick="cmd('toggle','fastBite')"><span></span></button></div>
               <div class="setting"><span>Slow fish trick</span><button id="toggle-slowFlick" class="switch" onclick="cmd('toggle','slowFlick')"><span></span></button></div>
+              <div class="setting"><span>Use fishing rod skill (Z)</span><button id="toggle-rodSkill" class="switch" onclick="cmd('toggle','rodSkill')"><span></span></button></div>
+              <p class="desc">Tries at the start of every reel. The game activates it when rod Power is ready.</p>
             </div>
             <div class="card"><h2>Camera &amp; view</h2><p class="desc">Keep zoom distance and angle steady.</p>
               <div class="setting"><span>Lock zoom distance</span><button id="toggle-zoomLock" class="switch" onclick="cmd('toggle','zoomLock')"><span></span></button></div>
@@ -216,7 +218,7 @@
             <label class="field"><span>Bait type</span><select id="bait" onchange="cmd('set','bait',this.value)"></select></label>
             <label class="field"><span>Bait already in bag</span><input id="baitNow" type="number" min="0" max="90" onchange="cmd('set','baitNow',this.value)"><small>Enter 0 to let the macro track it (maximum 90).</small></label>
             <label class="field"><span>Buy up to</span><select id="baitPer" onchange="cmd('set','baitPer',this.value)"><option>10</option><option>20</option><option>30</option><option>40</option><option>50</option><option>60</option><option>70</option><option>80</option><option>90</option><option>100</option></select></label>
-          </div><div class="card"><h2>Auto-sell</h2><p class="desc">Sell fish to the Fisherman after a chosen number of catches.</p>
+          </div><div class="card"><h2>Auto-sell</h2><p class="desc">Sell fish to the Fisherman after a chosen number of catches.</p><div id="npcwarning" class="callout" style="display:none"></div>
             <div class="setting"><span>Enable auto-sell</span><button id="toggle-sellOn" class="switch" onclick="cmd('toggle','sellOn')"><span></span></button></div>
             <label class="field"><span>Sell every X catches</span><input id="sellEvery" type="number" onchange="cmd('set','sellEvery',this.value)"></label>
             <h2 style="margin-top:20px">Session stats</h2><div class="setting"><span>Read money from the HUD</span><button id="toggle-trackIncome" class="switch" onclick="cmd('toggle','trackIncome')"><span></span></button></div>
@@ -235,6 +237,7 @@
         <section class="view" id="page-hook" data-title="Webhook" data-subtitle="Discord notifications and session reports.">
           <div class="grid"><div class="card"><h2>Discord webhook</h2><p class="desc">Webhook URLs are saved locally in BloxFishing.ini.</p>
             <div class="setting"><span>Enable webhook</span><button id="toggle-hkOn" class="switch" onclick="cmd('toggle','hkOn')"><span></span></button></div>
+            <p class="desc">Macro actions are sent individually as Discord embeds while it runs.</p>
             <label class="field"><span>Webhook URL</span><input id="hkUrl" type="password" onchange="cmd('set','hkUrl',this.value)"></label>
             <div class="actions"><button class="btn" onclick="cmd('test')">Send test</button><button class="btn" onclick="cmd('report')">Send report now</button></div>
             <label class="field"><span>Display name</span><input id="hkName" onchange="cmd('set','hkName',this.value)"></label>
@@ -252,7 +255,8 @@
             <div class="setting"><span>Catch screenshot</span><button id="toggle-hkCatchShot" class="switch" onclick="cmd('toggle','hkCatchShot')"><span></span></button></div>
             <div class="setting"><span>Sale, bait and report screenshots</span><button id="toggle-hkShot" class="switch" onclick="cmd('toggle','hkShot')"><span></span></button></div>
             <div class="setting"><span>Buy/sell activity</span><button id="toggle-hkBuy" class="switch" onclick="cmd('toggle','hkBuy')"><span></span></button></div>
-            <div class="setting"><span>Casting and hooked</span><button id="toggle-hkCast" class="switch" onclick="cmd('toggle','hkCast')"><span></span></button></div>
+            <div class="setting"><span>Individual action embeds</span><button id="toggle-hkActions" class="switch" onclick="cmd('toggle','hkActions')"><span></span></button></div>
+            <div class="setting"><span>Reel bar never appeared + screenshot</span><button id="toggle-hkBarMiss" class="switch" onclick="cmd('toggle','hkBarMiss')"><span></span></button></div>
             <div class="setting"><span>Quest accepted</span><button id="toggle-hkQuest" class="switch" onclick="cmd('toggle','hkQuest')"><span></span></button></div>
             <div class="setting"><span>Quest completed</span><button id="toggle-hkQuestDone" class="switch" onclick="cmd('toggle','hkQuestDone')"><span></span></button></div>
             <div class="setting"><span>Quest failed</span><button id="toggle-hkQuestFail" class="switch" onclick="cmd('toggle','hkQuestFail')"><span></span></button></div>
@@ -273,7 +277,7 @@
           <div class="actions" style="margin-bottom:12px"><button class="btn" onclick="cmd('check')">Check setup</button></div><pre id="log" class="log"></pre>
         </section>
       </div>
-      <footer class="footer"><div class="left">v<span id="version-footer">1.29.9</span><span class="dot">●</span><span id="footstatus">Idle</span></div><div class="actions"><button class="btn" onclick="cmd('update')">Updates</button><button class="btn" onclick="cmd('pause')">Pause / resume · F3</button><button class="btn" onclick="cmd('quit')">Quit · F4</button></div><span>F2 Start · F3 Pause · F4 Quit</span></footer>
+      <footer class="footer"><div class="left">v<span id="version-footer">1.33.0</span><span class="dot">●</span><span id="footstatus">Idle</span></div><div class="actions"><button class="btn" onclick="cmd('update')">Updates</button><button class="btn" onclick="cmd('pause')">Pause / resume · F3</button><button class="btn" onclick="cmd('quit')">Quit · F4</button></div><span>F2 Start · F3 Pause · F4 Quit</span></footer>
     </main>
   </div>
 </body>
