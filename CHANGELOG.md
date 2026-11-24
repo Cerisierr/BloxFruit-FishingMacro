@@ -1,7 +1,14 @@
 # Changelog: CeriFish — Fishing Macro (AutoHotkey v2)
 
-Current delivered files: `BloxFishing.ahk`, `BloxFishing.html`, the `modules/` source files, and CeriFish logo assets (v1.33.1 below).
+Current delivered files: `BloxFishing.ahk`, `BloxFishing.html`, the `modules/` source files, and CeriFish logo assets (v1.33.2 below).
 Nothing is pending from the earlier "not delivered" list except the open points at the bottom.
+
+---
+
+## v1.33.2: New logo applied to the window and taskbar icon
+
+- Regenerate `images/cerifish.ico` from the new logo (16 to 256 px). It was still the old icon, so the title bar and taskbar kept the old "CF".
+- Set the window's small and large icons explicitly from the .ico after the window is shown.
 
 ---
 

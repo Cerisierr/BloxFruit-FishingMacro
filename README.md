@@ -2,7 +2,7 @@
 
 AutoHotkey v2 macro for **Blox Fruits**: auto-fishing, auto-quest (Angler), bait/sell, chest collection and Discord reports.
 
-**Version 1.33.1** · [Full changelog](CHANGELOG.md)
+**Version 1.33.2** · [Full changelog](CHANGELOG.md)
 
 ![CeriFish dashboard](images/dashboard-preview.png)
 
@@ -53,9 +53,10 @@ If the camera faces the dock after the NPC dialogue, set Roblox **Camera Mode �
 | `F4` | Quit |
 | `F8` | Toggle debug log file |
 
-## Latest changes (v1.33.1)
+## Latest changes (v1.33.2)
 
-- Fixed the bite marker being missed outside RDP (`marker cells=47 largest blob=28 px (need 46)`): the salmon marker body is now detected on every setup, nearby fragments are merged with a wider gap, and the minimum blob size is lower.
+- New CeriFish logo. The window, title-bar and taskbar icon (`images/cerifish.ico`) now use it; it was still the old CF icon.
+- Fixed the bite marker (v1.33.1) being missed outside RDP (`marker cells=47 largest blob=28 px (need 46)`): the salmon marker body is now detected on every setup, nearby fragments are merged with a wider gap, and the minimum blob size is lower.
 - Refreshed the dashboard preview (Obsidian theme).
 
 ## Troubleshooting

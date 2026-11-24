@@ -762,6 +762,22 @@ ThemeCard(g, name, x, y) {
 ; ============================================================================
 ;  MAIN WINDOW
 ; ============================================================================
+; Title-bar (small) and taskbar / Alt+Tab (big) icon, loaded straight from the .ico
+; so the window never keeps a cached default icon.
+SetWindowIcon(hwnd) {
+    global ICON_FILE
+    if !FileExist(ICON_FILE)
+        return
+    try {
+        small := DllCall("LoadImage", "ptr", 0, "str", ICON_FILE, "uint", 1, "int", 16, "int", 16, "uint", 0x10, "ptr")
+        big := DllCall("LoadImage", "ptr", 0, "str", ICON_FILE, "uint", 1, "int", 32, "int", 32, "uint", 0x10, "ptr")
+        if small
+            SendMessage(0x80, 0, small, , "ahk_id " . hwnd)
+        if big
+            SendMessage(0x80, 1, big, , "ahk_id " . hwnd)
+    }
+}
+
 BuildGui(startPage := "dash") {
     global HTML_FILE
     MonitorGetWorkArea(1, &workLeft, &workTop, &workRight, &workBottom)
@@ -1052,6 +1068,7 @@ BuildGui(startPage := "dash") {
 
     ShowPage(startPage)
     g.Show("x" . windowX . " y" . windowY . " w" . windowWidth . " h" . windowHeight)
+    SetWindowIcon(g.Hwnd)
     ; Showing the parent window can put its older native child controls above
     ; the hosted browser. Explicitly restore the browser host to the top.
     DllCall("SetWindowPos", "ptr", Ui.browserCtl.Hwnd, "ptr", 0

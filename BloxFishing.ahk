@@ -35,7 +35,7 @@ if !A_IsAdmin {
 ;  CONFIGURATION
 ; ============================================================================
 APP_NAME    := "CeriFish"
-APP_VERSION := "1.33.1"
+APP_VERSION := "1.33.2"
 INI_FILE    := A_ScriptDir "\BloxFishing.ini"
 UPDATE_URL  := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.ahk"
 UPDATE_HTML_URL := "https://raw.githubusercontent.com/Cerisierr/BloxFruit-FishingMacro/main/BloxFishing.html"
