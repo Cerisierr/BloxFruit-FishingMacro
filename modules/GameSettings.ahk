@@ -20,7 +20,29 @@ PxAt(x, y) {
 }
 
 IsGreenBtn(p) {
-    return p.g >= 120 && p.g > p.r + 50 && p.g > p.b + 50
+    return p.g >= 95 && p.g > p.r + 28 && p.g > p.b + 18
+}
+
+; Read several points inside the left half of a toggle, away from its white
+; On/Off label. Return -1 when the pixels do not clearly identify either state.
+SettingToggleState(win, y) {
+    on := 0, off := 0
+    Loop 9 {
+        x := win.x + Round(win.w * (SET_SAMPLE_X + (A_Index - 1) * 0.0035))
+        for dy in [-5, 0, 5] {
+            p := PxAt(x, y + dy)
+            if IsGreenBtn(p) {
+                on++
+            } else if (Max(p.r, p.g, p.b) < 115 && Abs(p.r - p.g) < 30 && Abs(p.g - p.b) < 30) {
+                off++
+            }
+        }
+    }
+    if (on >= 3)
+        return 1
+    if (off >= 8)
+        return 0
+    return -1
 }
 
 ; Screen Y of the centre of the yellow "Settings" title bar, or -1.
@@ -105,18 +127,27 @@ ApplyGameSettings() {
         ty := ty2
 
     ok := true
-    sx := win.x + Round(win.w * SET_SAMPLE_X)
     bx := win.x + Round(win.w * SET_ON_X)
     for item in [["Fast Mode", SET_FAST_DY], ["Reduce Motion", SET_MOTION_DY]] {
         y := ty + Round(win.h * item[2])
-        if IsGreenBtn(PxAt(sx, y)) {
+        state := SettingToggleState(win, y)
+        if (state == 1) {
             LogMsg("[settings] " . item[1] . " is already on")
+            continue
+        }
+        if (state < 0) {
+            LogMsg("[settings] could not verify " . item[1] . " state - leaving it unchanged")
+            ok := false
             continue
         }
         Mouse.ClickAt(bx, y, 0.25, 0.10)
         Wait(0.5)
-        if IsGreenBtn(PxAt(sx, y)) {
+        state := SettingToggleState(win, y)
+        if (state == 1) {
             LogMsg("[settings] " . item[1] . " switched on")
+        } else if (state < 0) {
+            LogMsg("[settings] could not verify " . item[1] . " after clicking - check its state manually")
+            ok := false
         } else {
             LogMsg("[settings] " . item[1] . " could NOT be switched on - check the Settings window")
             ok := false

@@ -130,7 +130,7 @@ NPC_LIST := ["Fisherman", "Angler"]
 ; User-adjustable settings (persisted in BloxFishing.ini, edited in the GUI).
 Cfg := {
     resolution: "Auto", rodSlot: "4", fastBite: false, slowFlick: false, rodSkill: true
-  , chest: true, anchor: true, flick: true, perfect: true, perfectPct: 97
+  , chest: true, anchor: true, flick: true, perfect: true
   , zoomLock: true, zoomOut: 8, zoomEvery: 5, tiltPx: 70, dockWalk: 8, gameFast: true
   , questOn: true, questKey: "Z"
   , npc: "Fisherman", buyBait: true, baitType: "Basic Bait", baitNow: 0, baitPer: 40, baitRow: 0

@@ -6,113 +6,440 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CeriFish — Fishing Macro</title>
   <style>
-    * { box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
-    body { background: #07111f; color: #edf4ff; font: 13px "Segoe UI", Arial, sans-serif; }
-    button, input, select { font: inherit; }
-    button { cursor: pointer; color: inherit; }
-    .app { display: flex; width: 100%; height: 100%; min-width: 0; }
-    .side { flex: 0 0 220px; display: flex; flex-direction: column; padding: 20px 14px; background: #06101d; border-right: 1px solid #203149; }
-    .brand { display: flex; align-items: center; padding: 3px 8px 22px; }
-    .logo { display: block; width: 42px; height: 42px; flex: 0 0 42px; margin-right: 12px; border-radius: 13px; }
-    .brand b { display: block; font-size: 16px; }
-    .brand small { color: #68b5ff; font-size: 12px; }
-    .nav { display: flex; flex-direction: column; }
-    .nav button { margin: 0 0 5px; padding: 11px 12px; border: 0; border-radius: 9px; background: transparent; color: #9aacc3; text-align: left; }
-    .nav button:hover, .nav button.active { background: #102b49; color: #fff; }
-    .nav button.active { box-shadow: inset 3px 0 #3d91ff; }
-    .sidebottom { margin-top: auto; }
-    .status { padding: 14px; border: 1px solid #253b54; border-radius: 12px; background: #0a1b2d; color: #acbdd1; font-size: 12px; }
-    .status b { display: block; margin: 6px 0 12px; color: #f3f7ff; font-size: 15px; }
-    .dot { color: #54d58a; }
-    .ver { margin: 12px 4px 0; color: #8194ab; font-size: 11px; }
-    .main { display: flex; flex: 1; min-width: 0; flex-direction: column; }
-    .top { display: flex; flex: 0 0 82px; align-items: center; justify-content: space-between; padding: 0 25px; border-bottom: 1px solid #1b2d43; background: #081525; }
-    .top h1 { margin: 0 0 4px; font-size: 22px; }
-    .top p { margin: 0; color: #a5b5c9; font-size: 12px; }
-    .topactions { display: flex; }
-    .topactions .btn { margin-left: 9px; }
-    .btn { padding: 9px 13px; border: 1px solid #2d425c; border-radius: 9px; background: #102238; color: #dce9fb; }
-    .btn:hover { background: #193654; }
-    .btn.primary { border-color: #3984e9; background: #2877df; color: #fff; font-weight: 650; }
-    .btn.danger { border-color: #8c3e4b; background: #642936; }
-    .body { flex: 1; overflow: auto; padding: 22px 25px 25px; }
-    .view { display: none; }
-    .view.active { display: block; }
-    .intro { margin: 0 0 16px; color: #a6b8ce; font-size: 13px; line-height: 1.55; }
-    .grid { display: flex; flex-wrap: wrap; margin: -7px; }
-    .grid > .card { flex: 1 1 42%; min-width: 240px; margin: 7px; }
-    .grid.three > .card { flex-basis: 28%; }
-    .card { padding: 17px; border: 1px solid #263b53; border-radius: 13px; background: #0b1b2c; box-shadow: 0 8px 20px rgba(0,0,0,.13); }
-    .card h2 { margin: 0 0 4px; font-size: 15px; }
-    .desc { margin: 0 0 13px; color: #95a9c0; font-size: 11px; line-height: 1.5; }
-    .setting { position: relative; display: block; min-height: 37px; padding: 10px 54px 9px 0; border-bottom: 1px solid #182b40; color: #d9e4f1; font-size: 12px; }
-    .setting:last-child { border-bottom: 0; }
-    .switch { position: absolute; display: block; top: 50%; right: 0; width: 39px; height: 22px; margin-top: -11px; padding: 0; border: 0; border-radius: 14px; background: #34465d; }
-    .switch span { position: absolute; display: block; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #dce7f5; }
-    .switch.on { background: #2879e5; }
-    .switch.on span { left: 20px; background: #fff; }
-    .field { display: block; margin: 10px 0; color: #a9bbd1; font-size: 12px; }
-    .field > span { display: block; margin-bottom: 6px; }
-    .field input, .field select { width: 100%; padding: 8px 10px; border: 1px solid #2a4059; border-radius: 7px; outline: 0; background: #071525; color: #eff5ff; }
-    .field input:focus, .field select:focus { border-color: #4b9eff; }
-    .field small { display: block; margin-top: 5px; color: #8297b0; font-size: 10px; line-height: 1.45; }
-    .callout { margin-bottom: 15px; padding: 12px 14px; border: 1px solid #294667; border-radius: 10px; background: #0c2138; color: #b9cce1; font-size: 12px; line-height: 1.55; }
-    .callout b { color: #74b7ff; }
-    .metrics { display: flex; margin: 14px -5px; }
-    .metric { flex: 1; margin: 0 5px; padding: 12px; border: 1px solid #233952; border-radius: 10px; background: #0a1929; }
-    .metric small { color: #91a5be; font-size: 10px; }
-    .metric b { display: block; margin-top: 6px; font-size: 18px; }
-    .actions { display: flex; }
-    .actions .btn { margin-right: 8px; }
-    .footer { display: flex; flex: 0 0 49px; align-items: center; justify-content: space-between; padding: 0 22px; border-top: 1px solid #1b2d43; background: #081525; color: #91a5bc; font-size: 11px; }
-    .footer .left { display: flex; align-items: center; }
-    .footer .left .dot { margin: 0 8px; }
-    .log { height: 450px; overflow: auto; padding: 12px; border: 1px solid #223851; border-radius: 9px; background: #06111e; color: #bdd0e6; font: 11px Consolas, monospace; white-space: pre-wrap; }
-    .themegrid { display: flex; flex-wrap: wrap; }
-    .theme { min-width: 125px; margin: 0 10px 10px 0; padding: 14px; border: 1px solid #2b4058; border-radius: 10px; background: #102238; }
-    .theme:hover, .theme.selected { border-color: #58a3ff; }
-    .theme.selected { box-shadow: 0 0 0 2px rgba(58,145,255,.25); }
-    body[data-theme="Obsidian"] { background: #141414; color: #ededed; }
-    body[data-theme="Obsidian"] .side, body[data-theme="Obsidian"] .top, body[data-theme="Obsidian"] .footer { background: #0c0c0c; border-color: #333; }
-    body[data-theme="Obsidian"] .card, body[data-theme="Obsidian"] .status, body[data-theme="Obsidian"] .metric { background: #1d1d1d; border-color: #333; }
-    body[data-theme="Obsidian"] input, body[data-theme="Obsidian"] select, body[data-theme="Obsidian"] .log { background: #262626; border-color: #333; color: #ededed; }
-    body[data-theme="Obsidian"] .btn.primary, body[data-theme="Obsidian"] .switch.on { background: #b388ff; }
-    body[data-theme="Ocean"] { background: #0b1b26; color: #e3f4fa; }
-    body[data-theme="Ocean"] .side { background: #07131b; border-color: #1e4258; }
-    body[data-theme="Ocean"] .top, body[data-theme="Ocean"] .footer { background: #0b1b26; border-color: #1e4258; }
-    body[data-theme="Ocean"] .card, body[data-theme="Ocean"] .status, body[data-theme="Ocean"] .metric { background: #102a39; border-color: #1e4258; }
-    body[data-theme="Ocean"] input, body[data-theme="Ocean"] select, body[data-theme="Ocean"] .log { background: #163547; border-color: #1e4258; color: #e3f4fa; }
-    body[data-theme="Ocean"] .btn.primary, body[data-theme="Ocean"] .switch.on { background: #22d3ee; }
-    body[data-theme="Emerald"] { background: #0d1a14; color: #e4f6ec; }
-    body[data-theme="Emerald"] .side { background: #08120e; border-color: #21402f; }
-    body[data-theme="Emerald"] .top, body[data-theme="Emerald"] .footer { background: #0d1a14; border-color: #21402f; }
-    body[data-theme="Emerald"] .card, body[data-theme="Emerald"] .status, body[data-theme="Emerald"] .metric { background: #12261c; border-color: #21402f; }
-    body[data-theme="Emerald"] input, body[data-theme="Emerald"] select, body[data-theme="Emerald"] .log { background: #193327; border-color: #21402f; color: #e4f6ec; }
-    body[data-theme="Emerald"] .btn.primary, body[data-theme="Emerald"] .switch.on { background: #34d399; }
-    body[data-theme="Sunset"] { background: #1a1214; color: #f8eae4; }
-    body[data-theme="Sunset"] .side { background: #120b0d; border-color: #42292e; }
-    body[data-theme="Sunset"] .top, body[data-theme="Sunset"] .footer { background: #1a1214; border-color: #42292e; }
-    body[data-theme="Sunset"] .card, body[data-theme="Sunset"] .status, body[data-theme="Sunset"] .metric { background: #251a1d; border-color: #42292e; }
-    body[data-theme="Sunset"] input, body[data-theme="Sunset"] select, body[data-theme="Sunset"] .log { background: #2f2024; border-color: #42292e; color: #f8eae4; }
-    body[data-theme="Sunset"] .btn.primary, body[data-theme="Sunset"] .switch.on { background: #fb923c; }
-    body[data-theme="Rose"] { background: #1b1020; color: #f7e9f8; }
-    body[data-theme="Rose"] .side { background: #130a18; border-color: #43284f; }
-    body[data-theme="Rose"] .top, body[data-theme="Rose"] .footer { background: #1b1020; border-color: #43284f; }
-    body[data-theme="Rose"] .card, body[data-theme="Rose"] .status, body[data-theme="Rose"] .metric { background: #261630; border-color: #43284f; }
-    body[data-theme="Rose"] input, body[data-theme="Rose"] select, body[data-theme="Rose"] .log { background: #321d3e; border-color: #43284f; color: #f7e9f8; }
-    body[data-theme="Rose"] .btn.primary, body[data-theme="Rose"] .switch.on { background: #f472b6; }
-    body[data-theme="Daylight"] { background: #f3f5fa; color: #1b2033; }
-    body[data-theme="Daylight"] .side { background: #e3e8f2; border-color: #cdd3e4; }
-    body[data-theme="Daylight"] .top, body[data-theme="Daylight"] .footer { background: #fff; border-color: #cdd3e4; color: #5f6786; }
-    body[data-theme="Daylight"] .card, body[data-theme="Daylight"] .status, body[data-theme="Daylight"] .metric { background: #fff; border-color: #cdd3e4; color: #1b2033; }
-    body[data-theme="Daylight"] .field, body[data-theme="Daylight"] .desc, body[data-theme="Daylight"] .status, body[data-theme="Daylight"] .setting { color: #5f6786; }
-    body[data-theme="Daylight"] input, body[data-theme="Daylight"] select, body[data-theme="Daylight"] .log { background: #fff; border-color: #cdd3e4; color: #1b2033; }
-    body[data-theme="Daylight"] .callout { background: #edf2fc; border-color: #cdd3e4; color: #35415c; }
-    body[data-theme="Daylight"] .btn.primary, body[data-theme="Daylight"] .switch.on { background: #3b6ef5; color: #fff; }
-    @media (max-width: 1050px) { .side { flex-basis: 180px; padding: 16px 10px; } .grid.three > .card { flex-basis: 42%; } .body { padding: 17px; } .top { padding: 0 16px; } .topactions .btn { margin-left: 5px; padding: 8px 9px; } }
-    @media (max-width: 760px) { .side { flex-basis: 146px; padding: 14px 8px; } .brand { padding-left: 2px; padding-right: 2px; } .logo { width: 34px; height: 34px; flex-basis: 34px; margin-right: 7px; } .brand b { font-size: 13px; } .brand small { font-size: 10px; } .nav button { padding: 10px 8px; font-size: 11px; } .status { padding: 10px; font-size: 11px; } .top { min-height: 82px; height: auto; padding: 8px 11px; } .top h1 { font-size: 18px; } .top p { font-size: 10px; } .topactions { flex-wrap: wrap; justify-content: flex-end; } .topactions .btn { padding: 7px; font-size: 10px; } .body { padding: 12px; } .grid > .card, .grid.three > .card { flex-basis: 100%; min-width: 0; } .metrics { flex-wrap: wrap; } .metric { flex: 1 1 40%; margin-bottom: 8px; } .footer { padding: 0 8px; } .footer > span { display: none; } .footer .actions .btn { margin-right: 4px; padding: 7px; font-size: 10px; } }
-    @media (max-width: 560px) { .side { flex-basis: 124px; padding: 12px 6px; } .brand { flex-wrap: wrap; } .brand .logo { margin-right: 5px; } .brand b { font-size: 12px; } .brand small { display: block; width: 100%; margin-top: 4px; } .nav button { padding: 9px 5px; font-size: 10px; } .status { padding: 8px; font-size: 10px; } .status b { font-size: 13px; } .top { align-items: flex-start; flex-direction: column; justify-content: center; gap: 5px; } .topactions { width: 100%; justify-content: flex-start; } .topactions .btn { margin-left: 0; margin-right: 4px; padding: 6px; font-size: 9px; } .footer .left { font-size: 9px; } .footer .actions .btn { padding: 6px 5px; font-size: 9px; } .card { padding: 12px; } .intro { font-size: 11px; } }
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+body { font: 13px/20px "Segoe UI", Arial, sans-serif; }
+h1, h2, p, ul { margin: 0; padding: 0; }
+ul { list-style: none; }
+b { font-weight: 600; }
+button, input, select { font: inherit; }
+button { padding: 0; border: 0; background: none; color: inherit; cursor: pointer; }
+button, input, select { transition: background-color .12s ease, border-color .12s ease, color .12s ease; }
+button:focus { outline: 0; }
+.ico { display: block; flex: 0 0 16px; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+.app { display: flex; width: 100%; height: 100%; min-width: 0; }
+
+/* sidebar */
+.side { flex: 0 0 240px; display: flex; flex-direction: column; padding: 20px 12px 16px; border-right: 1px solid transparent; }
+.brand { display: flex; align-items: center; padding: 0 8px 24px; }
+.logo { display: block; flex: 0 0 36px; width: 36px; height: 36px; margin-right: 12px; border-radius: 8px; }
+.wordmark b { display: block; font-size: 16px; line-height: 20px; }
+.wordmark small { display: block; font-size: 12px; line-height: 16px; }
+.nav { display: flex; flex-direction: column; }
+.nav button { display: flex; align-items: center; height: 36px; margin-bottom: 2px; padding: 0 8px; border: 1px solid transparent; border-radius: 8px; font-size: 14px; text-align: left; }
+.nav .ico { margin-right: 10px; }
+.sidebottom { margin-top: auto; padding: 0 4px; }
+.status { padding: 12px; border: 1px solid transparent; border-radius: 12px; }
+.st-row { display: flex; align-items: center; }
+.st-row b { font-size: 14px; line-height: 20px; }
+.st-meta { margin-top: 4px; font: 12px/16px Consolas, "Courier New", monospace; }
+.ver { margin: 12px 4px 0; font-size: 12px; line-height: 16px; }
+.dot { display: inline-block; flex: 0 0 8px; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; }
+
+/* main */
+.main { display: flex; flex: 1 1 0px; min-width: 0; flex-direction: column; }
+.top { display: flex; flex: 0 0 64px; align-items: center; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid transparent; }
+.top h1 { font-size: 24px; line-height: 28px; font-weight: 400; }
+.top p { margin-top: 2px; font-size: 13px; line-height: 16px; }
+.topactions { display: flex; align-items: center; }
+.topactions .btn { margin-left: 8px; }
+.body { flex: 1 1 0px; min-height: 0; overflow: auto; padding: 24px; }
+.view { display: none; max-width: 1160px; }
+.view.active { display: block; animation: rise .16s ease-out; }
+@keyframes rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.intro { max-width: 640px; margin: 0 0 16px; font-size: 14px; line-height: 20px; }
+
+/* buttons */
+.btn { display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border: 1px solid transparent; border-radius: 8px; font-size: 13px; white-space: nowrap; }
+.btn:active { transform: scale(.98); }
+.btn.primary { font-weight: 600; }
+.btn.primary:hover { opacity: .92; }
+.btn.ghost { padding: 0 8px; }
+kbd { display: inline-block; min-width: 20px; height: 20px; margin-left: 8px; padding: 0 4px; border: 1px solid transparent; border-bottom-width: 2px; border-radius: 4px; font: 11px/16px Consolas, "Courier New", monospace; text-align: center; }
+.btn.primary kbd { border-color: rgba(0,0,0,.22); background: rgba(0,0,0,.12); color: inherit; font-weight: 400; }
+
+/* cards + grids */
+.grid { display: flex; flex-wrap: wrap; margin: -8px; }
+.grid > .card { flex: 1 1 280px; min-width: 240px; margin: 8px; }
+.grid.three > .card { flex-basis: 240px; }
+.card { padding: 20px; border: 1px solid transparent; border-radius: 12px; }
+.card h2 { font-size: 15px; line-height: 20px; font-weight: 400; }
+.card h2.sub { margin-top: 24px; }
+.desc { margin: 4px 0 8px; font-size: 12px; line-height: 16px; }
+.setting + .desc { padding-top: 8px; margin-top: 0; }
+.callout { margin-bottom: 16px; padding: 12px 16px; border: 1px solid transparent; border-radius: 12px; font-size: 13px; line-height: 20px; }
+.card .callout { margin: 12px 0 0; }
+.callout b { display: inline-block; margin-bottom: 2px; }
+
+/* metrics */
+.metrics { display: flex; margin: 0 -8px 8px; }
+.metric { flex: 1 1 0px; min-width: 0; margin: 8px; padding: 16px 20px; border: 1px solid transparent; border-radius: 12px; }
+.metric.lead { flex-grow: 1.6; }
+.metric small { display: block; margin-bottom: 8px; font-size: 12px; line-height: 16px; }
+.metric b { display: block; font-size: 28px; line-height: 32px; font-weight: 400; white-space: nowrap; }
+.metric.lead b { font-size: 40px; line-height: 32px; }
+
+/* link rows (dashboard) */
+.card.list { padding: 0; overflow: hidden; }
+.duo { display: flex; flex-wrap: wrap; margin: 0 -8px; }
+.duo > .card { margin: 8px; }
+.duo > .list { flex: 1.6 1 320px; }
+.duo > .session { flex: 1 1 240px; }
+.row { display: flex; align-items: center; width: 100%; padding: 12px 20px; border-bottom: 1px solid transparent; text-align: left; }
+.row:last-child { border-bottom: 0; }
+.row > span { flex: 1 1 0px; min-width: 0; }
+.row b { display: block; font-size: 14px; line-height: 20px; font-weight: 400; }
+.row small { display: block; font-size: 12px; line-height: 16px; }
+.session h2 { margin-bottom: 8px; }
+.session .actions { margin-top: 16px; }
+.meta { font: 12px/16px Consolas, "Courier New", monospace; }
+.actions { display: flex; align-items: center; }
+.actions .btn { margin-right: 8px; }
+.actions .btn:last-child { margin-right: 0; }
+
+/* settings */
+.setting { display: flex; align-items: center; justify-content: space-between; min-height: 40px; padding: 8px 0; border-bottom: 1px solid transparent; font-size: 13px; line-height: 20px; }
+.setting:last-child { border-bottom: 0; }
+.setting .val { font: 12px/16px Consolas, "Courier New", monospace; }
+.switch { position: relative; flex: 0 0 32px; width: 32px; height: 20px; margin-left: 16px; border-radius: 10px; }
+.switch i { position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; transition: transform .15s ease, background-color .15s ease; }
+.switch.on i { transform: translateX(12px); }
+.field { display: block; margin: 16px 0 0; font-size: 13px; line-height: 16px; }
+.field > span { display: block; margin-bottom: 8px; }
+.field input, .field select { display: block; width: 100%; height: 36px; padding: 0 12px; border: 1px solid transparent; border-radius: 8px; outline: 0; font-size: 13px; }
+.field select { padding-right: 32px; -webkit-appearance: none; appearance: none; }
+.field select::-ms-expand { display: none; }
+.field small { display: block; margin-top: 8px; font-size: 12px; line-height: 16px; }
+.card .actions { margin-top: 16px; }
+.checks { margin-top: 8px; }
+.checks li { position: relative; padding: 8px 0 8px 16px; border-bottom: 1px solid transparent; font-size: 13px; line-height: 20px; }
+.checks li:last-child { border-bottom: 0; }
+.checks li:before { content: ""; position: absolute; top: 16px; left: 0; width: 4px; height: 4px; border-radius: 50%; }
+
+/* themes */
+.themegrid { display: flex; flex-wrap: wrap; margin: 12px -6px -6px; }
+.theme { display: flex; flex-direction: column; justify-content: space-between; width: 152px; height: 88px; margin: 6px; padding: 12px; border: 1px solid rgba(128,128,128,.28); border-radius: 12px; font-size: 13px; line-height: 16px; text-align: left; }
+.sws { display: flex; }
+.sws i { display: block; width: 16px; height: 16px; margin-right: 4px; border: 1px solid rgba(128,128,128,.35); border-radius: 50%; }
+
+/* logs */
+.logbar { margin-bottom: 12px; }
+.log { height: calc(100vh - 220px); min-height: 240px; margin: 0; padding: 16px; overflow: auto; border: 1px solid transparent; border-radius: 12px; font: 12px/18px Consolas, "Courier New", monospace; white-space: pre-wrap; }
+
+/* footer */
+.footer { display: flex; flex: 0 0 48px; align-items: center; justify-content: space-between; padding: 0 24px; border-top: 1px solid transparent; font-size: 12px; }
+.footer .left { display: flex; align-items: center; }
+.footer .left .meta { margin-left: 12px; }
+.footer .actions .btn { margin-right: 4px; }
+
+@media (max-width: 960px) {
+  .side { flex-basis: 208px; padding: 16px 8px 12px; }
+  .grid.three > .card { flex-basis: 280px; }
+  .body { padding: 16px; }
+  .top { padding: 0 16px; }
+  .footer { padding: 0 16px; }
+}
+@media (max-width: 720px) {
+  .side { flex-basis: 56px; padding: 16px 8px 12px; }
+  .brand { justify-content: center; padding: 0 0 20px; }
+  .logo { margin-right: 0; }
+  .wordmark, .nav .label, .st-meta, .ver, .st-row b { display: none; }
+  .nav button { justify-content: center; padding: 0; }
+  .nav .ico { margin-right: 0; }
+  .sidebottom { padding: 0; }
+  .status { display: flex; justify-content: center; padding: 12px 0; }
+  .status .dot { margin-right: 0; }
+  .top p, .footer .left .meta { display: none; }
+  .top h1 { font-size: 20px; }
+  .btn { padding: 0 8px; }
+  .grid > .card, .grid.three > .card { flex-basis: 100%; min-width: 0; }
+  .metrics { flex-wrap: wrap; }
+  .metric, .metric.lead { flex: 1 1 40%; }
+  .duo > .list, .duo > .session { flex-basis: 100%; }
+}
+
+/* thèmes */
+body[data-theme="Obsidian"] { background:#141415;color:#ededed }
+body[data-theme="Obsidian"] .side { background:#0f0f10;border-color:rgba(237,237,237,0.08) }
+body[data-theme="Obsidian"] .top, body[data-theme="Obsidian"] .footer { background:#141415;border-color:rgba(237,237,237,0.08) }
+body[data-theme="Obsidian"] .card, body[data-theme="Obsidian"] .metric, body[data-theme="Obsidian"] .callout, body[data-theme="Obsidian"] .status { background:#19191b;border-color:rgba(237,237,237,0.08) }
+body[data-theme="Obsidian"] .card.list { background:#19191b }
+body[data-theme="Obsidian"] h1, body[data-theme="Obsidian"] h2, body[data-theme="Obsidian"] .metric b, body[data-theme="Obsidian"] .callout b, body[data-theme="Obsidian"] .wordmark b, body[data-theme="Obsidian"] .row b, body[data-theme="Obsidian"] .st-row b { color:#ededed }
+body[data-theme="Obsidian"] .setting { color:#ededed;border-color:rgba(237,237,237,0.08) }
+body[data-theme="Obsidian"] .intro, body[data-theme="Obsidian"] .field, body[data-theme="Obsidian"] .checks li, body[data-theme="Obsidian"] .meta, body[data-theme="Obsidian"] .log, body[data-theme="Obsidian"] .callout, body[data-theme="Obsidian"] .setting .val { color:#a1a1a6 }
+body[data-theme="Obsidian"] .desc, body[data-theme="Obsidian"] .field small, body[data-theme="Obsidian"] .metric small, body[data-theme="Obsidian"] .top p, body[data-theme="Obsidian"] .wordmark small, body[data-theme="Obsidian"] .st-meta, body[data-theme="Obsidian"] .ver, body[data-theme="Obsidian"] .row small, body[data-theme="Obsidian"] .footer { color:#8a8a90 }
+body[data-theme="Obsidian"] .nav button { color:#a1a1a6 }
+body[data-theme="Obsidian"] .nav .ico, body[data-theme="Obsidian"] .row .ico { color:#8a8a90 }
+body[data-theme="Obsidian"] .nav button:hover { background:rgba(237,237,237,0.04);color:#ededed }
+body[data-theme="Obsidian"] .nav button.active { background:#232325;border-color:rgba(237,237,237,0.08);color:#ededed;box-shadow:inset 0 1px 0 rgba(255,255,255,.06) }
+body[data-theme="Obsidian"] .nav button:hover .ico, body[data-theme="Obsidian"] .nav button.active .ico { color:#ededed }
+body[data-theme="Obsidian"] .btn { background:#232325;border-color:rgba(237,237,237,0.14);color:#ededed;box-shadow:inset 0 1px 0 rgba(255,255,255,.06) }
+body[data-theme="Obsidian"] .btn:hover { background:#2b2b2e }
+body[data-theme="Obsidian"] .btn.primary, body[data-theme="Obsidian"] .btn.primary:hover { background:#b388ff;border-color:#b388ff;color:#150a25 }
+body[data-theme="Obsidian"] .btn.ghost { background:transparent;border-color:transparent;box-shadow:none;color:#a1a1a6 }
+body[data-theme="Obsidian"] .btn.ghost:hover { background:rgba(237,237,237,0.04);color:#ededed }
+body[data-theme="Obsidian"][data-run="running"] #runbtn { background:transparent;border-color:#f87171;color:#f87171;box-shadow:none }
+body[data-theme="Obsidian"] kbd { border-color:rgba(237,237,237,0.14);background:#141415;color:#8a8a90 }
+body[data-theme="Obsidian"] .field input, body[data-theme="Obsidian"] .field select { background:#232325;border-color:rgba(237,237,237,0.14);color:#ededed }
+body[data-theme="Obsidian"] .field input:focus, body[data-theme="Obsidian"] .field select:focus { border-color:#b388ff }
+body[data-theme="Obsidian"] .field select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a90' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center }
+body[data-theme="Obsidian"] .switch { background:rgba(237,237,237,0.22) }
+body[data-theme="Obsidian"] .switch i { background:#a1a1a6 }
+body[data-theme="Obsidian"] .switch.on { background:#b388ff }
+body[data-theme="Obsidian"] .switch.on i { background:#150a25 }
+body[data-theme="Obsidian"] .dot { background:#8a8a90 }
+body[data-theme="Obsidian"][data-run="running"] .dot { background:#4ade80 }
+body[data-theme="Obsidian"][data-run="paused"] .dot { background:#e0a94a }
+body[data-theme="Obsidian"] .row { border-color:rgba(237,237,237,0.08) }
+body[data-theme="Obsidian"] .row:hover { background:rgba(237,237,237,0.04) }
+body[data-theme="Obsidian"] .log { background:#0f0f10;border-color:rgba(237,237,237,0.08) }
+body[data-theme="Obsidian"] #npcwarning { border-color:rgba(224,169,74,0.5) }
+body[data-theme="Obsidian"] .checks li { border-color:rgba(237,237,237,0.08) }
+body[data-theme="Obsidian"] .checks li:before { background:#8a8a90 }
+body[data-theme="Obsidian"] .theme.selected { border-color:#b388ff;box-shadow:0 0 0 1px #b388ff }
+body[data-theme="Obsidian"][data-input="key"] button:focus { outline:2px solid #b388ff;outline-offset:2px }
+body[data-theme="Obsidian"] ::selection { background:rgba(179,136,255,0.35) }
+body[data-theme="Midnight"] { background:#0b0d14;color:#eef0f5 }
+body[data-theme="Midnight"] .side { background:#07080d;border-color:rgba(238,240,245,0.08) }
+body[data-theme="Midnight"] .top, body[data-theme="Midnight"] .footer { background:#0b0d14;border-color:rgba(238,240,245,0.08) }
+body[data-theme="Midnight"] .card, body[data-theme="Midnight"] .metric, body[data-theme="Midnight"] .callout, body[data-theme="Midnight"] .status { background:#11141c;border-color:rgba(238,240,245,0.08) }
+body[data-theme="Midnight"] .card.list { background:#11141c }
+body[data-theme="Midnight"] h1, body[data-theme="Midnight"] h2, body[data-theme="Midnight"] .metric b, body[data-theme="Midnight"] .callout b, body[data-theme="Midnight"] .wordmark b, body[data-theme="Midnight"] .row b, body[data-theme="Midnight"] .st-row b { color:#eef0f5 }
+body[data-theme="Midnight"] .setting { color:#eef0f5;border-color:rgba(238,240,245,0.08) }
+body[data-theme="Midnight"] .intro, body[data-theme="Midnight"] .field, body[data-theme="Midnight"] .checks li, body[data-theme="Midnight"] .meta, body[data-theme="Midnight"] .log, body[data-theme="Midnight"] .callout, body[data-theme="Midnight"] .setting .val { color:#a3a9b8 }
+body[data-theme="Midnight"] .desc, body[data-theme="Midnight"] .field small, body[data-theme="Midnight"] .metric small, body[data-theme="Midnight"] .top p, body[data-theme="Midnight"] .wordmark small, body[data-theme="Midnight"] .st-meta, body[data-theme="Midnight"] .ver, body[data-theme="Midnight"] .row small, body[data-theme="Midnight"] .footer { color:#7f889c }
+body[data-theme="Midnight"] .nav button { color:#a3a9b8 }
+body[data-theme="Midnight"] .nav .ico, body[data-theme="Midnight"] .row .ico { color:#7f889c }
+body[data-theme="Midnight"] .nav button:hover { background:rgba(238,240,245,0.04);color:#eef0f5 }
+body[data-theme="Midnight"] .nav button.active { background:#1a1e28;border-color:rgba(238,240,245,0.08);color:#eef0f5;box-shadow:inset 0 1px 0 rgba(255,255,255,.06) }
+body[data-theme="Midnight"] .nav button:hover .ico, body[data-theme="Midnight"] .nav button.active .ico { color:#eef0f5 }
+body[data-theme="Midnight"] .btn { background:#1a1e28;border-color:rgba(238,240,245,0.14);color:#eef0f5;box-shadow:inset 0 1px 0 rgba(255,255,255,.06) }
+body[data-theme="Midnight"] .btn:hover { background:#222733 }
+body[data-theme="Midnight"] .btn.primary, body[data-theme="Midnight"] .btn.primary:hover { background:#3297f5;border-color:#3297f5;color:#04121f }
+body[data-theme="Midnight"] .btn.ghost { background:transparent;border-color:transparent;box-shadow:none;color:#a3a9b8 }
+body[data-theme="Midnight"] .btn.ghost:hover { background:rgba(238,240,245,0.04);color:#eef0f5 }
+body[data-theme="Midnight"][data-run="running"] #runbtn { background:transparent;border-color:#f87171;color:#f87171;box-shadow:none }
+body[data-theme="Midnight"] kbd { border-color:rgba(238,240,245,0.14);background:#0b0d14;color:#7f889c }
+body[data-theme="Midnight"] .field input, body[data-theme="Midnight"] .field select { background:#1a1e28;border-color:rgba(238,240,245,0.14);color:#eef0f5 }
+body[data-theme="Midnight"] .field input:focus, body[data-theme="Midnight"] .field select:focus { border-color:#3297f5 }
+body[data-theme="Midnight"] .field select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237f889c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center }
+body[data-theme="Midnight"] .switch { background:rgba(238,240,245,0.22) }
+body[data-theme="Midnight"] .switch i { background:#a3a9b8 }
+body[data-theme="Midnight"] .switch.on { background:#3297f5 }
+body[data-theme="Midnight"] .switch.on i { background:#04121f }
+body[data-theme="Midnight"] .dot { background:#7f889c }
+body[data-theme="Midnight"][data-run="running"] .dot { background:#55d98a }
+body[data-theme="Midnight"][data-run="paused"] .dot { background:#e0a94a }
+body[data-theme="Midnight"] .row { border-color:rgba(238,240,245,0.08) }
+body[data-theme="Midnight"] .row:hover { background:rgba(238,240,245,0.04) }
+body[data-theme="Midnight"] .log { background:#07080d;border-color:rgba(238,240,245,0.08) }
+body[data-theme="Midnight"] #npcwarning { border-color:rgba(224,169,74,0.5) }
+body[data-theme="Midnight"] .checks li { border-color:rgba(238,240,245,0.08) }
+body[data-theme="Midnight"] .checks li:before { background:#7f889c }
+body[data-theme="Midnight"] .theme.selected { border-color:#3297f5;box-shadow:0 0 0 1px #3297f5 }
+body[data-theme="Midnight"][data-input="key"] button:focus { outline:2px solid #3297f5;outline-offset:2px }
+body[data-theme="Midnight"] ::selection { background:rgba(50,151,245,0.35) }
+body[data-theme="Ocean"] { background:#0d1215;color:#e6f1f4 }
+body[data-theme="Ocean"] .side { background:#080d0f;border-color:rgba(230,241,244,0.08) }
+body[data-theme="Ocean"] .top, body[data-theme="Ocean"] .footer { background:#0d1215;border-color:rgba(230,241,244,0.08) }
+body[data-theme="Ocean"] .card, body[data-theme="Ocean"] .metric, body[data-theme="Ocean"] .callout, body[data-theme="Ocean"] .status { background:#12191d;border-color:rgba(230,241,244,0.08) }
+body[data-theme="Ocean"] .card.list { background:#12191d }
+body[data-theme="Ocean"] h1, body[data-theme="Ocean"] h2, body[data-theme="Ocean"] .metric b, body[data-theme="Ocean"] .callout b, body[data-theme="Ocean"] .wordmark b, body[data-theme="Ocean"] .row b, body[data-theme="Ocean"] .st-row b { color:#e6f1f4 }
+body[data-theme="Ocean"] .setting { color:#e6f1f4;border-color:rgba(230,241,244,0.08) }
+body[data-theme="Ocean"] .intro, body[data-theme="Ocean"] .field, body[data-theme="Ocean"] .checks li, body[data-theme="Ocean"] .meta, body[data-theme="Ocean"] .log, body[data-theme="Ocean"] .callout, body[data-theme="Ocean"] .setting .val { color:#a0b3ba }
+body[data-theme="Ocean"] .desc, body[data-theme="Ocean"] .field small, body[data-theme="Ocean"] .metric small, body[data-theme="Ocean"] .top p, body[data-theme="Ocean"] .wordmark small, body[data-theme="Ocean"] .st-meta, body[data-theme="Ocean"] .ver, body[data-theme="Ocean"] .row small, body[data-theme="Ocean"] .footer { color:#7f949b }
+body[data-theme="Ocean"] .nav button { color:#a0b3ba }
+body[data-theme="Ocean"] .nav .ico, body[data-theme="Ocean"] .row .ico { color:#7f949b }
+body[data-theme="Ocean"] .nav button:hover { background:rgba(230,241,244,0.04);color:#e6f1f4 }
+body[data-theme="Ocean"] .nav button.active { background:#1b2428;border-color:rgba(230,241,244,0.08);color:#e6f1f4;box-shadow:inset 0 1px 0 rgba(255,255,255,.06) }
+body[data-theme="Ocean"] .nav button:hover .ico, body[data-theme="Ocean"] .nav button.active .ico { color:#e6f1f4 }
+body[data-theme="Ocean"] .btn { background:#1b2428;border-color:rgba(230,241,244,0.14);color:#e6f1f4;box-shadow:inset 0 1px 0 rgba(255,255,255,.06) }
+body[data-theme="Ocean"] .btn:hover { background:#232e33 }
+body[data-theme="Ocean"] .btn.primary, body[data-theme="Ocean"] .btn.primary:hover { background:#22d3ee;border-color:#22d3ee;color:#04202a }
+body[data-theme="Ocean"] .btn.ghost { background:transparent;border-color:transparent;box-shadow:none;color:#a0b3ba }
+body[data-theme="Ocean"] .btn.ghost:hover { background:rgba(230,241,244,0.04);color:#e6f1f4 }
+body[data-theme="Ocean"][data-run="running"] #runbtn { background:transparent;border-color:#fb7185;color:#fb7185;box-shadow:none }
+body[data-theme="Ocean"] kbd { border-color:rgba(230,241,244,0.14);background:#0d1215;color:#7f949b }
+body[data-theme="Ocean"] .field input, body[data-theme="Ocean"] .field select { background:#1b2428;border-color:rgba(230,241,244,0.14);color:#e6f1f4 }
+body[data-theme="Ocean"] .field input:focus, body[data-theme="Ocean"] .field select:focus { border-color:#22d3ee }
+body[data-theme="Ocean"] .field select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237f949b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center }
+body[data-theme="Ocean"] .switch { background:rgba(230,241,244,0.22) }
+body[data-theme="Ocean"] .switch i { background:#a0b3ba }
+body[data-theme="Ocean"] .switch.on { background:#22d3ee }
+body[data-theme="Ocean"] .switch.on i { background:#04202a }
+body[data-theme="Ocean"] .dot { background:#7f949b }
+body[data-theme="Ocean"][data-run="running"] .dot { background:#4ade80 }
+body[data-theme="Ocean"][data-run="paused"] .dot { background:#e0a94a }
+body[data-theme="Ocean"] .row { border-color:rgba(230,241,244,0.08) }
+body[data-theme="Ocean"] .row:hover { background:rgba(230,241,244,0.04) }
+body[data-theme="Ocean"] .log { background:#080d0f;border-color:rgba(230,241,244,0.08) }
+body[data-theme="Ocean"] #npcwarning { border-color:rgba(224,169,74,0.5) }
+body[data-theme="Ocean"] .checks li { border-color:rgba(230,241,244,0.08) }
+body[data-theme="Ocean"] .checks li:before { background:#7f949b }
+body[data-theme="Ocean"] .theme.selected { border-color:#22d3ee;box-shadow:0 0 0 1px #22d3ee }
+body[data-theme="Ocean"][data-input="key"] button:focus { outline:2px solid #22d3ee;outline-offset:2px }
+body[data-theme="Ocean"] ::selection { background:rgba(34,211,238,0.35) }
+body[data-theme="Emerald"] { background:#0f1311;color:#e8f1ec }
+body[data-theme="Emerald"] .side { background:#0a0e0c;border-color:rgba(232,241,236,0.08) }
+body[data-theme="Emerald"] .top, body[data-theme="Emerald"] .footer { background:#0f1311;border-color:rgba(232,241,236,0.08) }
+body[data-theme="Emerald"] .card, body[data-theme="Emerald"] .metric, body[data-theme="Emerald"] .callout, body[data-theme="Emerald"] .status { background:#151a17;border-color:rgba(232,241,236,0.08) }
+body[data-theme="Emerald"] .card.list { background:#151a17 }
+body[data-theme="Emerald"] h1, body[data-theme="Emerald"] h2, body[data-theme="Emerald"] .metric b, body[data-theme="Emerald"] .callout b, body[data-theme="Emerald"] .wordmark b, body[data-theme="Emerald"] .row b, body[data-theme="Emerald"] .st-row b { color:#e8f1ec }
+body[data-theme="Emerald"] .setting { color:#e8f1ec;border-color:rgba(232,241,236,0.08) }
+body[data-theme="Emerald"] .intro, body[data-theme="Emerald"] .field, body[data-theme="Emerald"] .checks li, body[data-theme="Emerald"] .meta, body[data-theme="Emerald"] .log, body[data-theme="Emerald"] .callout, body[data-theme="Emerald"] .setting .val { color:#a1b1a8 }
+body[data-theme="Emerald"] .desc, body[data-theme="Emerald"] .field small, body[data-theme="Emerald"] .metric small, body[data-theme="Emerald"] .top p, body[data-theme="Emerald"] .wordmark small, body[data-theme="Emerald"] .st-meta, body[data-theme="Emerald"] .ver, body[data-theme="Emerald"] .row small, body[data-theme="Emerald"] .footer { color:#82948a }
+body[data-theme="Emerald"] .nav button { color:#a1b1a8 }
+body[data-theme="Emerald"] .nav .ico, body[data-theme="Emerald"] .row .ico { color:#82948a }
+body[data-theme="Emerald"] .nav button:hover { background:rgba(232,241,236,0.04);color:#e8f1ec }
+body[data-theme="Emerald"] .nav button.active { background:#1e2521;border-color:rgba(232,241,236,0.08);color:#e8f1ec;box-shadow:inset 0 1px 0 rgba(255,255,255,.06) }
+body[data-theme="Emerald"] .nav button:hover .ico, body[data-theme="Emerald"] .nav button.active .ico { color:#e8f1ec }
+body[data-theme="Emerald"] .btn { background:#1e2521;border-color:rgba(232,241,236,0.14);color:#e8f1ec;box-shadow:inset 0 1px 0 rgba(255,255,255,.06) }
+body[data-theme="Emerald"] .btn:hover { background:#262e2a }
+body[data-theme="Emerald"] .btn.primary, body[data-theme="Emerald"] .btn.primary:hover { background:#34d399;border-color:#34d399;color:#04200f }
+body[data-theme="Emerald"] .btn.ghost { background:transparent;border-color:transparent;box-shadow:none;color:#a1b1a8 }
+body[data-theme="Emerald"] .btn.ghost:hover { background:rgba(232,241,236,0.04);color:#e8f1ec }
+body[data-theme="Emerald"][data-run="running"] #runbtn { background:transparent;border-color:#f87171;color:#f87171;box-shadow:none }
+body[data-theme="Emerald"] kbd { border-color:rgba(232,241,236,0.14);background:#0f1311;color:#82948a }
+body[data-theme="Emerald"] .field input, body[data-theme="Emerald"] .field select { background:#1e2521;border-color:rgba(232,241,236,0.14);color:#e8f1ec }
+body[data-theme="Emerald"] .field input:focus, body[data-theme="Emerald"] .field select:focus { border-color:#34d399 }
+body[data-theme="Emerald"] .field select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2382948a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center }
+body[data-theme="Emerald"] .switch { background:rgba(232,241,236,0.22) }
+body[data-theme="Emerald"] .switch i { background:#a1b1a8 }
+body[data-theme="Emerald"] .switch.on { background:#34d399 }
+body[data-theme="Emerald"] .switch.on i { background:#04200f }
+body[data-theme="Emerald"] .dot { background:#82948a }
+body[data-theme="Emerald"][data-run="running"] .dot { background:#86efac }
+body[data-theme="Emerald"][data-run="paused"] .dot { background:#e0a94a }
+body[data-theme="Emerald"] .row { border-color:rgba(232,241,236,0.08) }
+body[data-theme="Emerald"] .row:hover { background:rgba(232,241,236,0.04) }
+body[data-theme="Emerald"] .log { background:#0a0e0c;border-color:rgba(232,241,236,0.08) }
+body[data-theme="Emerald"] #npcwarning { border-color:rgba(224,169,74,0.5) }
+body[data-theme="Emerald"] .checks li { border-color:rgba(232,241,236,0.08) }
+body[data-theme="Emerald"] .checks li:before { background:#82948a }
+body[data-theme="Emerald"] .theme.selected { border-color:#34d399;box-shadow:0 0 0 1px #34d399 }
+body[data-theme="Emerald"][data-input="key"] button:focus { outline:2px solid #34d399;outline-offset:2px }
+body[data-theme="Emerald"] ::selection { background:rgba(52,211,153,0.35) }
+body[data-theme="Sunset"] { background:#151211;color:#f3ebe6 }
+body[data-theme="Sunset"] .side { background:#100d0c;border-color:rgba(243,235,230,0.08) }
+body[data-theme="Sunset"] .top, body[data-theme="Sunset"] .footer { background:#151211;border-color:rgba(243,235,230,0.08) }
+body[data-theme="Sunset"] .card, body[data-theme="Sunset"] .metric, body[data-theme="Sunset"] .callout, body[data-theme="Sunset"] .status { background:#1b1716;border-color:rgba(243,235,230,0.08) }
+body[data-theme="Sunset"] .card.list { background:#1b1716 }
+body[data-theme="Sunset"] h1, body[data-theme="Sunset"] h2, body[data-theme="Sunset"] .metric b, body[data-theme="Sunset"] .callout b, body[data-theme="Sunset"] .wordmark b, body[data-theme="Sunset"] .row b, body[data-theme="Sunset"] .st-row b { color:#f3ebe6 }
+body[data-theme="Sunset"] .setting { color:#f3ebe6;border-color:rgba(243,235,230,0.08) }
+body[data-theme="Sunset"] .intro, body[data-theme="Sunset"] .field, body[data-theme="Sunset"] .checks li, body[data-theme="Sunset"] .meta, body[data-theme="Sunset"] .log, body[data-theme="Sunset"] .callout, body[data-theme="Sunset"] .setting .val { color:#b1a49e }
+body[data-theme="Sunset"] .desc, body[data-theme="Sunset"] .field small, body[data-theme="Sunset"] .metric small, body[data-theme="Sunset"] .top p, body[data-theme="Sunset"] .wordmark small, body[data-theme="Sunset"] .st-meta, body[data-theme="Sunset"] .ver, body[data-theme="Sunset"] .row small, body[data-theme="Sunset"] .footer { color:#918480 }
+body[data-theme="Sunset"] .nav button { color:#b1a49e }
+body[data-theme="Sunset"] .nav .ico, body[data-theme="Sunset"] .row .ico { color:#918480 }
+body[data-theme="Sunset"] .nav button:hover { background:rgba(243,235,230,0.04);color:#f3ebe6 }
+body[data-theme="Sunset"] .nav button.active { background:#262120;border-color:rgba(243,235,230,0.08);color:#f3ebe6;box-shadow:inset 0 1px 0 rgba(255,255,255,.06) }
+body[data-theme="Sunset"] .nav button:hover .ico, body[data-theme="Sunset"] .nav button.active .ico { color:#f3ebe6 }
+body[data-theme="Sunset"] .btn { background:#262120;border-color:rgba(243,235,230,0.14);color:#f3ebe6;box-shadow:inset 0 1px 0 rgba(255,255,255,.06) }
+body[data-theme="Sunset"] .btn:hover { background:#2f2928 }
+body[data-theme="Sunset"] .btn.primary, body[data-theme="Sunset"] .btn.primary:hover { background:#fb923c;border-color:#fb923c;color:#2a1204 }
+body[data-theme="Sunset"] .btn.ghost { background:transparent;border-color:transparent;box-shadow:none;color:#b1a49e }
+body[data-theme="Sunset"] .btn.ghost:hover { background:rgba(243,235,230,0.04);color:#f3ebe6 }
+body[data-theme="Sunset"][data-run="running"] #runbtn { background:transparent;border-color:#f87171;color:#f87171;box-shadow:none }
+body[data-theme="Sunset"] kbd { border-color:rgba(243,235,230,0.14);background:#151211;color:#918480 }
+body[data-theme="Sunset"] .field input, body[data-theme="Sunset"] .field select { background:#262120;border-color:rgba(243,235,230,0.14);color:#f3ebe6 }
+body[data-theme="Sunset"] .field input:focus, body[data-theme="Sunset"] .field select:focus { border-color:#fb923c }
+body[data-theme="Sunset"] .field select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23918480' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center }
+body[data-theme="Sunset"] .switch { background:rgba(243,235,230,0.22) }
+body[data-theme="Sunset"] .switch i { background:#b1a49e }
+body[data-theme="Sunset"] .switch.on { background:#fb923c }
+body[data-theme="Sunset"] .switch.on i { background:#2a1204 }
+body[data-theme="Sunset"] .dot { background:#918480 }
+body[data-theme="Sunset"][data-run="running"] .dot { background:#4ade80 }
+body[data-theme="Sunset"][data-run="paused"] .dot { background:#e0a94a }
+body[data-theme="Sunset"] .row { border-color:rgba(243,235,230,0.08) }
+body[data-theme="Sunset"] .row:hover { background:rgba(243,235,230,0.04) }
+body[data-theme="Sunset"] .log { background:#100d0c;border-color:rgba(243,235,230,0.08) }
+body[data-theme="Sunset"] #npcwarning { border-color:rgba(224,169,74,0.5) }
+body[data-theme="Sunset"] .checks li { border-color:rgba(243,235,230,0.08) }
+body[data-theme="Sunset"] .checks li:before { background:#918480 }
+body[data-theme="Sunset"] .theme.selected { border-color:#fb923c;box-shadow:0 0 0 1px #fb923c }
+body[data-theme="Sunset"][data-input="key"] button:focus { outline:2px solid #fb923c;outline-offset:2px }
+body[data-theme="Sunset"] ::selection { background:rgba(251,146,60,0.35) }
+body[data-theme="Rose"] { background:#141116;color:#f3eaf4 }
+body[data-theme="Rose"] .side { background:#0f0c11;border-color:rgba(243,234,244,0.08) }
+body[data-theme="Rose"] .top, body[data-theme="Rose"] .footer { background:#141116;border-color:rgba(243,234,244,0.08) }
+body[data-theme="Rose"] .card, body[data-theme="Rose"] .metric, body[data-theme="Rose"] .callout, body[data-theme="Rose"] .status { background:#1a161c;border-color:rgba(243,234,244,0.08) }
+body[data-theme="Rose"] .card.list { background:#1a161c }
+body[data-theme="Rose"] h1, body[data-theme="Rose"] h2, body[data-theme="Rose"] .metric b, body[data-theme="Rose"] .callout b, body[data-theme="Rose"] .wordmark b, body[data-theme="Rose"] .row b, body[data-theme="Rose"] .st-row b { color:#f3eaf4 }
+body[data-theme="Rose"] .setting { color:#f3eaf4;border-color:rgba(243,234,244,0.08) }
+body[data-theme="Rose"] .intro, body[data-theme="Rose"] .field, body[data-theme="Rose"] .checks li, body[data-theme="Rose"] .meta, body[data-theme="Rose"] .log, body[data-theme="Rose"] .callout, body[data-theme="Rose"] .setting .val { color:#aea0b2 }
+body[data-theme="Rose"] .desc, body[data-theme="Rose"] .field small, body[data-theme="Rose"] .metric small, body[data-theme="Rose"] .top p, body[data-theme="Rose"] .wordmark small, body[data-theme="Rose"] .st-meta, body[data-theme="Rose"] .ver, body[data-theme="Rose"] .row small, body[data-theme="Rose"] .footer { color:#8f8294 }
+body[data-theme="Rose"] .nav button { color:#aea0b2 }
+body[data-theme="Rose"] .nav .ico, body[data-theme="Rose"] .row .ico { color:#8f8294 }
+body[data-theme="Rose"] .nav button:hover { background:rgba(243,234,244,0.04);color:#f3eaf4 }
+body[data-theme="Rose"] .nav button.active { background:#251f28;border-color:rgba(243,234,244,0.08);color:#f3eaf4;box-shadow:inset 0 1px 0 rgba(255,255,255,.06) }
+body[data-theme="Rose"] .nav button:hover .ico, body[data-theme="Rose"] .nav button.active .ico { color:#f3eaf4 }
+body[data-theme="Rose"] .btn { background:#251f28;border-color:rgba(243,234,244,0.14);color:#f3eaf4;box-shadow:inset 0 1px 0 rgba(255,255,255,.06) }
+body[data-theme="Rose"] .btn:hover { background:#2e2731 }
+body[data-theme="Rose"] .btn.primary, body[data-theme="Rose"] .btn.primary:hover { background:#f472b6;border-color:#f472b6;color:#2a0a1c }
+body[data-theme="Rose"] .btn.ghost { background:transparent;border-color:transparent;box-shadow:none;color:#aea0b2 }
+body[data-theme="Rose"] .btn.ghost:hover { background:rgba(243,234,244,0.04);color:#f3eaf4 }
+body[data-theme="Rose"][data-run="running"] #runbtn { background:transparent;border-color:#fb7185;color:#fb7185;box-shadow:none }
+body[data-theme="Rose"] kbd { border-color:rgba(243,234,244,0.14);background:#141116;color:#8f8294 }
+body[data-theme="Rose"] .field input, body[data-theme="Rose"] .field select { background:#251f28;border-color:rgba(243,234,244,0.14);color:#f3eaf4 }
+body[data-theme="Rose"] .field input:focus, body[data-theme="Rose"] .field select:focus { border-color:#f472b6 }
+body[data-theme="Rose"] .field select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238f8294' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center }
+body[data-theme="Rose"] .switch { background:rgba(243,234,244,0.22) }
+body[data-theme="Rose"] .switch i { background:#aea0b2 }
+body[data-theme="Rose"] .switch.on { background:#f472b6 }
+body[data-theme="Rose"] .switch.on i { background:#2a0a1c }
+body[data-theme="Rose"] .dot { background:#8f8294 }
+body[data-theme="Rose"][data-run="running"] .dot { background:#4ade80 }
+body[data-theme="Rose"][data-run="paused"] .dot { background:#e0a94a }
+body[data-theme="Rose"] .row { border-color:rgba(243,234,244,0.08) }
+body[data-theme="Rose"] .row:hover { background:rgba(243,234,244,0.04) }
+body[data-theme="Rose"] .log { background:#0f0c11;border-color:rgba(243,234,244,0.08) }
+body[data-theme="Rose"] #npcwarning { border-color:rgba(224,169,74,0.5) }
+body[data-theme="Rose"] .checks li { border-color:rgba(243,234,244,0.08) }
+body[data-theme="Rose"] .checks li:before { background:#8f8294 }
+body[data-theme="Rose"] .theme.selected { border-color:#f472b6;box-shadow:0 0 0 1px #f472b6 }
+body[data-theme="Rose"][data-input="key"] button:focus { outline:2px solid #f472b6;outline-offset:2px }
+body[data-theme="Rose"] ::selection { background:rgba(244,114,182,0.35) }
+body[data-theme="Daylight"] { background:#f5f7fa;color:#111827 }
+body[data-theme="Daylight"] .side { background:#eceff4;border-color:rgba(17,24,39,0.1) }
+body[data-theme="Daylight"] .top, body[data-theme="Daylight"] .footer { background:#f5f7fa;border-color:rgba(17,24,39,0.1) }
+body[data-theme="Daylight"] .card, body[data-theme="Daylight"] .metric, body[data-theme="Daylight"] .callout, body[data-theme="Daylight"] .status { background:#ffffff;border-color:rgba(17,24,39,0.1) }
+body[data-theme="Daylight"] .card.list { background:#ffffff }
+body[data-theme="Daylight"] h1, body[data-theme="Daylight"] h2, body[data-theme="Daylight"] .metric b, body[data-theme="Daylight"] .callout b, body[data-theme="Daylight"] .wordmark b, body[data-theme="Daylight"] .row b, body[data-theme="Daylight"] .st-row b { color:#111827 }
+body[data-theme="Daylight"] .setting { color:#111827;border-color:rgba(17,24,39,0.1) }
+body[data-theme="Daylight"] .intro, body[data-theme="Daylight"] .field, body[data-theme="Daylight"] .checks li, body[data-theme="Daylight"] .meta, body[data-theme="Daylight"] .log, body[data-theme="Daylight"] .callout, body[data-theme="Daylight"] .setting .val { color:#4b5565 }
+body[data-theme="Daylight"] .desc, body[data-theme="Daylight"] .field small, body[data-theme="Daylight"] .metric small, body[data-theme="Daylight"] .top p, body[data-theme="Daylight"] .wordmark small, body[data-theme="Daylight"] .st-meta, body[data-theme="Daylight"] .ver, body[data-theme="Daylight"] .row small, body[data-theme="Daylight"] .footer { color:#5d677c }
+body[data-theme="Daylight"] .nav button { color:#4b5565 }
+body[data-theme="Daylight"] .nav .ico, body[data-theme="Daylight"] .row .ico { color:#5d677c }
+body[data-theme="Daylight"] .nav button:hover { background:rgba(17,24,39,0.04);color:#111827 }
+body[data-theme="Daylight"] .nav button.active { background:#f1f3f7;border-color:rgba(17,24,39,0.1);color:#111827;box-shadow:inset 0 1px 0 rgba(255,255,255,.9) }
+body[data-theme="Daylight"] .nav button:hover .ico, body[data-theme="Daylight"] .nav button.active .ico { color:#111827 }
+body[data-theme="Daylight"] .btn { background:#f1f3f7;border-color:rgba(17,24,39,0.16);color:#111827;box-shadow:inset 0 1px 0 rgba(255,255,255,.9) }
+body[data-theme="Daylight"] .btn:hover { background:#e7eaf0 }
+body[data-theme="Daylight"] .btn.primary, body[data-theme="Daylight"] .btn.primary:hover { background:#3566ee;border-color:#3566ee;color:#ffffff }
+body[data-theme="Daylight"] .btn.ghost { background:transparent;border-color:transparent;box-shadow:none;color:#4b5565 }
+body[data-theme="Daylight"] .btn.ghost:hover { background:rgba(17,24,39,0.04);color:#111827 }
+body[data-theme="Daylight"][data-run="running"] #runbtn { background:transparent;border-color:#dc2626;color:#dc2626;box-shadow:none }
+body[data-theme="Daylight"] kbd { border-color:rgba(17,24,39,0.16);background:#f5f7fa;color:#5d677c }
+body[data-theme="Daylight"] .field input, body[data-theme="Daylight"] .field select { background:#f1f3f7;border-color:rgba(17,24,39,0.16);color:#111827 }
+body[data-theme="Daylight"] .field input:focus, body[data-theme="Daylight"] .field select:focus { border-color:#3566ee }
+body[data-theme="Daylight"] .field select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235d677c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center }
+body[data-theme="Daylight"] .switch { background:rgba(17,24,39,0.24) }
+body[data-theme="Daylight"] .switch i { background:#4b5565 }
+body[data-theme="Daylight"] .switch.on { background:#3566ee }
+body[data-theme="Daylight"] .switch.on i { background:#ffffff }
+body[data-theme="Daylight"] .dot { background:#5d677c }
+body[data-theme="Daylight"][data-run="running"] .dot { background:#16a34a }
+body[data-theme="Daylight"][data-run="paused"] .dot { background:#b45309 }
+body[data-theme="Daylight"] .row { border-color:rgba(17,24,39,0.1) }
+body[data-theme="Daylight"] .row:hover { background:rgba(17,24,39,0.04) }
+body[data-theme="Daylight"] .log { background:#eceff4;border-color:rgba(17,24,39,0.1) }
+body[data-theme="Daylight"] #npcwarning { border-color:rgba(180,83,9,0.5) }
+body[data-theme="Daylight"] .checks li { border-color:rgba(17,24,39,0.1) }
+body[data-theme="Daylight"] .checks li:before { background:#5d677c }
+body[data-theme="Daylight"] .theme.selected { border-color:#3566ee;box-shadow:0 0 0 1px #3566ee }
+body[data-theme="Daylight"][data-input="key"] button:focus { outline:2px solid #3566ee;outline-offset:2px }
+body[data-theme="Daylight"] ::selection { background:rgba(53,102,238,0.35) }
   </style>
   <script>
     function cmd(action, key, value, name) {
@@ -122,162 +449,168 @@
       if (name) query += "&name=" + encodeURIComponent(name);
       window.location.href = "https://ahk.local/?" + query;
     }
-    function navHover(e) {
-      var button = e.srcElement || e.target;
-      if (!button || !button.getAttribute("data-page") || button.className === "active") return;
-      button.setAttribute("data-hover", "1");
-      button.style.backgroundColor = document.body.getAttribute("data-accent");
-      button.style.color = document.body.getAttribute("data-accent-text");
-    }
-    function navLeave(e) {
-      var button = e.srcElement || e.target;
-      if (!button || !button.getAttribute("data-page")) return;
-      button.setAttribute("data-hover", "0");
-      if (button.className !== "active") {
-        button.style.backgroundColor = "";
-        button.style.color = "";
-      }
-    }
     function page(name) {
       var views = document.getElementsByClassName("view");
       var i;
       for (i = 0; i < views.length; i++) views[i].className = "view";
-      document.getElementById("page-" + name).className = "view active";
+      var target = document.getElementById("page-" + name);
+      target.className = "view active";
       var nav = document.querySelectorAll(".nav button");
       for (i = 0; i < nav.length; i++) {
         nav[i].className = nav[i].getAttribute("data-page") === name ? "active" : "";
-        nav[i].setAttribute("data-hover", "0");
-        if (nav[i].className !== "active") {
-          nav[i].style.backgroundColor = "";
-          nav[i].style.color = "";
-        }
       }
-      document.getElementById("heading").innerText = document.getElementById("page-" + name).getAttribute("data-title");
-      document.getElementById("subtitle").innerText = document.getElementById("page-" + name).getAttribute("data-subtitle");
+      document.getElementById("heading").innerText = target.getAttribute("data-title");
+      document.getElementById("subtitle").innerText = target.getAttribute("data-subtitle");
       cmd("page", null, null, name);
     }
+    /* Anneau de focus seulement pour la navigation clavier (IE11 n'a pas :focus-visible). */
+    document.addEventListener("mousedown", function () { document.body.setAttribute("data-input", "mouse"); }, true);
+    document.addEventListener("keydown", function () { document.body.setAttribute("data-input", "key"); }, true);
   </script>
 </head>
-<body id="root">
+<body id="root" data-theme="Obsidian" data-run="idle" data-input="mouse">
   <div class="app">
     <aside class="side">
-      <div class="brand"><img class="logo" src="images/cerifish-mark.png" alt="CF" width="42" height="42"><div><b>CeriFish</b><small>Fishing Macro</small></div></div>
-      <nav class="nav" onmouseover="navHover(event)" onmouseout="navLeave(event)">
-        <button data-page="dash" onclick="page('dash')">Dashboard</button>
-        <button data-page="fish" onclick="page('fish')">Fishing</button>
-        <button data-page="shop" onclick="page('shop')">NPC + Bait</button>
-        <button data-page="quest" onclick="page('quest')">Quests</button>
-        <button data-page="hook" onclick="page('hook')">Webhook</button>
-        <button data-page="look" onclick="page('look')">Appearance</button>
-        <button data-page="logs" onclick="page('logs')">Logs</button>
-      </nav>
-      <div class="sidebottom"><div class="status"><span class="dot">●</span> Macro status<b id="runstatus">Idle</b>Game<b>Blox Fruits</b>Version <span id="version">1.33.0</span></div><div class="ver">Settings save automatically</div></div>
+      <div class="brand"><img class="logo" src="images/cerifish-mark.png" alt="CF" width="36" height="36"><div class="wordmark"><b>CeriFish</b><small>Fishing Macro</small></div></div>
+      <nav class="nav"><button class="active" data-page="dash" onclick="page('dash')"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span class="label">Dashboard</span></button><button data-page="fish" onclick="page('fish')"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M2.5 12C6 6.5 12 6 16 9.5L21.5 6v12L16 14.5C12 18 6 17.5 2.5 12Z"/><path d="M7.5 11.5h.01"/></svg><span class="label">Fishing</span></button><button data-page="shop" onclick="page('shop')"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span class="label">NPC + Bait</span></button><button data-page="quest" onclick="page('quest')"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg><span class="label">Quests</span></button><button data-page="hook" onclick="page('hook')"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="label">Webhook</span></button><button data-page="look" onclick="page('look')"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z"/></svg><span class="label">Appearance</span></button><button data-page="logs" onclick="page('logs')"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg><span class="label">Logs</span></button></nav>
+      <div class="sidebottom">
+        <div class="status"><div class="st-row"><i class="dot"></i><b id="runstatus">Idle</b></div><div class="st-meta">Blox Fruits · v<span id="version">1.33.0</span></div></div>
+        <div class="ver">Settings save automatically</div>
+      </div>
     </aside>
     <main class="main">
-      <header class="top"><div><h1 id="heading">Dashboard</h1><p id="subtitle">Your fishing setup, session status and quick links.</p></div><div class="topactions"><button class="btn" onclick="page('look')">Theme</button><button class="btn" onclick="cmd('check')">Check setup</button><button class="btn primary" id="runbtn" onclick="cmd('start')">Start macro · F2</button></div></header>
+      <header class="top"><div><h1 id="heading">Dashboard</h1><p id="subtitle">Your fishing setup, session status and quick links</p></div><div class="topactions"><button class="btn ghost" onclick="page('look')">Theme</button><button class="btn" onclick="cmd('check')">Check setup</button><button class="btn primary" id="runbtn" onclick="cmd('start')"><span id="runlabel">Start macro</span><kbd>F2</kbd></button></div></header>
       <div class="body">
-        <section class="view active" id="page-dash" data-title="Dashboard" data-subtitle="Your fishing setup, session status and quick links.">
+        <section class="view active" id="page-dash" data-title="Dashboard" data-subtitle="Your fishing setup, session status and quick links">
           <div class="callout"><b>Before starting</b><br>Stand in the lower white circle to talk to the NPC. For fishing, stand at the edge of the dock. Choose your NPC and bait, then press F2.</div>
-          <div class="metrics"><div class="metric"><small>Fish caught</small><b id="catch">0</b></div><div class="metric"><small>Bait left</small><b id="baitstat">n/a</b></div><div class="metric"><small>Money</small><b id="income">$0</b></div><div class="metric"><small>Run time</small><b id="uptime">0m 00s</b></div></div>
-          <div class="grid three"><div class="card"><h2>Fishing</h2><p class="desc">Casting, camera and dock options.</p><button class="btn" onclick="page('fish')">Configure →</button></div><div class="card"><h2>NPC + Bait</h2><p class="desc">Choose the NPC, bait and sale interval.</p><button class="btn" onclick="page('shop')">Configure →</button></div><div class="card"><h2>Quests</h2><p class="desc">Angler quest options and status.</p><button class="btn" onclick="page('quest')">Configure →</button></div></div>
-          <div class="card" style="margin-top:14px"><h2>Session</h2><p id="sessioninfo" class="desc">Ready.</p><div class="actions"><button class="btn" onclick="cmd('update')">Check updates</button><button class="btn" onclick="page('logs')">Open logs</button></div></div>
+          <div class="metrics">
+            <div class="metric lead"><small>Fish caught</small><b id="catch">0</b></div>
+            <div class="metric"><small>Bait left</small><b id="baitstat">n/a</b></div>
+            <div class="metric"><small>Money</small><b id="income">$0</b></div>
+            <div class="metric"><small>Run time</small><b id="uptime">0m 00s</b></div>
+          </div>
+          <div class="duo">
+            <div class="card list">
+              <button class="row" onclick="page('fish')"><span><b>Fishing</b><small>Casting, camera and dock options</small></span><svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+              <button class="row" onclick="page('shop')"><span><b>NPC + Bait</b><small>Choose the NPC, bait and sale interval</small></span><svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+              <button class="row" onclick="page('quest')"><span><b>Quests</b><small>Angler quest options and status</small></span><svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+            </div>
+            <div class="card session"><h2>Session</h2><p id="sessioninfo" class="meta">Ready</p><div class="actions"><button class="btn" onclick="cmd('update')">Check updates</button><button class="btn" onclick="page('logs')">Open logs</button></div></div>
+          </div>
         </section>
-        <section class="view" id="page-fish" data-title="Fishing" data-subtitle="Set casting, camera and dock recovery options.">
+        <section class="view" id="page-fish" data-title="Fishing" data-subtitle="Set casting, camera and dock recovery options">
           <p class="intro">Adjust your fishing settings. The upward camera tilt helps keep the cast bar easier to read.</p>
           <div class="grid three">
-            <div class="card"><h2>Casting</h2><p class="desc">Set the cast release and timing.</p>
-              <div class="setting"><span>Perfect cast</span><button id="toggle-perfect" class="switch" onclick="cmd('toggle','perfect')"><span></span></button></div>
-              <label class="field"><span>Release at charge (%)</span><input id="perfectPct" type="number" onchange="cmd('set','perfectPct',this.value)"><small>Recommended: 96–98%.</small></label>
-              <div class="setting"><span>Fast bite reaction</span><button id="toggle-fastBite" class="switch" onclick="cmd('toggle','fastBite')"><span></span></button></div>
-              <div class="setting"><span>Slow fish trick</span><button id="toggle-slowFlick" class="switch" onclick="cmd('toggle','slowFlick')"><span></span></button></div>
-              <div class="setting"><span>Use fishing rod skill (Z)</span><button id="toggle-rodSkill" class="switch" onclick="cmd('toggle','rodSkill')"><span></span></button></div>
-              <p class="desc">Tries at the start of every reel. The game activates it when rod Power is ready.</p>
+            <div class="card"><h2>Casting</h2><p class="desc">Set the cast release and timing</p>
+              <div class="setting"><span>Perfect cast</span><button id="toggle-perfect" class="switch" onclick="cmd('toggle','perfect')"><i></i></button></div>
+              <div class="setting"><span>Accepted charge</span><span class="val">95%–100%</span></div><p class="desc">Releases at or above 95%; no exact percentage is required</p>
+              <div class="setting"><span>Fast bite reaction</span><button id="toggle-fastBite" class="switch" onclick="cmd('toggle','fastBite')"><i></i></button></div>
+              <div class="setting"><span>Slow fish trick</span><button id="toggle-slowFlick" class="switch" onclick="cmd('toggle','slowFlick')"><i></i></button></div>
+              <div class="setting"><span>Use fishing rod skill (Z)</span><button id="toggle-rodSkill" class="switch" onclick="cmd('toggle','rodSkill')"><i></i></button></div>
+              <p class="desc">Tries at the start of every reel. The game activates it when rod Power is ready</p>
             </div>
-            <div class="card"><h2>Camera &amp; view</h2><p class="desc">Keep zoom distance and angle steady.</p>
-              <div class="setting"><span>Lock zoom distance</span><button id="toggle-zoomLock" class="switch" onclick="cmd('toggle','zoomLock')"><span></span></button></div>
+            <div class="card"><h2>Camera &amp; view</h2><p class="desc">Keep zoom distance and angle steady</p>
+              <div class="setting"><span>Lock zoom distance</span><button id="toggle-zoomLock" class="switch" onclick="cmd('toggle','zoomLock')"><i></i></button></div>
               <label class="field"><span>Zoom-out notches</span><input id="zoomOut" type="number" onchange="cmd('set','zoomOut',this.value)"></label>
               <label class="field"><span>Reapply zoom every X casts</span><input id="zoomEvery" type="number" onchange="cmd('set','zoomEvery',this.value)"></label>
-              <label class="field"><span>Camera tilt upward</span><input id="tiltPx" type="number" onchange="cmd('set','tiltPx',this.value)"><small>Increase this value to tilt the view further up.</small></label>
+              <label class="field"><span>Camera tilt upward</span><input id="tiltPx" type="number" onchange="cmd('set','tiltPx',this.value)"><small>Increase this value to tilt the view further up</small></label>
             </div>
-            <div class="card"><h2>Dock &amp; game</h2><p class="desc">Recovery movement and Roblox options.</p>
-              <div class="setting"><span>Collect treasure chests</span><button id="toggle-chest" class="switch" onclick="cmd('toggle','chest')"><span></span></button></div>
-              <div class="setting"><span>Use lower white NPC circle</span><button id="toggle-anchor" class="switch" onclick="cmd('toggle','anchor')"><span></span></button></div>
-              <label class="field"><span>Extra dock steps</span><input id="dockWalk" type="number" onchange="cmd('set','dockWalk',this.value)"><small>Each step lasts about 0.1 seconds.</small></label>
+            <div class="card"><h2>Dock &amp; game</h2><p class="desc">Recovery movement and Roblox options</p>
+              <div class="setting"><span>Collect treasure chests</span><button id="toggle-chest" class="switch" onclick="cmd('toggle','chest')"><i></i></button></div>
+              <div class="setting"><span>Use lower white NPC circle</span><button id="toggle-anchor" class="switch" onclick="cmd('toggle','anchor')"><i></i></button></div>
+              <label class="field"><span>Extra dock steps</span><input id="dockWalk" type="number" onchange="cmd('set','dockWalk',this.value)"><small>Each step lasts about 0.1 seconds</small></label>
               <label class="field"><span>Roblox resolution</span><select id="res" onchange="cmd('set','res',this.value)"><option>Auto</option><option>1920x1080</option><option>2560x1440</option><option>1366x768</option></select></label>
               <label class="field"><span>Rod slot</span><select id="rod" onchange="cmd('set','rod',this.value)"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>0</option></select></label>
-              <div class="setting"><span>Enable Roblox Fast Mode</span><button id="toggle-gameFast" class="switch" onclick="cmd('toggle','gameFast')"><span></span></button></div>
+              <div style="height:8px"></div>
+              <div class="setting"><span>Enable Roblox Fast Mode</span><button id="toggle-gameFast" class="switch" onclick="cmd('toggle','gameFast')"><i></i></button></div>
             </div>
           </div>
         </section>
-        <section class="view" id="page-shop" data-title="NPC + Bait" data-subtitle="Choose your NPC, prepare bait and schedule sales.">
-          <p class="intro">The macro walks to the selected NPC. The lower white ring in your screenshot is the NPC interaction target.</p>
-          <div class="grid"><div class="card"><h2>Fishing NPC</h2><p class="desc">Fisherman sells bait and buys fish. Angler is for quests.</p>
-            <label class="field"><span>NPC</span><select id="npc" onchange="cmd('set','npc',this.value)"><option>Fisherman</option><option>Angler</option></select></label>
-            <div class="callout">Stand in the white circle around the NPC to interact.</div><h2>Auto-buy bait</h2>
-            <div class="setting"><span>Buy bait automatically</span><button id="toggle-buyBait" class="switch" onclick="cmd('toggle','buyBait')"><span></span></button></div>
-            <label class="field"><span>Bait type</span><select id="bait" onchange="cmd('set','bait',this.value)"></select></label>
-            <label class="field"><span>Bait already in bag</span><input id="baitNow" type="number" min="0" max="90" onchange="cmd('set','baitNow',this.value)"><small>Enter 0 to let the macro track it (maximum 90).</small></label>
-            <label class="field"><span>Buy up to</span><select id="baitPer" onchange="cmd('set','baitPer',this.value)"><option>10</option><option>20</option><option>30</option><option>40</option><option>50</option><option>60</option><option>70</option><option>80</option><option>90</option><option>100</option></select></label>
-          </div><div class="card"><h2>Auto-sell</h2><p class="desc">Sell fish to the Fisherman after a chosen number of catches.</p><div id="npcwarning" class="callout" style="display:none"></div>
-            <div class="setting"><span>Enable auto-sell</span><button id="toggle-sellOn" class="switch" onclick="cmd('toggle','sellOn')"><span></span></button></div>
-            <label class="field"><span>Sell every X catches</span><input id="sellEvery" type="number" onchange="cmd('set','sellEvery',this.value)"></label>
-            <h2 style="margin-top:20px">Session stats</h2><div class="setting"><span>Read money from the HUD</span><button id="toggle-trackIncome" class="switch" onclick="cmd('toggle','trackIncome')"><span></span></button></div>
-            <div class="setting"><span>Read level from the HUD</span><button id="toggle-trackLevel" class="switch" onclick="cmd('toggle','trackLevel')"><span></span></button></div>
-            <p class="desc">Money and level are read using Windows OCR.</p>
-          </div></div>
-        </section>
-        <section class="view" id="page-quest" data-title="Quests" data-subtitle="Configure supported quests near the Angler.">
-          <div class="grid"><div class="card"><h2>Angler quests</h2><p class="desc">Accept supported quests automatically while near the Angler.</p>
-            <div class="setting"><span>Auto-accept quests</span><button id="toggle-questOn" class="switch" onclick="cmd('toggle','questOn')"><span></span></button></div>
-            <label class="field"><span>Rod skill key</span><select id="questKey" onchange="cmd('set','questKey',this.value)"><option>Z</option><option>X</option><option>C</option><option>V</option><option>F</option></select></label>
-            <p id="queststatus" class="callout">Macro not running.</p></div>
-            <div class="card"><h2>Supported quest types</h2><p class="desc">Unrecognized quests are recorded in Logs.</p><ul><li>Catch a fish of a specified rarity</li><li>Catch three fish within the time limit</li><li>Make three perfect casts and reactions</li><li>Use the rod skill three times</li></ul></div>
+        <section class="view" id="page-shop" data-title="NPC + Bait" data-subtitle="Choose your NPC, prepare bait and schedule sales">
+          <p class="intro">The macro walks to the selected NPC. The lower white ring around the NPC is the interaction target.</p>
+          <div class="grid">
+            <div class="card"><h2>Fishing NPC</h2><p class="desc">Fisherman sells bait and buys fish. Angler is for quests</p>
+              <label class="field"><span>NPC</span><select id="npc" onchange="cmd('set','npc',this.value)"><option>Fisherman</option><option>Angler</option></select></label>
+              <div class="callout">Stand in the white circle around the NPC to interact.</div>
+              <h2 class="sub">Auto-buy bait</h2>
+              <div class="setting"><span>Buy bait automatically</span><button id="toggle-buyBait" class="switch" onclick="cmd('toggle','buyBait')"><i></i></button></div>
+              <label class="field"><span>Bait type</span><select id="bait" onchange="cmd('set','bait',this.value)"></select></label>
+              <label class="field"><span>Bait already in bag</span><input id="baitNow" type="number" min="0" max="90" onchange="cmd('set','baitNow',this.value)"><small>Enter 0 to let the macro track it (maximum 90)</small></label>
+              <label class="field"><span>Buy up to</span><select id="baitPer" onchange="cmd('set','baitPer',this.value)"><option>10</option><option>20</option><option>30</option><option>40</option><option>50</option><option>60</option><option>70</option><option>80</option><option>90</option><option>100</option></select></label>
+            </div>
+            <div class="card"><h2>Auto-sell</h2><p class="desc">Sell fish to the Fisherman after a chosen number of catches</p>
+              <div id="npcwarning" class="callout" style="display:none"></div>
+              <div class="setting"><span>Enable auto-sell</span><button id="toggle-sellOn" class="switch" onclick="cmd('toggle','sellOn')"><i></i></button></div>
+              <label class="field"><span>Sell every X catches</span><input id="sellEvery" type="number" onchange="cmd('set','sellEvery',this.value)"></label>
+              <h2 class="sub">Session stats</h2>
+              <div class="setting"><span>Read money from the HUD</span><button id="toggle-trackIncome" class="switch" onclick="cmd('toggle','trackIncome')"><i></i></button></div>
+              <div class="setting"><span>Read level from the HUD</span><button id="toggle-trackLevel" class="switch" onclick="cmd('toggle','trackLevel')"><i></i></button></div>
+              <p class="desc">Money and level are read using Windows OCR</p>
+            </div>
           </div>
         </section>
-        <section class="view" id="page-hook" data-title="Webhook" data-subtitle="Discord notifications and session reports.">
-          <div class="grid"><div class="card"><h2>Discord webhook</h2><p class="desc">Webhook URLs are saved locally in BloxFishing.ini.</p>
-            <div class="setting"><span>Enable webhook</span><button id="toggle-hkOn" class="switch" onclick="cmd('toggle','hkOn')"><span></span></button></div>
-            <p class="desc">Macro actions are sent individually as Discord embeds while it runs.</p>
-            <label class="field"><span>Webhook URL</span><input id="hkUrl" type="password" onchange="cmd('set','hkUrl',this.value)"></label>
-            <div class="actions"><button class="btn" onclick="cmd('test')">Send test</button><button class="btn" onclick="cmd('report')">Send report now</button></div>
-            <label class="field"><span>Display name</span><input id="hkName" onchange="cmd('set','hkName',this.value)"></label>
-            <label class="field"><span>Mention user ID (optional)</span><input id="hkMention" onchange="cmd('set','hkMention',this.value)"></label>
-            <label class="field"><span>Hourly report URL (optional)</span><input id="hkUrlHourly" type="password" onchange="cmd('set','hkUrlHourly',this.value)"></label>
-          </div><div class="card"><h2>Notifications</h2><p class="desc">Choose which events are sent to Discord.</p>
-            <div class="callout">Hourly reports are automatic at each full hour on your PC clock (24-hour time).</div>
-            <div class="setting"><span>Macro started</span><button id="toggle-hkStart" class="switch" onclick="cmd('toggle','hkStart')"><span></span></button></div>
-            <div class="setting"><span>Stopped and session summary</span><button id="toggle-hkStop" class="switch" onclick="cmd('toggle','hkStop')"><span></span></button></div>
-            <div class="setting"><span>Fish sold</span><button id="toggle-hkSale" class="switch" onclick="cmd('toggle','hkSale')"><span></span></button></div>
-            <div class="setting"><span>Bait purchased</span><button id="toggle-hkBait" class="switch" onclick="cmd('toggle','hkBait')"><span></span></button></div>
-            <div class="setting"><span>Errors</span><button id="toggle-hkErr" class="switch" onclick="cmd('toggle','hkErr')"><span></span></button></div>
-            <div class="setting"><span>Chest collected</span><button id="toggle-hkChest" class="switch" onclick="cmd('toggle','hkChest')"><span></span></button></div>
-            <div class="setting"><span>Fish caught</span><button id="toggle-hkCatch" class="switch" onclick="cmd('toggle','hkCatch')"><span></span></button></div>
-            <div class="setting"><span>Catch screenshot</span><button id="toggle-hkCatchShot" class="switch" onclick="cmd('toggle','hkCatchShot')"><span></span></button></div>
-            <div class="setting"><span>Sale, bait and report screenshots</span><button id="toggle-hkShot" class="switch" onclick="cmd('toggle','hkShot')"><span></span></button></div>
-            <div class="setting"><span>Buy/sell activity</span><button id="toggle-hkBuy" class="switch" onclick="cmd('toggle','hkBuy')"><span></span></button></div>
-            <div class="setting"><span>Individual action embeds</span><button id="toggle-hkActions" class="switch" onclick="cmd('toggle','hkActions')"><span></span></button></div>
-            <div class="setting"><span>Reel bar never appeared + screenshot</span><button id="toggle-hkBarMiss" class="switch" onclick="cmd('toggle','hkBarMiss')"><span></span></button></div>
-            <div class="setting"><span>Quest accepted</span><button id="toggle-hkQuest" class="switch" onclick="cmd('toggle','hkQuest')"><span></span></button></div>
-            <div class="setting"><span>Quest completed</span><button id="toggle-hkQuestDone" class="switch" onclick="cmd('toggle','hkQuestDone')"><span></span></button></div>
-            <div class="setting"><span>Quest failed</span><button id="toggle-hkQuestFail" class="switch" onclick="cmd('toggle','hkQuestFail')"><span></span></button></div>
-          </div></div>
+        <section class="view" id="page-quest" data-title="Quests" data-subtitle="Configure supported quests near the Angler">
+          <div class="grid">
+            <div class="card"><h2>Angler quests</h2><p class="desc">Accept supported quests automatically while near the Angler</p>
+              <div class="setting"><span>Auto-accept quests</span><button id="toggle-questOn" class="switch" onclick="cmd('toggle','questOn')"><i></i></button></div>
+              <label class="field"><span>Rod skill key</span><select id="questKey" onchange="cmd('set','questKey',this.value)"><option>Z</option><option>X</option><option>C</option><option>V</option><option>F</option></select></label>
+              <p id="queststatus" class="callout">Macro not running</p>
+            </div>
+            <div class="card"><h2>Supported quest types</h2><p class="desc">Unrecognized quests are recorded in Logs</p>
+              <ul class="checks"><li>Catch a fish of a specified rarity</li><li>Catch three fish within the time limit</li><li>Make three perfect casts and reactions</li><li>Use the rod skill three times</li></ul>
+            </div>
+          </div>
         </section>
-        <section class="view" id="page-look" data-title="Appearance" data-subtitle="Choose the control panel colors.">
-          <div class="card"><h2>Theme</h2><p class="desc">Your choice is saved automatically.</p><div class="themegrid">
-            <button id="theme-Midnight" class="theme" data-theme="Midnight" onclick="cmd('theme',null,null,'Midnight')" style="background:#071321;color:#f0f5fc">Midnight</button>
-            <button id="theme-Obsidian" class="theme" data-theme="Obsidian" onclick="cmd('theme',null,null,'Obsidian')" style="background:#141414;color:#ededed">Obsidian</button>
-            <button id="theme-Ocean" class="theme" data-theme="Ocean" onclick="cmd('theme',null,null,'Ocean')" style="background:#0b1b26;color:#e3f4fa">Ocean</button>
-            <button id="theme-Emerald" class="theme" data-theme="Emerald" onclick="cmd('theme',null,null,'Emerald')" style="background:#0d1a14;color:#e4f6ec">Emerald</button>
-            <button id="theme-Sunset" class="theme" data-theme="Sunset" onclick="cmd('theme',null,null,'Sunset')" style="background:#1a1214;color:#f8eae4">Sunset</button>
-            <button id="theme-Rose" class="theme" data-theme="Rose" onclick="cmd('theme',null,null,'Rose')" style="background:#1b1020;color:#f7e9f8">Rose</button>
-            <button id="theme-Daylight" class="theme" data-theme="Daylight" onclick="cmd('theme',null,null,'Daylight')" style="background:#f3f5fa;color:#1b2033">Daylight</button>
-          </div></div>
+        <section class="view" id="page-hook" data-title="Webhook" data-subtitle="Discord notifications and session reports">
+          <div class="grid">
+            <div class="card"><h2>Discord webhook</h2><p class="desc">Webhook URLs are saved locally in BloxFishing.ini</p>
+              <div class="setting"><span>Enable webhook</span><button id="toggle-hkOn" class="switch" onclick="cmd('toggle','hkOn')"><i></i></button></div>
+              <p class="desc">Macro actions are sent individually as Discord embeds while it runs</p>
+              <label class="field"><span>Webhook URL</span><input id="hkUrl" type="password" onchange="cmd('set','hkUrl',this.value)"></label>
+              <div class="actions"><button class="btn" onclick="cmd('test')">Send test</button><button class="btn" onclick="cmd('report')">Send report now</button></div>
+              <label class="field"><span>Display name</span><input id="hkName" type="text" onchange="cmd('set','hkName',this.value)"></label>
+              <label class="field"><span>Mention user ID (optional)</span><input id="hkMention" type="text" onchange="cmd('set','hkMention',this.value)"></label>
+              <label class="field"><span>Hourly report URL (optional)</span><input id="hkUrlHourly" type="password" onchange="cmd('set','hkUrlHourly',this.value)"></label>
+            </div>
+            <div class="card"><h2>Notifications</h2><p class="desc">Choose which events are sent to Discord</p>
+              <div class="callout">Hourly reports are automatic at each full hour on your PC clock (24-hour time).</div>
+              <div class="setting"><span>Macro started</span><button id="toggle-hkStart" class="switch" onclick="cmd('toggle','hkStart')"><i></i></button></div>
+              <div class="setting"><span>Stopped and session summary</span><button id="toggle-hkStop" class="switch" onclick="cmd('toggle','hkStop')"><i></i></button></div>
+              <div class="setting"><span>Fish sold</span><button id="toggle-hkSale" class="switch" onclick="cmd('toggle','hkSale')"><i></i></button></div>
+              <div class="setting"><span>Bait purchased</span><button id="toggle-hkBait" class="switch" onclick="cmd('toggle','hkBait')"><i></i></button></div>
+              <div class="setting"><span>Errors</span><button id="toggle-hkErr" class="switch" onclick="cmd('toggle','hkErr')"><i></i></button></div>
+              <div class="setting"><span>Chest collected</span><button id="toggle-hkChest" class="switch" onclick="cmd('toggle','hkChest')"><i></i></button></div>
+              <div class="setting"><span>Fish caught</span><button id="toggle-hkCatch" class="switch" onclick="cmd('toggle','hkCatch')"><i></i></button></div>
+              <div class="setting"><span>Catch screenshot</span><button id="toggle-hkCatchShot" class="switch" onclick="cmd('toggle','hkCatchShot')"><i></i></button></div>
+              <div class="setting"><span>Sale, bait and report screenshots</span><button id="toggle-hkShot" class="switch" onclick="cmd('toggle','hkShot')"><i></i></button></div>
+              <div class="setting"><span>Buy/sell activity</span><button id="toggle-hkBuy" class="switch" onclick="cmd('toggle','hkBuy')"><i></i></button></div>
+              <div class="setting"><span>Individual action embeds</span><button id="toggle-hkActions" class="switch" onclick="cmd('toggle','hkActions')"><i></i></button></div>
+              <div class="setting"><span>Reel bar never appeared + screenshot</span><button id="toggle-hkBarMiss" class="switch" onclick="cmd('toggle','hkBarMiss')"><i></i></button></div>
+              <div class="setting"><span>Quest accepted</span><button id="toggle-hkQuest" class="switch" onclick="cmd('toggle','hkQuest')"><i></i></button></div>
+              <div class="setting"><span>Quest completed</span><button id="toggle-hkQuestDone" class="switch" onclick="cmd('toggle','hkQuestDone')"><i></i></button></div>
+              <div class="setting"><span>Quest failed</span><button id="toggle-hkQuestFail" class="switch" onclick="cmd('toggle','hkQuestFail')"><i></i></button></div>
+            </div>
+          </div>
         </section>
-        <section class="view" id="page-logs" data-title="Logs" data-subtitle="Live activity and setup details.">
-          <div class="actions" style="margin-bottom:12px"><button class="btn" onclick="cmd('check')">Check setup</button></div><pre id="log" class="log"></pre>
+        <section class="view" id="page-look" data-title="Appearance" data-subtitle="Choose the control panel colors">
+          <div class="card"><h2>Theme</h2><p class="desc">Your choice is saved automatically</p>
+            <div class="themegrid">
+            <button id="theme-Obsidian" class="theme" data-theme="Obsidian" onclick="cmd('theme',null,null,'Obsidian')" style="background:#141415;color:#ededed"><span class="sws"><i style="background:#19191b"></i><i style="background:#232325"></i><i style="background:#b388ff"></i></span>Obsidian</button>
+            <button id="theme-Midnight" class="theme" data-theme="Midnight" onclick="cmd('theme',null,null,'Midnight')" style="background:#0b0d14;color:#eef0f5"><span class="sws"><i style="background:#11141c"></i><i style="background:#1a1e28"></i><i style="background:#3297f5"></i></span>Midnight</button>
+            <button id="theme-Ocean" class="theme" data-theme="Ocean" onclick="cmd('theme',null,null,'Ocean')" style="background:#0d1215;color:#e6f1f4"><span class="sws"><i style="background:#12191d"></i><i style="background:#1b2428"></i><i style="background:#22d3ee"></i></span>Ocean</button>
+            <button id="theme-Emerald" class="theme" data-theme="Emerald" onclick="cmd('theme',null,null,'Emerald')" style="background:#0f1311;color:#e8f1ec"><span class="sws"><i style="background:#151a17"></i><i style="background:#1e2521"></i><i style="background:#34d399"></i></span>Emerald</button>
+            <button id="theme-Sunset" class="theme" data-theme="Sunset" onclick="cmd('theme',null,null,'Sunset')" style="background:#151211;color:#f3ebe6"><span class="sws"><i style="background:#1b1716"></i><i style="background:#262120"></i><i style="background:#fb923c"></i></span>Sunset</button>
+            <button id="theme-Rose" class="theme" data-theme="Rose" onclick="cmd('theme',null,null,'Rose')" style="background:#141116;color:#f3eaf4"><span class="sws"><i style="background:#1a161c"></i><i style="background:#251f28"></i><i style="background:#f472b6"></i></span>Rose</button>
+            <button id="theme-Daylight" class="theme" data-theme="Daylight" onclick="cmd('theme',null,null,'Daylight')" style="background:#f5f7fa;color:#111827"><span class="sws"><i style="background:#ffffff"></i><i style="background:#f1f3f7"></i><i style="background:#3566ee"></i></span>Daylight</button>
+            </div>
+          </div>
+        </section>
+        <section class="view" id="page-logs" data-title="Logs" data-subtitle="Live activity and setup details">
+          <div class="actions logbar"><button class="btn" onclick="cmd('check')">Check setup</button></div>
+          <pre id="log" class="log"></pre>
         </section>
       </div>
-      <footer class="footer"><div class="left">v<span id="version-footer">1.33.0</span><span class="dot">●</span><span id="footstatus">Idle</span></div><div class="actions"><button class="btn" onclick="cmd('update')">Updates</button><button class="btn" onclick="cmd('pause')">Pause / resume · F3</button><button class="btn" onclick="cmd('quit')">Quit · F4</button></div><span>F2 Start · F3 Pause · F4 Quit</span></footer>
+      <footer class="footer"><div class="left"><i class="dot"></i><span id="footstatus">Idle</span><span class="meta">v<span id="version-footer">1.33.0</span></span></div><div class="actions"><button class="btn ghost" onclick="cmd('update')">Updates</button><button class="btn ghost" onclick="cmd('pause')">Pause / resume<kbd>F3</kbd></button><button class="btn ghost" onclick="cmd('quit')">Quit<kbd>F4</kbd></button></div></footer>
     </main>
   </div>
 </body>

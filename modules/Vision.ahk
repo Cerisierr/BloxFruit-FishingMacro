@@ -400,7 +400,7 @@ ProgressPresent(geo) {
 IsBitePx(rr, gg, bb) {
     if (rr < 110)
         return false
-    if (Rdp.on && rr >= 200 && gg >= 60 && gg <= 165 && bb >= 70 && bb <= 175 && rr - gg >= 70 && Abs(bb - gg) <= 45)
+    if (rr >= 200 && gg >= 60 && gg <= 165 && bb >= 70 && bb <= 175 && rr - gg >= 70 && Abs(bb - gg) <= 45)
         return true                                        ; salmon body (RDP colour pipeline only)
     if (bb > gg && rr >= bb) {                             ; pink edge (previous rule)
         d := rr - gg
@@ -548,8 +548,8 @@ BiteNow() {
         return false
 
     seen := Buffer(gw * gh, 0)
-    gap := 2                                   ; cells: bridges ~8 px gaps (the "close")
-    minDim := w * 0.055
+    gap := 3                                   ; cells: bridges ~8 px gaps (the "close")
+    minDim := w * 0.04
     areaFloor := 6e-4 * w * h
     bestDim := 0
     Loop n {

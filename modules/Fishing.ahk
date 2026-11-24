@@ -25,14 +25,12 @@ DoCast() {
     if !Alive()
         return false
 
-    ; Perfect cast = release when the charge bar is FULL. The bar bounces
-    ; (fills, then drains again), so it is measured against the track height every
-    ; tick and released the moment it reaches the threshold on the way up. If the
-    ; first rise is missed, it simply waits for the next one (up to castHold s).
+    ; Any reading from 95% through full charge is good; this is a minimum
+    ; threshold, never an exact-value match. The perfect-cast quest uses 97%.
     perfectMode := PerfectOn()
     if !perfectMode
         return DoQuickCast()
-    thr := Min(100, Max(QuestPerfectActive() ? 97 : 60, Cfg.perfectPct)) / 100.0
+    thr := QuestPerfectActive() ? 0.97 : 0.95
     lead := Timing.releaseLead                           ; RDP shows the bar late: look ahead by that delay
     if (Rdp.on && lead <= 0)
         lead := Rdp.castLead
@@ -71,8 +69,8 @@ DoCast() {
                     perfect := true
                     break
                 }
-                ; A bar that saturates just under the threshold sits still at the top.
-                if (lv >= 0.85) {
+                ; A plateau only qualifies once it has reached the minimum threshold.
+                if (lv >= thr && lv >= 0.85) {
                     if (topSince == 0.0 || lv > topRef + 0.01) {
                         topSince := tn
                         topRef := lv
@@ -95,12 +93,25 @@ DoCast() {
         MeterReset()
 
         if charged {
-            if perfectMode
+            if perfectMode {
+                if perfect {
+                    if byPlateau {
+                        releaseWhy := "bar saturated"
+                    } else if (level >= thr) {
+                        releaseWhy := Round(thr * 100) . "% minimum reached"
+                    } else {
+                        projected := Min(1.0, level + Max(0.0, rate) * lead)
+                        releaseWhy := "perfect timing; input-delay estimate " . Round(projected * 100)
+                            . "% (last read " . Round(level * 100) . "%)"
+                    }
+                } else {
+                    releaseWhy := "did not reach " . Round(thr * 100) . "%, released anyway"
+                }
                 LogMsg("[cast] released at " . Round(level * 100) . "% (peak " . Round(peak * 100)
                     . "%) after " . Round(elapsed, 2) . " s"
-                    . (perfect ? (byPlateau ? " - bar saturated" : " - top reached")
-                               : " - never reached " . Round(thr * 100) . "%, released anyway")
+                    . " - " . releaseWhy
                     . (QuestPerfectActive() ? "  [perfect-cast quest]" : ""))
+            }
             BotState.npcHits := 0
             Tally("casts")
             LogMsg("[cast] #" . BotStats.casts . (attempt == 1 ? "" : " (attempt " . attempt . ")"))

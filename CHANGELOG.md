@@ -7,6 +7,7 @@ Nothing is pending from the earlier "not delivered" list except the open points 
 
 ## v1.33.0: Individual action embeds and resolved startup settings
 
+- Make Perfect Cast release at any charge from 95% through 100%, without requiring an exact configured percentage. The perfect-cast quest retains its 97% minimum.
 - Add enabled-by-default individual Discord embeds for each recorded macro action, including casts, bite detection, and rod Power attempts.
 - When a Hooked marker is followed by no reel bar, attach a bite-zone crop with a red frame around the detected pixels.
 - Include NPC, bait, rod slot and configured/effective resolution in the start notification.

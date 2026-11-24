@@ -135,41 +135,33 @@ EnsureShiftLockOff() {
     cx := win.x + win.w // 2
     cy := win.y + win.h // 2
     probeX := cx + 8
-    if BotState.shiftLock
-        SetShiftLock(false)
+    ; An NPC dialogue can release the pointer by itself. Check that first:
+    ; sending Shift while the menu already owns a free cursor can toggle Shift
+    ; Lock back ON, which makes the Nevermind mouse movement rotate the camera.
     MouseGetPos(&mx, &my)
     if !ShiftCentered(mx, my) {
         BotState.shiftLock := false
         BotState.shiftVerified := false
-        LogMsg("[input] cursor is free for NPC dialogue controls; Shift Lock is already off")
+        LogMsg("[input] dialogue already released the cursor; leaving Shift Lock untouched")
         return true
     }
-    Loop 2 {
-        MouseMove(probeX, cy, 0)
-        Sleep(50)
-        MouseGetPos(&mx, &my)
-        if (Abs(mx - cx) >= 4) {
-            BotState.shiftLock := false
-            BotState.shiftVerified := false
-            LogMsg("[input] mouse cursor released for NPC dialogue controls")
-            return true
-        }
-        LogMsg("[input] cursor still locked during NPC dialogue; toggling Shift Lock off (" . A_Index . "/2)")
+    if BotState.shiftLock
+        SetShiftLock(false)
+    else
         Keys.Tap(Keys.SC_LSHIFT, 0.10)
-        Wait(ShopCfg.afterShift)
-        MouseMove(probeX, cy, 0)
-        Sleep(50)
-        MouseGetPos(&mx, &my)
-        if (Abs(mx - cx) >= 4) {
-            BotState.shiftLock := false
-            BotState.shiftVerified := false
-            LogMsg("[input] mouse cursor released for NPC dialogue controls")
-            return true
-        }
+    Wait(ShopCfg.afterShift)
+    MouseMove(probeX, cy, 0)
+    Sleep(50)
+    MouseGetPos(&mx, &my)
+    if (Abs(mx - cx) >= 4) {
+        BotState.shiftLock := false
+        BotState.shiftVerified := false
+        LogMsg("[input] mouse cursor released for NPC dialogue controls")
+        return true
     }
     BotState.shiftLock := true
     BotState.shiftVerified := false
-    LogMsg("[input] could not release the Shift Lock cursor for NPC dialogue controls")
+    LogMsg("[input] Shift Lock toggle did not release the cursor; no Nevermind click sent")
     return false
 }
 
@@ -402,10 +394,8 @@ OpenNpcDialogue() {
 ;     repeat forever. From attempt 2 the cursor is first moved away to wake the
 ;     game's hover state (remote desktop drops small mouse moves).
 NevermindClick(attempt := 1) {
-    if (!Rdp.on && attempt == 1) {                     ; normal desktop: first try is the original click
-        ClickMenuAction("root", "nevermind")
-        return
-    }
+    if !EnsureShiftLockOff()
+        return false
     win := BotState.win
     expected := PageRows("root")
     settle := Min(0.50, 0.15 + 0.15 * (attempt - 1))
@@ -424,13 +414,21 @@ NevermindClick(attempt := 1) {
             how := "fixed point (only " . n . "/" . expected . " panels, lowest one too high)"
         }
     }
-    if (attempt >= 2) {
-        MouseMove(win.x + win.w // 2, win.y + win.h // 2, 0)
-        Sleep(80)
-    }
     BotState.witness := ""
     LogMsg("[shop] nevermind/back attempt " . attempt . ": " . how . " at " . pt.x . "," . pt.y)
-    Mouse.ClickAt(pt.x, pt.y, settle, hold)
+    ; Do not use ClickAt's relative cursor nudges here. If Shift Lock was not
+    ; released, they move the camera; refuse the click unless the pointer lands
+    ; on the menu target first.
+    MouseMove(pt.x, pt.y, 0)
+    Sleep(60)
+    MouseGetPos(&mx, &my)
+    if (Abs(mx - pt.x) > 12 || Abs(my - pt.y) > 12) {
+        LogMsg("[input] cursor did not reach the Nevermind target; skipping click to protect the camera")
+        return false
+    }
+    Sleep(Round(settle * 1000))
+    Mouse.Tap(hold)
+    return true
 }
 
 ; Leave the dialogue. Fisherman: Back -> Nevermind, waiting for each page.

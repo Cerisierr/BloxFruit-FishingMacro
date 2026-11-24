@@ -120,7 +120,7 @@ The dashboard shows fish, bait, money, level and session time. Use its cards to 
 ## Fishing
 
 **Casting**
-- **Perfect cast**: reads the whole charge bar (orange > yellow > green) continuously and releases at the chosen percentage (**Release at**, default 97 %). With zoom-out 8 the bar is small, so 96-98 % works well. With Perfect cast off, a quick fixed-timing cast is used.
+- **Perfect cast**: reads the whole charge bar continuously and releases as soon as it reaches 95% or more; any reading through 100% is accepted. The perfect-cast quest uses a 97% minimum. With Perfect cast off, a quick fixed-timing cast is used.
 - **Use fishing rod skill (Z)**: tries the rod skill at the start of every reel; the game ignores the input while rod Power is unavailable and activates the skill when ready.
 - **Lock camera zoom**, **Zoom-out notches**, **Re-apply the zoom every N casts**, **Tilt down (px)**: camera setup used for stable detection.
 
@@ -236,7 +236,6 @@ theme=Midnight
 [fishing]
 rodSlot=4
 perfect=1
-perfectPct=97
 chest=1
 anchor=1
 

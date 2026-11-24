@@ -333,12 +333,13 @@ HtmlSync(syncFields := false) {
     global Ui, BotState, BotStats, BAITS, Cfg, APP_VERSION, THEME_ORDER, THEMES
     try {
         doc := Ui.browser.Document
-        accent := "#" . THEMES[Cfg.theme].accent
-        accentText := "#" . THEMES[Cfg.theme].onAccent
-        palette := THEMES[Cfg.theme]
-        doc.getElementById("runstatus").innerText := BotState.running ? (BotState.paused ? "Paused" : "Running") : "Idle"
-        doc.getElementById("footstatus").innerText := BotState.running ? (BotState.paused ? "Paused" : "Running") : "Idle"
-        doc.getElementById("runbtn").innerText := BotState.running ? "■ Stop macro" : "▶ Start macro"
+        state := BotState.running ? (BotState.paused ? "Paused" : "Running") : "Idle"
+        ; Colours, hover and selected states live in BloxFishing.html (CSS keyed on
+        ; body[data-theme] and body[data-run]). This function only sets text, classes
+        ; and data attributes, so it never fights the stylesheet with inline styles.
+        doc.getElementById("runstatus").innerText := state
+        doc.getElementById("footstatus").innerText := state
+        doc.getElementById("runlabel").innerText := BotState.running ? "Stop macro" : "Start macro"
         doc.getElementById("catch").innerText := Fmt(BotStats.catches)
         doc.getElementById("baitstat").innerText := (BotState.bait >= 0) ? Fmt(BotState.bait) : "n/a"
         doc.getElementById("income").innerText := "$" . Fmt(BotStats.income)
@@ -351,63 +352,14 @@ HtmlSync(syncFields := false) {
         if (Cfg.npc == "Angler")
             npcWarn.innerText := "Auto-sell only works with the Fisherman. It is unavailable while Angler is selected."
         doc.getElementById("log").innerText := BotState.logBuf
-        doc.querySelector(".brand small").style.color := accent
-        callouts := doc.querySelectorAll(".callout")
-        Loop callouts.length {
-            callout := callouts.item(A_Index - 1)
-            callout.style.backgroundColor := "#" . palette.card
-            callout.style.borderColor := "#" . palette.line
-            callout.style.color := "#" . palette.muted
-        }
-        calloutHeads := doc.querySelectorAll(".callout b")
-        Loop calloutHeads.length
-            calloutHeads.item(A_Index - 1).style.color := accent
         for key, value in Ui.tog {
             toggle := doc.getElementById("toggle-" . key)
             toggle.className := "switch" . (value ? " on" : "")
-            toggle.style.backgroundColor := value ? accent : ""
-        }
-        buttons := doc.getElementsByTagName("button")
-        Loop buttons.length {
-            button := buttons.item(A_Index - 1)
-            classes := " " . button.className . " "
-            if InStr(classes, " btn ") {
-                button.style.backgroundColor := accent
-                button.style.color := accentText
-                button.style.borderColor := accent
-            }
-            if InStr(classes, " active ") {
-                button.style.backgroundColor := accent
-                button.style.borderColor := accent
-            }
-            if InStr(classes, " selected ") {
-                button.style.borderColor := accent
-                button.style.boxShadow := "0 0 0 2px " . accent
-            }
-        }
-        navButtons := doc.querySelectorAll(".nav button")
-        Loop navButtons.length {
-            navButton := navButtons.item(A_Index - 1)
-            if (navButton.className == "active") {
-                navButton.style.backgroundColor := accent
-                navButton.style.color := accentText
-                navButton.style.borderColor := accent
-                navButton.style.boxShadow := "inset 3px 0 " . accent
-            } else if (navButton.getAttribute("data-hover") == "1") {
-                navButton.style.backgroundColor := accent
-                navButton.style.color := accentText
-            } else {
-                navButton.style.backgroundColor := ""
-                navButton.style.color := ""
-                navButton.style.borderColor := ""
-                navButton.style.boxShadow := ""
-            }
         }
         doc.getElementById("version").innerText := APP_VERSION
         doc.getElementById("version-footer").innerText := APP_VERSION
         doc.body.setAttribute("data-theme", Cfg.theme)
-        doc.body.setAttribute("data-accent", accent)
-        doc.body.setAttribute("data-accent-text", accentText)
+        doc.body.setAttribute("data-run", BotState.running ? (BotState.paused ? "paused" : "running") : "idle")
         baitSelect := doc.getElementById("bait")
         if (baitSelect.options.length == 0) {
             for i, bait in BAITS {
@@ -419,7 +371,7 @@ HtmlSync(syncFields := false) {
         }
         HtmlField(doc, "bait", IdxOf(BAITS, CurBait(), 1))
         if syncFields {
-            for key in ["perfectPct", "zoomOut", "zoomEvery", "tiltPx", "dockWalk", "baitNow", "sellEvery"]
+            for key in ["zoomOut", "zoomEvery", "tiltPx", "dockWalk", "baitNow", "sellEvery"]
                 HtmlField(doc, key, Cfg.%key%)
             for key in ["hkUrl", "hkUrlHourly", "hkName", "hkMention"]
                 HtmlField(doc, key, Cfg.%key%)
@@ -430,15 +382,7 @@ HtmlSync(syncFields := false) {
             HtmlField(doc, "questKey", Cfg.questKey)
         }
         for name in THEME_ORDER {
-            theme := doc.getElementById("theme-" . name)
-            theme.className := "theme" . (name == Cfg.theme ? " selected" : "")
-            if (name == Cfg.theme) {
-                theme.style.borderColor := accent
-                theme.style.boxShadow := "0 0 0 2px " . accent
-            } else {
-                theme.style.borderColor := ""
-                theme.style.boxShadow := ""
-            }
+            doc.getElementById("theme-" . name).className := "theme" . (name == Cfg.theme ? " selected" : "")
         }
     }
 }
@@ -926,8 +870,7 @@ BuildGui(startPage := "dash") {
     Section(g, "fish", 214, 100, "CAMERA + CASTING")
     AddToggle(g, "fish", "perfect", 214, 126, "Release at the selected charge level", Cfg.perfect, 230)
     Lbl(g, "fish", 470, 129, 90, "Release at", th.muted)
-    AddEdit(g, "fish", "perfectPct", 548, 125, 54, Cfg.perfectPct, true)
-    Lbl(g, "fish", 610, 129, 190, "% of charge bar", th.muted)
+    Lbl(g, "fish", 470, 129, 250, "Release as soon as charge reaches 95–100%", th.muted)
     AddToggle(g, "fish", "zoomLock", 214, 166, "Keep zoom distance fixed", Cfg.zoomLock, 210)
     Lbl(g, "fish", 470, 169, 120, "Zoom-out notches", th.muted)
     AddEdit(g, "fish", "zoomOut", 598, 165, 54, Cfg.zoomOut, true)
@@ -953,8 +896,8 @@ BuildGui(startPage := "dash") {
     AddEdit(g, "fish", "dockWalk", 430, 470, 54, Cfg.dockWalk, true)
     Lbl(g, "fish", 494, 474, 150, "8 = 0.8 seconds", th.muted)
     AddToggle(g, "fish", "gameFast", 214, 508, "Enable Roblox Fast Mode and Reduce Motion at startup", Cfg.gameFast, 480)
-    Lbl(g, "fish", 214, 536, 590, "Perfect cast reads the charge meter continuously and releases at the selected percentage."
-        . " The current default is 97%.", th.muted, 9, 400, 42)
+    Lbl(g, "fish", 214, 536, 590, "Perfect cast accepts any charge from 95% to 100%; it does not wait for one exact percentage."
+        . " The perfect-cast quest keeps a 97% minimum.", th.muted, 9, 400, 42)
 
     ; ---- QUEST -------------------------------------------------------------
     PageHeader(g, "quest", "Quests", "Optional: accept and track the Angler quests this macro supports.")

@@ -12,7 +12,6 @@ SETTINGS_SPEC := [
   , ["fishing", "chest", "1", "b"]
   , ["fishing", "anchor", "1", "b"]
   , ["fishing", "perfect", "1", "b"]
-  , ["fishing", "perfectPct", "97", "i"]
   , ["fishing", "dockWalk", "8", "i"]
   , ["camera", "zoomLock", "1", "b"]
   , ["camera", "zoomOut", "8", "i"]
@@ -86,7 +85,7 @@ LoadSettings() {
     try ver := Integer(IniRead(INI_FILE, "meta", "ver", "1"))
     if (ver < 2)
         Cfg.zoomOut := 8                                 ; new default camera distance
-    Cfg.perfectPct := Min(100, Max(60, Cfg.perfectPct))
+    try IniDelete(INI_FILE, "fishing", "perfectPct")
     Cfg.dockWalk := Min(40, Max(0, Cfg.dockWalk))
     ; Remove the old optional interval settings; reports now follow the PC clock.
     try IniDelete(INI_FILE, "webhook", "hkHourly")
@@ -151,7 +150,6 @@ SyncSettings(save := true) {
             Cfg.baitType := BAITS[idx].name
         for key, v in Ui.tog
             Cfg.%key% := v
-        Cfg.perfectPct := Min(100, Max(60, IntOf(Ui.perfectPct, 97)))
         Cfg.zoomOut := Min(30, Max(0, IntOf(Ui.zoomOut, 8)))
         Cfg.zoomEvery := Max(0, IntOf(Ui.zoomEvery, 5))
         Cfg.tiltPx := Min(300, Max(0, IntOf(Ui.tiltPx, 70)))

@@ -195,7 +195,7 @@ HookStartMsg() {
         , ["Auto-buy bait", Cfg.buyBait ? "on" : "off"]
         , ["Fishing rod slot", Cfg.rodSlot], ["Resolution", resolution]
         , ["Auto-sell", (Cfg.sellOn && Cfg.npc != "Angler") ? "every " . Cfg.sellEvery . " catches" : "off"]
-        , ["Perfect cast", Cfg.perfect ? "release at " . Cfg.perfectPct . "%" : "off"]
+        , ["Perfect cast", Cfg.perfect ? "release at 95–100%" : "off"]
         , ["Zoom-out", Cfg.zoomLock ? Cfg.zoomOut . " notches" : "unlocked"]
         , ["Level", BotState.levelLast >= 0 ? BotState.levelLast : "n/a"]]
     HookPost(EmbedJson("Macro started", "Fishing has begun.", 0x4ADE80, f), , , "start message")
