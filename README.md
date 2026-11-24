@@ -55,8 +55,8 @@ If the camera faces the dock after the NPC dialogue, set Roblox **Camera Mode â†
 
 ## Latest changes (v1.33.2)
 
-- New CeriFish logo. The window, title-bar and taskbar icon (`images/cerifish.ico`) now use it; it was still the old CF icon.
-- Fixed the bite marker (v1.33.1) being missed outside RDP (`marker cells=47 largest blob=28 px (need 46)`): the salmon marker body is now detected on every setup, nearby fragments are merged with a wider gap, and the minimum blob size is lower.
+- New CeriFish logo with a transparent background, also used for the window and taskbar icon.
+- Fixed the bite marker being missed when the "!" was on screen (v1.33.1).
 - Refreshed the dashboard preview (Obsidian theme).
 
 ## Troubleshooting

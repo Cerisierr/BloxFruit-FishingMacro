@@ -5,19 +5,19 @@ Nothing is pending from the earlier "not delivered" list except the open points 
 
 ---
 
-## v1.33.2: New logo applied to the window and taskbar icon
+## v1.33.2: New logo and window icon
 
-- Regenerate `images/cerifish.ico` from the new logo (16 to 256 px). It was still the old icon, so the title bar and taskbar kept the old "CF".
-- Set the window's small and large icons explicitly from the .ico after the window is shown.
+- New CeriFish logo with a transparent background.
+- The title bar, taskbar and Alt+Tab icon now show the new logo instead of the old CF.
 
 ---
 
-## v1.33.1: Fix missed bite markers outside RDP
+## v1.33.1: Bite detection fix
 
-- Fix bite detection timing out while the "!" marker was visible (log: `marker cells=47 largest blob=28 px (need 46)`). The salmon marker body was only matched in an RDP session, so on a normal desktop only the thin pink edge was detected and its fragments stayed below the minimum blob size.
-- Accept the salmon marker body on every setup, not only in RDP.
-- Merge nearby marker fragments with a wider gap (2 -> 3 cells) and lower the minimum blob size from 5.5% to 4% of the bite-zone width. The aspect and fill-ratio gates are unchanged.
-- Refresh the README dashboard preview (Obsidian theme) and bump the version everywhere.
+- Fixed the bite marker being missed: the macro timed out even when the "!" was on screen.
+- The marker body is now detected on every setup, not only over remote desktop.
+- Small marker fragments are merged more reliably and the minimum marker size is a bit lower.
+- Updated the dashboard preview.
 
 ---
 
