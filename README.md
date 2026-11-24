@@ -4,7 +4,7 @@ AutoHotkey v2 macro for automating fishing in **Blox Fruits**.
 
 The macro uses screen capture, color detection and Windows OCR to read the fishing bar, the bite indicator, the fish position, chests, the cast charge meter, NPC/shop menus and the quest panel. It controls the reel automatically and can buy bait, sell fish, do the Angler quests and report to Discord.
 
-Current version: **1.33.0** (see `CHANGELOG.md` for the full history).
+Current version: **1.33.1** (see `CHANGELOG.md` for the full history).
 
 ## Source layout
 
@@ -12,13 +12,13 @@ Current version: **1.33.0** (see `CHANGELOG.md` for the full history).
 
 ## Preview
 
-Dashboard preview using the Sunset theme:
+Dashboard preview using the default Obsidian theme:
 
-![CeriFish dashboard in the Sunset theme with the CF logo](images/dashboard-preview.png)
+![CeriFish dashboard in the Obsidian theme with the CF logo](images/dashboard-preview.png)
 
 ## Features
 
-- Automatic casting (optional **Perfect cast**), bite detection and reel controller
+- Automatic casting (optional **Perfect cast**), bite detection (salmon marker body and pink edge both recognised, with or without RDP) and reel controller
 - Optional automatic fishing-rod skill (**Z**) at the start of every reel; the game decides when rod Power allows it
 - Optional individual Discord embeds for each recorded macro action, including casts, bite detection, and rod Power attempts
 - When a Hooked marker is followed by no reel bar, the Discord screenshot marks the bite-detection pixels with a red frame

@@ -1,7 +1,16 @@
 # Changelog: CeriFish — Fishing Macro (AutoHotkey v2)
 
-Current delivered files: `BloxFishing.ahk`, `BloxFishing.html`, the `modules/` source files, and CeriFish logo assets (v1.33.0 below).
+Current delivered files: `BloxFishing.ahk`, `BloxFishing.html`, the `modules/` source files, and CeriFish logo assets (v1.33.1 below).
 Nothing is pending from the earlier "not delivered" list except the open points at the bottom.
+
+---
+
+## v1.33.1: Fix missed bite markers outside RDP
+
+- Fix bite detection timing out while the "!" marker was visible (log: `marker cells=47 largest blob=28 px (need 46)`). The salmon marker body was only matched in an RDP session, so on a normal desktop only the thin pink edge was detected and its fragments stayed below the minimum blob size.
+- Accept the salmon marker body on every setup, not only in RDP.
+- Merge nearby marker fragments with a wider gap (2 -> 3 cells) and lower the minimum blob size from 5.5% to 4% of the bite-zone width. The aspect and fill-ratio gates are unchanged.
+- Refresh the README dashboard preview (Obsidian theme) and bump the version everywhere.
 
 ---
 

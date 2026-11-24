@@ -396,7 +396,7 @@ ProgressPresent(geo) {
 ; only the anti-aliased edge blends towards pink/purple (170,102,143). The old
 ; rule matched only that edge (114 of ~3,300 marker pixels), so detection depended
 ; on what was behind the marker. In an RDP session both looks are accepted; on a
-; normal desktop the original rule is used unchanged.
+; normal desktop the salmon body is accepted too (v1.33.1).
 IsBitePx(rr, gg, bb) {
     if (rr < 110)
         return false
